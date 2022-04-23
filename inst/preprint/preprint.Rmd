@@ -32,11 +32,28 @@ header-includes: |
 output: rticles::arxiv_article
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
+options(replace.assign=TRUE, width=90, prompt="R> ")
+```
+
+
 # Introduction \label{sec:introduction}
+
+```{r}
+x <- 1
+x <- list(
+  a = 1
+)
+x
+```
+
 
 Here we describe the general role of spatial modeling, discuss existing software, and argue spmodel is a valuable contribution.
 
 # Background and Usage
+
+
 
 ## Spatial Linear Models
 

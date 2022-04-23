@@ -32,6 +32,10 @@ header-includes: |
 output: rticles::arxiv_article
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
+options(replace.assign=TRUE, width=90, prompt="R> ")
+```
 
 # Estimation
 
