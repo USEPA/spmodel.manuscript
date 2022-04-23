@@ -1,0 +1,78 @@
+---
+title: |
+  spmodel: Spatial Modeling in **R** -- Supplementary Material
+authors:
+  - name: Michael Dumelle
+    thanks: Corresponding Author
+    department: United States
+    affiliation: Environmental Protection Agency
+    location: 200 SW 35th St, Corvallis, OR, 97333
+    email: Dumelle.Michael@epa.gov
+  - name: Matt Higham
+    department: Department of Math, Computer Science, and Statistics
+    affiliation: St. Lawrence University
+    location: 23 Romoda Drive, Canton, NY, 13617
+    email: mhigham@stlawu.edu
+  - name: Jay M. Ver Hoef
+    department: National Oceanic and Atmospheric Administration
+    affiliation: Alaska Fisheries Science Center
+    location: Marine Mammal Laboratory, Seattle, WA, 98115
+    email: jay.verhoef@noaa.gov
+abstract: |
+  Enter the text of your abstract here.
+keywords:
+  - Spatial covariance
+  - Linear Model
+  - Autoregressive model
+bibliography: references.bib
+biblio-style: unsrt
+header-includes: |
+  \usepackage{amsmath,amsfonts,amssymb}
+  \usepackage{bm, bbm}
+output: rticles::arxiv_article
+---
+
+
+# Estimation
+
+## Likelihood-based Estimation
+
+Minus twice a profiled Gaussian log-likelihood, denoted $-2l(\bm{\theta} | \mathbf{y})$ is given by 
+\begin{equation}\label{eq:ml-lik}
+  -2l(\bm{\theta} | \mathbf{y}) = \ln{|\mathbf{\Sigma}|} + (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}}) + n \ln{2\pi},
+\end{equation}
+where $\tilde{\bm{\beta}} = (\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$. Minimizing Equation$~$\ref{eq:ml-lik} yields $\bm{\hat{\theta}}_{ml}$, the maximum likelihood estimates for $\bm{\theta}$. Then a closed for solution exists for $\bm{\hat{\beta}}_{ml}$, the maximum likelihood estimates for $\bm{\beta}$: $\bm{\hat{\beta}}_{ml} = \tilde{\bm{\beta}}_{ml}$, where $\tilde{\bm{\beta}}_{ml}$ is $\tilde{\bm{\beta}}$ evaluated at $\bm{\hat{\theta}}_{ml}$. Unfortunately $\bm{\hat{\theta}}_{ml}$ can be badly biased for $\bm{\theta}$ (especially for small sample sizes), which impacts the estimation of $\bm{\beta}$ [@patterson1971recovery]. This bias occurs due to the simultaneous estimation of $\bm{\beta}$ and $\bm{\theta}$ To reduce this bias, restricted maximum likelihood estimation (REML) emerged [@patterson1971recovery; @harville1977maximum; @wolfinger1994computing]. It can be shown that integrating $\bm{\beta}$ out of a Gaussian likelihood yields the restricted Gaussian likelihood used in REML estimation. Minus twice a restricted Gaussian log-likelihood, denoted $-2l_R(\bm{\theta} | \mathbf{y})$ is given by 
+\begin{equation}\label{eq:reml-lik}
+  -2l_R(\bm{\theta} | \mathbf{y}) = -2l(\bm{\theta} | \mathbf{y})  + \ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|} - p \ln{2\pi} .
+\end{equation}
+Minimizing Equation$~$\ref{eq:reml-lik} yields $\bm{\hat{\theta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\theta}$. Then a closed for solution exists for $\bm{\hat{\beta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\beta}$: $\bm{\hat{\beta}}_{reml} = \tilde{\bm{\beta}}_{reml}$, where $\tilde{\bm{\beta}}_{reml}$ is $\tilde{\bm{\beta}}$ evaluated at $\bm{\hat{\theta}}_{reml}$.
+
+When all variance parameters are unknown, the overall variance, $\sigma^2$, can be profiled out of Equation$~$\ref{eq:ml-lik} and Equation$~$\ref{eq:reml-lik}. This reduces the number of parameters requiring optimization by one, which can dramatically reduce estimation time. For example, profiling $\sigma^2$ out of Equation$~$\ref{eq:ml-lik} yields
+\begin{equation}\label{eq:ml-plik}
+  -2l^*(\bm{\theta}^* | \mathbf{y}) = \ln{|\mathbf{\Sigma^*}|} + n\ln[(\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] + n + n\ln{2\pi / n}.
+\end{equation}
+After finding $\hat{\bm{\theta}}^*_{ml}$ a closed form solution for $\hat{\sigma}^2_{ml}$ exists: $\hat{\sigma}^2_{ml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / n$. Then $\bm{\hat{\theta}}^*_{ml}$ is combined with $\hat{\sigma}^2_{ml}$ to yield $\bm{\hat{\theta}}_{ml}$ and subsequently $\bm{\hat{\beta}}_{ml}$
+
+Next describe REML adjustments
+
+## Semivariogram-based Estimation
+
+### Weighted Least Squares
+
+[@cressie1985fitting; @cressie1993statistics]
+
+### Composite Likelihood
+
+[@curriero1999composite]
+
+# Hypothesis Testing
+
+## The General Linear Hypothesis Test
+
+## Contrasts
+
+# Random Effects
+
+## BLUPs
+
+# References {.unnumbered}

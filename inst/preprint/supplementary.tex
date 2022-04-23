@@ -1,0 +1,191 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{lmodern}        % https://github.com/rstudio/rticles/issues/343
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+
+\title{spmodel: Spatial Modeling in \textbf{R} -- Supplementary Material}
+
+\author{
+    Michael Dumelle
+    \thanks{Corresponding Author}
+   \\
+    United States \\
+    Environmental Protection Agency \\
+  200 SW 35th St, Corvallis, OR, 97333 \\
+  \texttt{\href{mailto:Dumelle.Michael@epa.gov}{\nolinkurl{Dumelle.Michael@epa.gov}}} \\
+   \And
+    Matt Higham
+   \\
+    Department of Math, Computer Science, and Statistics \\
+    St.~Lawrence University \\
+  23 Romoda Drive, Canton, NY, 13617 \\
+  \texttt{\href{mailto:mhigham@stlawu.edu}{\nolinkurl{mhigham@stlawu.edu}}} \\
+   \And
+    Jay M. Ver Hoef
+   \\
+    National Oceanic and Atmospheric Administration \\
+    Alaska Fisheries Science Center \\
+  Marine Mammal Laboratory, Seattle, WA, 98115 \\
+  \texttt{\href{mailto:jay.verhoef@noaa.gov}{\nolinkurl{jay.verhoef@noaa.gov}}} \\
+  }
+
+
+% tightlist command for lists without linebreak
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{bm, bbm}
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+Enter the text of your abstract here.
+\end{abstract}
+
+\keywords{
+    Spatial covariance
+   \and
+    Linear Model
+   \and
+    Autoregressive model
+  }
+
+\hypertarget{estimation}{%
+\section{Estimation}\label{estimation}}
+
+\hypertarget{likelihood-based-estimation}{%
+\subsection{Likelihood-based
+Estimation}\label{likelihood-based-estimation}}
+
+Minus twice a profiled Gaussian log-likelihood, denoted
+\(-2l(\bm{\theta} | \mathbf{y})\) is given by
+\begin{equation}\label{eq:ml-lik}
+  -2l(\bm{\theta} | \mathbf{y}) = \ln{|\mathbf{\Sigma}|} + (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}}) + n \ln{2\pi},
+\end{equation} where
+\(\tilde{\bm{\beta}} = (\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}\).
+Minimizing Equation\(~\)\ref{eq:ml-lik} yields
+\(\bm{\hat{\theta}}_{ml}\), the maximum likelihood estimates for
+\(\bm{\theta}\). Then a closed for solution exists for
+\(\bm{\hat{\beta}}_{ml}\), the maximum likelihood estimates for
+\(\bm{\beta}\): \(\bm{\hat{\beta}}_{ml} = \tilde{\bm{\beta}}_{ml}\),
+where \(\tilde{\bm{\beta}}_{ml}\) is \(\tilde{\bm{\beta}}\) evaluated at
+\(\bm{\hat{\theta}}_{ml}\). Unfortunately \(\bm{\hat{\theta}}_{ml}\) can
+be badly biased for \(\bm{\theta}\) (especially for small sample sizes),
+which impacts the estimation of \(\bm{\beta}\) (Patterson and Thompson
+1971). This bias occurs due to the simultaneous estimation of
+\(\bm{\beta}\) and \(\bm{\theta}\) To reduce this bias, restricted
+maximum likelihood estimation (REML) emerged (Patterson and Thompson
+1971; Harville 1977; Wolfinger, Tobias, and Sall 1994). It can be shown
+that integrating \(\bm{\beta}\) out of a Gaussian likelihood yields the
+restricted Gaussian likelihood used in REML estimation. Minus twice a
+restricted Gaussian log-likelihood, denoted
+\(-2l_R(\bm{\theta} | \mathbf{y})\) is given by
+\begin{equation}\label{eq:reml-lik}
+  -2l_R(\bm{\theta} | \mathbf{y}) = -2l(\bm{\theta} | \mathbf{y})  + \ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|} - p \ln{2\pi} .
+\end{equation} Minimizing Equation\(~\)\ref{eq:reml-lik} yields
+\(\bm{\hat{\theta}}_{reml}\), the restricted maximum likelihood
+estimates for \(\bm{\theta}\). Then a closed for solution exists for
+\(\bm{\hat{\beta}}_{reml}\), the restricted maximum likelihood estimates
+for \(\bm{\beta}\):
+\(\bm{\hat{\beta}}_{reml} = \tilde{\bm{\beta}}_{reml}\), where
+\(\tilde{\bm{\beta}}_{reml}\) is \(\tilde{\bm{\beta}}\) evaluated at
+\(\bm{\hat{\theta}}_{reml}\).
+
+When all variance parameters are unknown, the overall variance,
+\(\sigma^2\), can be profiled out of Equation\(~\)\ref{eq:ml-lik} and
+Equation\(~\)\ref{eq:reml-lik}. This reduces the number of parameters
+requiring optimization by one, which can dramatically reduce estimation
+time. For example, profiling \(\sigma^2\) out of
+Equation\(~\)\ref{eq:ml-lik} yields \begin{equation}\label{eq:ml-plik}
+  -2l^*(\bm{\theta}^* | \mathbf{y}) = \ln{|\mathbf{\Sigma^*}|} + n\ln[(\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] + n + n\ln{2\pi / n}.
+\end{equation} After finding \(\hat{\bm{\theta}}^*_{ml}\) a closed form
+solution for \(\hat{\sigma}^2_{ml}\) exists:
+\(\hat{\sigma}^2_{ml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / n\).
+Then \(\bm{\hat{\theta}}^*_{ml}\) is combined with
+\(\hat{\sigma}^2_{ml}\) to yield \(\bm{\hat{\theta}}_{ml}\) and
+subsequently \(\bm{\hat{\beta}}_{ml}\)
+
+Next describe REML adjustments
+
+\hypertarget{semivariogram-based-estimation}{%
+\subsection{Semivariogram-based
+Estimation}\label{semivariogram-based-estimation}}
+
+\hypertarget{weighted-least-squares}{%
+\subsubsection{Weighted Least Squares}\label{weighted-least-squares}}
+
+(Cressie 1985, 1993)
+
+\hypertarget{composite-likelihood}{%
+\subsubsection{Composite Likelihood}\label{composite-likelihood}}
+
+(Curriero and Lele 1999)
+
+\hypertarget{hypothesis-testing}{%
+\section{Hypothesis Testing}\label{hypothesis-testing}}
+
+\hypertarget{the-general-linear-hypothesis-test}{%
+\subsection{The General Linear Hypothesis
+Test}\label{the-general-linear-hypothesis-test}}
+
+\hypertarget{contrasts}{%
+\subsection{Contrasts}\label{contrasts}}
+
+\hypertarget{random-effects}{%
+\section{Random Effects}\label{random-effects}}
+
+\hypertarget{blups}{%
+\subsection{BLUPs}\label{blups}}
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-cressie1985fitting}{}%
+Cressie, Noel. 1985. ``Fitting Variogram Models by Weighted Least
+Squares.'' \emph{Journal of the International Association for
+Mathematical Geology} 17 (5): 563--86.
+
+\leavevmode\hypertarget{ref-cressie1993statistics}{}%
+---------. 1993. \emph{Statistics for Spatial Data}. John Wiley \& Sons.
+
+\leavevmode\hypertarget{ref-curriero1999composite}{}%
+Curriero, Frank C, and Subhash Lele. 1999. ``A Composite Likelihood
+Approach to Semivariogram Estimation.'' \emph{Journal of Agricultural,
+Biological, and Environmental Statistics}, 9--28.
+
+\leavevmode\hypertarget{ref-harville1977maximum}{}%
+Harville, David A. 1977. ``Maximum Likelihood Approaches to Variance
+Component Estimation and to Related Problems.'' \emph{Journal of the
+American Statistical Association} 72 (358): 320--38.
+
+\leavevmode\hypertarget{ref-patterson1971recovery}{}%
+Patterson, H Desmond, and Robin Thompson. 1971. ``Recovery of
+Inter-Block Information When Block Sizes Are Unequal.''
+\emph{Biometrika} 58 (3): 545--54.
+
+\leavevmode\hypertarget{ref-wolfinger1994computing}{}%
+Wolfinger, Russ, Randy Tobias, and John Sall. 1994. ``Computing Gaussian
+Likelihoods and Their Derivatives for General Linear Mixed Models.''
+\emph{SIAM Journal on Scientific Computing} 15 (6): 1294--1310.
+
+\bibliographystyle{unsrt}
+\bibliography{references.bib}
+
+
+\end{document}
