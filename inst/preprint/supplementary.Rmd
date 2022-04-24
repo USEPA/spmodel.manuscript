@@ -63,13 +63,17 @@ After finding $\hat{\bm{\theta}}^*_{ml}$ a closed form solution for $\hat{\sigma
 \end{equation}
 After finding $\hat{\bm{\theta}}^*_{reml}$ a closed form solution for $\hat{\sigma}^2_{reml}$ exists: $\hat{\sigma}^2_{reml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / (n - p)$. Then $\bm{\hat{\theta}}^*_{reml}$ is combined with $\hat{\sigma}^2_{reml}$ to yield $\bm{\hat{\theta}}_{reml}$ and subsequently $\bm{\hat{\beta}}_{reml}$.
 
+Both ML and REML estimation rely on the an $n \times n$ covariance matrix inverse. Inverting an $n \times n$ matrix is an enormous computational demand that scales cubically with the sample size. For this reason, ML and REML have historically been unfeasible to implement in their standard form with data larger than a few thousand observations. This motivates the use for the big data approaches outlined in Section$~$(INSERT SECTION).
+
+It is worth noting that the inverses themselves are not strictly needed for estimation (or prediction), though at least their square root is needed. In spmodel, calculating this square root requires a Cholesky decomposition, which still scales cubically with the sample size. Computing the Cholesky decomposition, however, is far more computationally efficient than computing the inverse. To see why only the Cholesky decomposition is needed, recall that the Cholesky decomposition of the covariance matrix $\mathbf{\Sigma}$ is $\mathbf{C}\mathbf{C}^\intercal$, where $\mathbf{C}$ is a lower triangular matrix (so $\mathbf{C}\mathbf{C}^\intercal = \mathbf{\Sigma}$). In the ML and REML likelihoods, $\mathbf{\Sigma}^{-1}$ is not needed on its own, only $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}$ and $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$ are needed. We can rewrite the $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}$ as $\mathbf{X}^\intercal (\mathbf{C}^\intercal)^{-1} \mathbf{C}^{-1} \mathbf{X} = (\mathbf{C}^{-1} \mathbf{X})^\intercal \mathbf{C}^{-1} \mathbf{X}$. Then $\mathbf{C}^{-1} \mathbf{X}$ is efficiently solved by noticing that $\mathbf{C}^{-1} \mathbf{X} = \mathbf{A}$ for some matrix $\mathbf{A}$ implies $\mathbf{X} = \mathbf{C} \mathbf{A}$. This system can be efficiently solved for $\mathbf{A}$ using linear forward solves (forward substitution). Then $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X} = \mathbf{A}^\intercal \mathbf{A}$. A similar approach is used to solve $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$. Still, using Cholesky decomositions is unfeasible for sample sizes larger than a few thousand observations.
+
 ## Semivariogram-based Estimation
 
 An alternative approach to likelihood-based estimation is semivariogram-based estimation. The semivariogram of a constant-mean process $\mathbf{y}$ is the expectation of the squared half-difference between two observations $h$ distance units apart. More formally, the semivariogram is denoted $\gamma(h)$ and defined as
 \begin{equation}\label{eq:sv}
   \gamma(h) = \text{E}(y_i - y_j)^2 / 2 ,
 \end{equation}
-where $||y_i - y_j||_2 = h$ (the Euclidean distance). When the process $\mathbf{y}$ is second-order stationary, the semivariogram and covariance function are intimately connected: $\gamma(h) = \text{Cov}(0) - \text{Cov}(h)$, where $\text{Cov}(0)$ is the covariance function evaluated at 0 (which is the overall variance, $\sigma^2$) and $\text{Cov}(h)$is the covariance function evaluated at $h$.
+where $||y_i - y_j||_2 = h$ (the Euclidean distance). When the process $\mathbf{y}$ is second-order stationary, the semivariogram and covariance function are intimately connected: $\gamma(h) = \text{Cov}(0) - \text{Cov}(h)$, where $\text{Cov}(0)$ is the covariance function evaluated at 0 (which is the overall variance, $\sigma^2$) and $\text{Cov}(h)$is the covariance function evaluated at $h$. Both semivariogram approaches described next are more computationally efficient than ML or REML because their major computational burden (calculations based on pairs) scale the squared sample size (i.e., not the cubed sample size).
 
 ### Weighted Least Squares
 
@@ -77,11 +81,13 @@ The empirical semivariogram is a moment-based estimate of the semivariogram deno
 \begin{equation}\label{eq:esv}
   \hat{\gamma}(h) = \frac{1}{2|N(h)|} \sum_{N(h)} (y_i - y_j)^2, 
 \end{equation}
-where $N(h)$ is the set of observations in $\mathbf{y}$ that are $h$ units apart (distance classes) and $|N(h)|$ is the cardinality of $N(h)$ [@cressie1993statistics]. Often the set $N(h)$ contains observations that are $h \pm \alpha$ apart -- this approach is known as "binning" the empirical semivariogram. Equation$~$\eqref{eq:esv} is viewed as the average squared half-distance between two observations in $\mathbf{y}$. @cressie1985fitting proposed estimating $\bm{\theta}$ by minimizing an objective function that involves $\gamma{h}$ and $\hat{\gamma}(h)$ and is based on a weighted least squares criterion. This criterion is defined as
+where $N(h)$ is the set of observations in $\mathbf{y}$ that are $h$ units apart (distance classes) and $|N(h)|$ is the cardinality of $N(h)$ [@cressie1993statistics]. Often the set $N(h)$ contains observations that are $h \pm \alpha$ apart -- this approach is known as "binning" the empirical semivariogram. Typically, only certain $h$ considered when constructing Equation$~$\ref{eq:esv} -- a commonly used cutoff is to ignore $h$ larger than half the maximum distance in the domain. One criticism of the empirical semivariogram is that distance bins and cutoffs tend to be artitrarily chosen (i.e., not chosen according to some statistical criteria).
+
+Equation$~$\eqref{eq:esv} is viewed as the average squared half-distance between two observations in $\mathbf{y}$. @cressie1985fitting proposed estimating $\bm{\theta}$ by minimizing an objective function that involves $\gamma{h}$ and $\hat{\gamma}(h)$ and is based on a weighted least squares criterion. This criterion is defined as
 \begin{equation}\label{eq:svwls}
   \sum_i w_i [\hat{\gamma}(h)_i - \gamma(h)_i]^2,
 \end{equation}
-where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. @cressie1985fitting recommended setting $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the `weights` argument to `splm()`. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel.
+where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. @cressie1985fitting recommended setting $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the \texttt{weights} argument to \texttt{splm()}. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel. 
 \begin{table}\label{tab:weights}
   \centering
   \begin{tabular}{c|c|c}
@@ -98,12 +104,19 @@ where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical s
   \end{tabular}
   \caption{spmodel table weights}
 \end{table}
+Additionally, the number of $N(h)$ classes and maximum distance for $h$ are specified by passing the \texttt{bins} and \texttt{cutoff} arguments to \texttt{splm()} (these arguments are passed via \texttt{...} to \texttt{esv()}). The default value for \texttt{bins} is 15 and the default value for the maximum $h$ is half the maximum distance of the spatial domain's bounding box.
 
-Recall that the semivariogram is defined for a constant-mean process. Typically in linear models, $\mathbf{y}$ does not have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are actually constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
+Recall that the semivariogram is defined for a constant-mean process. Generally, $\mathbf{y}$ does not necessarily have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are typically constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
 
 ### Composite Likelihood
 
-[@curriero1999composite]
+The composite likelihood approach involves constructing a likelihood based on conditional or marginal events for which log-likelihoods are available and then adding together these individual components. Composite likelihoods are attractive because they behave very similar to likelihoods but are easier to handle, both from a theoretical and a computational perspective. @curriero1999composite derive a particular composite likelihood for estimating semivariogram parameters. The negative log of this composite likelihood, denoted $\text{CL}(h)$, is given by
+\begin{equation}\label{eq:svcl}
+  \text{CL}(h) = \sum_{i = 1}^{n - 1} \sum_{j > i} \left( \frac{(y_i - y_j)^2}{2\gamma(h)} + \ln(\gamma(h)) \right)
+\end{equation}
+where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\theta}$). Minimizing Equation$~$\ref{eq:svcl} yields $\bm{\hat{\theta}}_{cl}$, the semivariogram composite likelihood estimates of $\bm{\theta}$.
+
+An advantage of the composite likelihood approach to semivariogram estimation is that it does not require arbitrarily specifying empirial semivariogram bins and cutoffs. It does tend to be more computationally demanding than the weighted least squares, however, as the composite likelihood is constructed from $\binom{n}{2}$ pairs for a sample size $n$, whereas the weighted least squares approach only requires calculating $\binom{|N(h)|}{2}$ pairs for each distance bin $N(h)$. As with the weighted least squares approach, Equation$~$\ref{eq:svcl} requires constant-mean process, so typically the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ are used to estimate $\bm{\theta}$.
 
 # Hypothesis Testing
 
