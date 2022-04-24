@@ -37,6 +37,8 @@ knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " 
 options(replace.assign=TRUE, width=90, prompt="R> ")
 ```
 
+# Covariance Functions
+
 # Estimation
 
 ## Likelihood-based Estimation
@@ -47,23 +49,57 @@ Minus twice a profiled Gaussian log-likelihood, denoted $-2l(\bm{\theta} | \math
 \end{equation}
 where $\tilde{\bm{\beta}} = (\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$. Minimizing Equation$~$\ref{eq:ml-lik} yields $\bm{\hat{\theta}}_{ml}$, the maximum likelihood estimates for $\bm{\theta}$. Then a closed for solution exists for $\bm{\hat{\beta}}_{ml}$, the maximum likelihood estimates for $\bm{\beta}$: $\bm{\hat{\beta}}_{ml} = \tilde{\bm{\beta}}_{ml}$, where $\tilde{\bm{\beta}}_{ml}$ is $\tilde{\bm{\beta}}$ evaluated at $\bm{\hat{\theta}}_{ml}$. Unfortunately $\bm{\hat{\theta}}_{ml}$ can be badly biased for $\bm{\theta}$ (especially for small sample sizes), which impacts the estimation of $\bm{\beta}$ [@patterson1971recovery]. This bias occurs due to the simultaneous estimation of $\bm{\beta}$ and $\bm{\theta}$ To reduce this bias, restricted maximum likelihood estimation (REML) emerged [@patterson1971recovery; @harville1977maximum; @wolfinger1994computing]. It can be shown that integrating $\bm{\beta}$ out of a Gaussian likelihood yields the restricted Gaussian likelihood used in REML estimation. Minus twice a restricted Gaussian log-likelihood, denoted $-2l_R(\bm{\theta} | \mathbf{y})$ is given by 
 \begin{equation}\label{eq:reml-lik}
-  -2l_R(\bm{\theta} | \mathbf{y}) = -2l(\bm{\theta} | \mathbf{y})  + \ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|} - p \ln{2\pi} .
+  -2l_R(\bm{\theta} | \mathbf{y}) = -2l(\bm{\theta} | \mathbf{y})  + \ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|} - p \ln{2\pi} ,
 \end{equation}
-Minimizing Equation$~$\ref{eq:reml-lik} yields $\bm{\hat{\theta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\theta}$. Then a closed for solution exists for $\bm{\hat{\beta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\beta}$: $\bm{\hat{\beta}}_{reml} = \tilde{\bm{\beta}}_{reml}$, where $\tilde{\bm{\beta}}_{reml}$ is $\tilde{\bm{\beta}}$ evaluated at $\bm{\hat{\theta}}_{reml}$.
+where $p$ equals the dimension of $\bm{\beta}$. Minimizing Equation$~$\ref{eq:reml-lik} yields $\bm{\hat{\theta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\theta}$. Then a closed for solution exists for $\bm{\hat{\beta}}_{reml}$, the restricted maximum likelihood estimates for $\bm{\beta}$: $\bm{\hat{\beta}}_{reml} = \tilde{\bm{\beta}}_{reml}$, where $\tilde{\bm{\beta}}_{reml}$ is $\tilde{\bm{\beta}}$ evaluated at $\bm{\hat{\theta}}_{reml}$.
 
-When all variance parameters are unknown, the overall variance, $\sigma^2$, can be profiled out of Equation$~$\ref{eq:ml-lik} and Equation$~$\ref{eq:reml-lik}. This reduces the number of parameters requiring optimization by one, which can dramatically reduce estimation time. For example, profiling $\sigma^2$ out of Equation$~$\ref{eq:ml-lik} yields
+Generally the overall variance, $\sigma^2$, can be profiled out of Equation$~$\ref{eq:ml-lik} and Equation$~$\ref{eq:reml-lik}. This reduces the number of parameters requiring optimization by one, which can dramatically reduce estimation time. For example, profiling $\sigma^2$ out of Equation$~$\ref{eq:ml-lik} yields
 \begin{equation}\label{eq:ml-plik}
   -2l^*(\bm{\theta}^* | \mathbf{y}) = \ln{|\mathbf{\Sigma^*}|} + n\ln[(\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] + n + n\ln{2\pi / n}.
 \end{equation}
-After finding $\hat{\bm{\theta}}^*_{ml}$ a closed form solution for $\hat{\sigma}^2_{ml}$ exists: $\hat{\sigma}^2_{ml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / n$. Then $\bm{\hat{\theta}}^*_{ml}$ is combined with $\hat{\sigma}^2_{ml}$ to yield $\bm{\hat{\theta}}_{ml}$ and subsequently $\bm{\hat{\beta}}_{ml}$
-
-Next describe REML adjustments
+After finding $\hat{\bm{\theta}}^*_{ml}$ a closed form solution for $\hat{\sigma}^2_{ml}$ exists: $\hat{\sigma}^2_{ml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / n$. Then $\bm{\hat{\theta}}^*_{ml}$ is combined with $\hat{\sigma}^2_{ml}$ to yield $\bm{\hat{\theta}}_{ml}$ and subsequently $\bm{\hat{\beta}}_{ml}$. A similar result holds for REML estimation. Profiling $\sigma^2$ out of Equation$~$\ref{eq:reml-lik} yields
+\begin{equation}\label{eq:reml-plik}
+  -2l_R^*(\bm{\theta}^* | \mathbf{y}) = \ln{|\mathbf{\Sigma^*}|} + (n - p)\ln[(\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] + (n - p) + (n - p)\ln2\pi / (n - p).
+\end{equation}
+After finding $\hat{\bm{\theta}}^*_{reml}$ a closed form solution for $\hat{\sigma}^2_{reml}$ exists: $\hat{\sigma}^2_{reml} = [(\mathbf{y} - \mathbf{X} \bm{\tilde{\beta}})^\intercal \mathbf{\Sigma}^{-1} (\mathbf{y} - \mathbf{X} \tilde{\bm{\beta}})] / (n - p)$. Then $\bm{\hat{\theta}}^*_{reml}$ is combined with $\hat{\sigma}^2_{reml}$ to yield $\bm{\hat{\theta}}_{reml}$ and subsequently $\bm{\hat{\beta}}_{reml}$.
 
 ## Semivariogram-based Estimation
 
+An alternative approach to likelihood-based estimation is semivariogram-based estimation. The semivariogram of a constant-mean process $\mathbf{y}$ is the expectation of the squared half-difference between two observations $h$ distance units apart. More formally, the semivariogram is denoted $\gamma(h)$ and defined as
+\begin{equation}\label{eq:sv}
+  \gamma(h) = \text{E}(y_i - y_j)^2 / 2 ,
+\end{equation}
+where $||y_i - y_j||_2 = h$ (the Euclidean distance). When the process $\mathbf{y}$ is second-order stationary, the semivariogram and covariance function are intimately connected: $\gamma(h) = \text{Cov}(0) - \text{Cov}(h)$, where $\text{Cov}(0)$ is the covariance function evaluated at 0 (which is the overall variance, $\sigma^2$) and $\text{Cov}(h)$is the covariance function evaluated at $h$.
+
 ### Weighted Least Squares
 
-[@cressie1985fitting; @cressie1993statistics]
+The empirical semivariogram is a moment-based estimate of the semivariogram denoted by $\hat{\gamma}(h)$ and defined as
+\begin{equation}\label{eq:esv}
+  \hat{\gamma}(h) = \frac{1}{2|N(h)|} \sum_{N(h)} (y_i - y_j)^2, 
+\end{equation}
+where $N(h)$ is the set of observations in $\mathbf{y}$ that are $h$ units apart (distance classes) and $|N(h)|$ is the cardinality of $N(h)$ [@cressie1993statistics]. Often the set $N(h)$ contains observations that are $h \pm \alpha$ apart -- this approach is known as "binning" the empirical semivariogram. Equation$~$\eqref{eq:esv} is viewed as the average squared half-distance between two observations in $\mathbf{y}$. @cressie1985fitting proposed estimating $\bm{\theta}$ by minimizing an objective function that involves $\gamma{h}$ and $\hat{\gamma}(h)$ and is based on a weighted least squares criterion. This criterion is defined as
+\begin{equation}\label{eq:svwls}
+  \sum_i w_i [\hat{\gamma}(h)_i - \gamma(h)_i]^2,
+\end{equation}
+where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. @cressie1985fitting recommended setting $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the `weights` argument to `splm()`. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel.
+\begin{table}\label{tab:weights}
+  \centering
+  \begin{tabular}{c|c|c}
+  \hline
+  $w_i$ Name & $w_i$ Form & \texttt{weight = } \\
+  Cressie & $|N(h)| / \gamma(h)_i^2$ & \texttt{"cressie"} \\
+  Cressie (Denominator) Root & $|N(h)| / \gamma(h)_i$ & \texttt{"cressie-droot"} \\
+  Cressie No Pairs & $1 / \gamma(h)_i^2$ & \texttt{"cressie-nopairs"} \\
+  Cressie (Denominator) Root No Pairs & $1 / \gamma(h)_i$ & \texttt{"cressie-droot-nopairs"} \\
+  Pairs & $|N(h)|$ & \texttt{"pairs"} \\
+  Pairs Inverse Distance & $|N(h)| / h^2$ & \texttt{"pairs-invd"} \\
+  Pairs Inverse (Root) Distance & $|N(h)| / h$ & \texttt{"pairs-invsd"} \\
+  Ordinary Least Squares & 1 & \texttt{ols}
+  \end{tabular}
+  \caption{spmodel table weights}
+\end{table}
+
+Recall that the semivariogram is defined for a constant-mean process. Typically in linear models, $\mathbf{y}$ does not have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are actually constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
 
 ### Composite Likelihood
 

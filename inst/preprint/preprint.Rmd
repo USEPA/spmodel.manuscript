@@ -35,18 +35,11 @@ output: rticles::arxiv_article
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
 options(replace.assign=TRUE, width=90, prompt="R> ")
+library(spmodel)
 ```
 
 
 # Introduction \label{sec:introduction}
-
-```{r}
-x <- 1
-x <- list(
-  a = 1
-)
-x
-```
 
 
 Here we describe the general role of spatial modeling, discuss existing software, and argue spmodel is a valuable contribution.
@@ -57,27 +50,95 @@ Here we describe the general role of spatial modeling, discuss existing software
 
 ## Spatial Linear Models
 
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
+summary(spmod)
+```
+
+
 * REML citations [@patterson1971recovery; @harville1977maximum; @wolfinger1994computing]
 * SV-WLS citations [@cressie1985fitting; @cressie1993statistics]
 * SV-CL citations [@curriero1999composite]
 
+```{r, out.width="49%", fig.show="hold"}
+plot(spmod, which = c(1, 2))
+```
+
+
 ### Anisotropy
 
-## Spatial Autoregressive Models
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord, anisotropy = TRUE)
+```
 
 ## Prediction
 
+```{r}
+spmod_preds <- predict(spmod, newexdata, interval = "prediction")
+```
+
+## Model-fit Statistics
+
+## broom functions
+
+```{r}
+tidy(spmod)
+glance(spmod)
+augment(spmod)
+augment(spmod, newdata = newexdata)
+```
+
+## Spatial Autoregressive Models
+
+```{r}
+spmod <- spautor(y ~ x, exdata_poly, "car")
+```
+
+
 ## Neighborhood Indexing for Big Data
+
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord, local = TRUE)
+```
 
 ### The local list
 
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord, local = list(parallel = TRUE))
+```
+
+
 ## Random Effects
+
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord, random = ~ group)
+```
 
 ## Partition Factors
 
+```{r}
+spmod <- splm(y ~ x, exdata, "exponential", xcoord, ycoord, partition_factor = ~ group)
+```
+
 ## Initial Values and Known Values
 
+```{r}
+spcov_params_init <- spcov_initial("exponential", de = 1, ie = 0, known = "ie")
+spmod <- splm(
+  y ~ x,
+  exdata,
+  spcov_initial = spcov_params_init,
+  xcoord = xcoord, 
+  ycoord = ycoord
+)
+```
+
 ## Simulating Gaussian Random Variables
+
+```{r}
+spcov_params_val <- spcov_params("exponential", de = 1, ie = 1, range = 2)
+var <- sprnorm(spcov_params_val, data = exdata, xcoord = xcoord, ycoord = ycoord)
+```
 
 # Discussion
 
