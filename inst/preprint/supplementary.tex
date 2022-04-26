@@ -218,13 +218,23 @@ weighted least squares criterion. This criterion is defined as
   \sum_i w_i [\hat{\gamma}(h)_i - \gamma(h)_i]^2,
 \end{equation} where \(w_i\), \(\hat{\gamma}(h)_i\), and \(\gamma(h)_i\)
 are the weights, empirical semivariogram, and semivariogram for the
-\(i\)th distance class. Cressie (1985) recommended setting
-\(w_i = |N(h)| / \gamma(h)_i^2\), which gives more weights to distance
-classes with more observations (\(|N(h)|\)) and semivariances at shorter
-distances (\(1 / \gamma(h)_i^2\)). The default in spmodel is to use
-these \(w_i\) -- the type of \(w_i\) is changed via the \texttt{weights}
-argument to \texttt{splm()}. Table\(~\)\ref{tab:weights} contains all
-\(w_i\) available in spmodel.
+\(i\)th distance class. Minimizing Equation\(~\)\eqref{eq:svwls} yields
+\(\bm{\hat{\theta}}_{wls}\), the semivariogram weighted least squares
+estimates of \(\bm{\theta}\). After estimating \(\bm{\theta}\),
+\(\bm{\beta}\) estimates are constructed using generalized least
+squares:
+\(\bm{\hat{\beta}}_{wls} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}\),
+where \(\hat{\mathbf{\Sigma}}^{-1}\) is \(\mathbf{\Sigma}\) evaluated at
+\(\bm{\hat{\theta}}_{wls}\).
+
+Cressie (1985) recommends setting the \(w_i\) in
+Equation\(~\)\eqref{eq:svwls} as \(w_i = |N(h)| / \gamma(h)_i^2\), which
+gives more weights to distance classes with more observations
+(\(|N(h)|\)) and semivariances at shorter distances
+(\(1 / \gamma(h)_i^2\)). The default in spmodel is to use these \(w_i\)
+-- the type of \(w_i\) is changed via the \texttt{weights} argument to
+\texttt{splm()}. Table\(~\)\ref{tab:weights} contains all \(w_i\)
+available in spmodel.
 
 \begin{table}\label{tab:weights}
   \centering
@@ -257,6 +267,8 @@ typically constructed using the residuals from an ordinary least squares
 regression of \(\mathbf{y}\) on \(\mathbf{X}\) -- these residuals are
 assumed to have mean zero.
 
+After
+
 \hypertarget{composite-likelihood}{%
 \subsubsection{Composite Likelihood}\label{composite-likelihood}}
 
@@ -273,10 +285,15 @@ given by \begin{equation}\label{eq:svcl}
 \end{equation} where \(\gamma(h)\) is the semivariogram (that depends on
 parameter vector \(\bm{\theta}\)). Minimizing Equation\(~\)\ref{eq:svcl}
 yields \(\bm{\hat{\theta}}_{cl}\), the semivariogram composite
-likelihood estimates of \(\bm{\theta}\).
+likelihood estimates of \(\bm{\theta}\). After estimating
+\(\bm{\theta}\), \(\bm{\beta}\) estimates are constructed using
+generalized least squares:
+\(\bm{\hat{\beta}}_{cl} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}\),
+where \(\hat{\mathbf{\Sigma}}^{-1}\) is \(\mathbf{\Sigma}\) evaluated at
+\(\bm{\hat{\theta}}_{cl}\).
 
 An advantage of the composite likelihood approach to semivariogram
-estimation is that it does not require arbitrarily specifying empirial
+estimation is that it does not require arbitrarily specifying empircial
 semivariogram bins and cutoffs. It does tend to be more computationally
 demanding than the weighted least squares, however, as the composite
 likelihood is constructed from \(\binom{n}{2}\) pairs for a sample size
@@ -294,6 +311,163 @@ are used to estimate \(\bm{\theta}\).
 \subsection{The General Linear Hypothesis
 Test}\label{the-general-linear-hypothesis-test}}
 
+Hypothesis tests for each element in \(\hat{\bm{\beta}}\) are available
+in \texttt{summary()}.
+
+\begin{verbatim}
+R> spmod <- splm(y ~ x + group, exdata, "exponential", xcoord, ycoord)
+R> summary(spmod)
+\end{verbatim}
+
+\begin{verbatim}
+
+Call:
+splm(formula = y ~ x + group, data = exdata, spcov_type = "exponential", 
+    xcoord = xcoord, ycoord = ycoord)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.91090 -0.38965  0.07808  0.56560  2.29718 
+
+Coefficients (fixed):
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept) -0.65261    0.38911  -1.677   0.0935 .
+x           -0.07809    0.07357  -1.061   0.2885  
+group2       0.29110    0.20997   1.386   0.1656  
+group3       0.37734    0.20857   1.809   0.0704 .
+group4       0.32637    0.21531   1.516   0.1296  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Pseudo R-squared: 0.04864
+
+Coefficients (spatial covariance):
+    de     ie  range 
+0.6330 0.3791 1.2350 
+
+Spatial covariance type: exponential
+\end{verbatim}
+
+Test statistics are the ratio of the estimate to its standard error.
+These tests are useful for continuous predictors, but for categorical
+predictors, \texttt{summary()} only provides test statistics for each
+level, not all levels simultaneously. To find a test statistic for a
+categorical variable, there are two approaches. The first is to use
+\texttt{anova()}.
+
+\begin{verbatim}
+R> anova(spmod)
+\end{verbatim}
+
+\begin{verbatim}
+Analysis of Variance Table
+
+Response: y
+                Df     X2 Pr(>X2)
+(Intercept) 1.0000 2.8129  0.0935
+x           1.0000 1.1267  0.2885
+group       3.0000 3.8742  0.2754
+\end{verbatim}
+
+Test statistics from \texttt{anova()} are formed using the general
+linear hypothesis test. Let \(\mathbf{L}\) be an \(l \times p\) contrast
+matrix and \(l_0\) be an \(l \times 1\) vector. The null hypothesis is
+that \(\mathbf{L} \bm{\hat{\beta}} = l_0\) and the alternative
+hypothesis is that \(\mathbf{L} \bm{\hat{\beta}} \neq l_0\). Usually,
+\(l_0\) is the zero vector (and in spmodel, this is assumed). The test
+statistic, denoted \(X^2\), is given by \begin{equation}\label{eq:glht}
+  X^2 = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
+\end{equation}
+
+It is notoriously difficult to determine appropriate p-values for linear
+mixed models based on the general linear hypothesis test. lme4, for
+example, does not report p-values by default. There are three reasons we
+focus on next that explain why obtaining p-values is so challenging.
+
+\begin{itemize}
+\tightlist
+\item
+  The first (and often most important) challenge is that when estimating
+  \(\bm{\theta}\), it is usually not clear what the null distribution of
+  the test statistic is. In certain cases such as ordinary least squares
+  regression or certain experimental designs (e.g., blocked design,
+  split plot design, etc.), Equation\(~\)\ref{eq:glht} is F-distributed
+  (the test statistic is known) with known numerator and denominator
+  degrees of freedom. But outside of these well-studied cases, no
+  general results exist.
+\item
+  The second challenge is that the standard error of the test statistic
+  does not account for the uncertainty in \(\bm{\hat{\theta}}\). For
+  some approaches to addressing this problem, see Kackar and Harville
+  (1984), Prasad and Rao (1990), Harville and Jeske (1992), and Kenward
+  and Roger (1997).
+\item
+  The third challenge is in determining denominator degrees of freedom.
+  Again, in certain cases, these are known -- but this is not true in
+  general. For some approaches to addressing this problem, see
+  Satterthwaite (1946), Schluchter and Elashoff (1990), Hrong-Tai Fai
+  and Cornelius (1996), Kenward and Roger (1997), Littell et al. (2006),
+  Pinheiro and Bates (2006), and Kenward and Roger (2009).
+\end{itemize}
+
+For these reasons, spmodel assumes a large-sample, Chi-squared
+approximation when calculating p-values. This approach addresses the
+three points above by assuming that with a large enough sample size:
+
+\begin{itemize}
+\tightlist
+\item
+  The numerator in Equation\(~\)\ref{eq:glht} tends to be asymptotically
+  Chi-squared (under certain conditions) with \(rank(\mathbf{L})\)
+  degrees of freedom.
+\item
+  The uncertainty from estimating \(\bm{\hat{\theta}}\) is small enough
+  to be safely ignored.
+\end{itemize}
+
+Because the approximation is asymptotic, degree of freedom adjustments
+can be ignored (it is also worth noting that an F distribution with
+infinite denominator degrees of freedom is a scaled Chi-squared
+distribution). A takeaway here is that this asymptotic approximation
+implies these p-values are likely unreliable with small samples.
+
+A second approach to determining p-values is a likelihood ratio test for
+nested models. Let
+\(l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )\) be the
+log-likelihood from some reduced model and
+\(l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )\) be the
+log-likelihood from some full model. When the reduced model is nested in
+the full model (i.e., the reduced model can be obtained by fixing some
+parameters of the full model),
+\([-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]\)
+is asymptotically Chi-squared with degrees of freedom equal to the
+difference in estimated parameters between the full and reduced model.
+To see whether there is evidence of spatial covariance, run
+
+\begin{verbatim}
+R> spmod_r <- splm(y ~ x, exdata, "none")
+R> spmod_f <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
+R> anova(spmod_r, spmod_f)
+\end{verbatim}
+
+\begin{verbatim}
+Likelihood Ratio Test
+
+Response: y
+           Df     X2 Pr(>X2)
+1 vs 2  2.000 20.139       0
+\end{verbatim}
+
+This output suggests evidence of spatial covariance. Because the
+likelihood relies on minimized likelihoods, they are only defined for ML
+or REML estimation. Furthermore, for REML estimation, likelihood ratio
+tests can only be used to compare nested models whose fixed effect
+structure does not change. This is because the REML likelihood
+\eqref{eq:reml-lik} depends on the fixed effects through
+\(\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}\). To use
+likelihood ratio tests for assessing the importance of fixed effects,
+parameters must be estimated using REML.
+
 \hypertarget{contrasts}{%
 \subsection{Contrasts}\label{contrasts}}
 
@@ -302,6 +476,9 @@ Test}\label{the-general-linear-hypothesis-test}}
 
 \hypertarget{blups}{%
 \subsection{BLUPs}\label{blups}}
+
+\hypertarget{the-local-list}{%
+\section{The Local list}\label{the-local-list}}
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
@@ -326,10 +503,62 @@ Harville, David A. 1977. ``Maximum Likelihood Approaches to Variance
 Component Estimation and to Related Problems.'' \emph{Journal of the
 American Statistical Association} 72 (358): 320--38.
 
+\leavevmode\hypertarget{ref-harville1992mean}{}%
+Harville, David A, and Daniel R Jeske. 1992. ``Mean Squared Error of
+Estimation or Prediction Under a General Linear Model.'' \emph{Journal
+of the American Statistical Association} 87 (419): 724--31.
+
+\leavevmode\hypertarget{ref-hrong1996approximate}{}%
+Hrong-Tai Fai, Alex, and Paul L Cornelius. 1996. ``Approximate F-Tests
+of Multiple Degree of Freedom Hypotheses in Generalized Least Squares
+Analyses of Unbalanced Split-Plot Experiments.'' \emph{Journal of
+Statistical Computation and Simulation} 54 (4): 363--78.
+
+\leavevmode\hypertarget{ref-kackar1984approximations}{}%
+Kackar, Raghu N, and David A Harville. 1984. ``Approximations for
+Standard Errors of Estimators of Fixed and Random Effects in Mixed
+Linear Models.'' \emph{Journal of the American Statistical Association}
+79 (388): 853--62.
+
+\leavevmode\hypertarget{ref-kenward1997small}{}%
+Kenward, Michael G, and James H Roger. 1997. ``Small Sample Inference
+for Fixed Effects from Restricted Maximum Likelihood.''
+\emph{Biometrics}, 983--97.
+
+\leavevmode\hypertarget{ref-kenward2009improved}{}%
+---------. 2009. ``An Improved Approximation to the Precision of Fixed
+Effects from Restricted Maximum Likelihood.'' \emph{Computational
+Statistics \& Data Analysis} 53 (7): 2583--95.
+
+\leavevmode\hypertarget{ref-littell2006sas}{}%
+Littell, Ramon C, George A Milliken, Walter W Stroup, Russell D
+Wolfinger, and Schabenberber Oliver. 2006. \emph{SAS for Mixed Models}.
+SAS publishing.
+
 \leavevmode\hypertarget{ref-patterson1971recovery}{}%
 Patterson, H Desmond, and Robin Thompson. 1971. ``Recovery of
 Inter-Block Information When Block Sizes Are Unequal.''
 \emph{Biometrika} 58 (3): 545--54.
+
+\leavevmode\hypertarget{ref-pinheiro2006mixed}{}%
+Pinheiro, José, and Douglas Bates. 2006. \emph{Mixed-Effects Models in S
+and S-Plus}. Springer science \& business media.
+
+\leavevmode\hypertarget{ref-prasad1990estimation}{}%
+Prasad, NG Narasimha, and Jon NK Rao. 1990. ``The Estimation of the Mean
+Squared Error of Small-Area Estimators.'' \emph{Journal of the American
+Statistical Association} 85 (409): 163--71.
+
+\leavevmode\hypertarget{ref-satterthwaite1946approximate}{}%
+Satterthwaite, Franklin E. 1946. ``An Approximate Distribution of
+Estimates of Variance Components.'' \emph{Biometrics Bulletin} 2 (6):
+110--14.
+
+\leavevmode\hypertarget{ref-schluchter1990small}{}%
+Schluchter, Mark D, and Janet T Elashoff. 1990. ``Small-Sample
+Adjustments to Tests with Unbalanced Repeated Measures Assuming Several
+Covariance Structures.'' \emph{Journal of Statistical Computation and
+Simulation} 37 (1-2): 69--87.
 
 \leavevmode\hypertarget{ref-wolfinger1994computing}{}%
 Wolfinger, Russ, Randy Tobias, and John Sall. 1994. ``Computing Gaussian

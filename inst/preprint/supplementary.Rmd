@@ -35,6 +35,7 @@ output: rticles::arxiv_article
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
 options(replace.assign=TRUE, width=90, prompt="R> ")
+library(spmodel)
 ```
 
 # Covariance Functions
@@ -87,7 +88,9 @@ Equation$~$\eqref{eq:esv} is viewed as the average squared half-distance between
 \begin{equation}\label{eq:svwls}
   \sum_i w_i [\hat{\gamma}(h)_i - \gamma(h)_i]^2,
 \end{equation}
-where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. @cressie1985fitting recommended setting $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the \texttt{weights} argument to \texttt{splm()}. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel. 
+where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. Minimizing Equation$~$\eqref{eq:svwls} yields $\bm{\hat{\theta}}_{wls}$, the semivariogram weighted least squares estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using generalized least squares: $\bm{\hat{\beta}}_{wls} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{wls}$. 
+
+@cressie1985fitting recommends setting the $w_i$ in Equation$~$\eqref{eq:svwls} as $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the \texttt{weights} argument to \texttt{splm()}. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel. 
 \begin{table}\label{tab:weights}
   \centering
   \begin{tabular}{c|c|c}
@@ -108,24 +111,65 @@ Additionally, the number of $N(h)$ classes and maximum distance for $h$ are spec
 
 Recall that the semivariogram is defined for a constant-mean process. Generally, $\mathbf{y}$ does not necessarily have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are typically constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
 
+After 
+
 ### Composite Likelihood
 
 The composite likelihood approach involves constructing a likelihood based on conditional or marginal events for which log-likelihoods are available and then adding together these individual components. Composite likelihoods are attractive because they behave very similar to likelihoods but are easier to handle, both from a theoretical and a computational perspective. @curriero1999composite derive a particular composite likelihood for estimating semivariogram parameters. The negative log of this composite likelihood, denoted $\text{CL}(h)$, is given by
 \begin{equation}\label{eq:svcl}
   \text{CL}(h) = \sum_{i = 1}^{n - 1} \sum_{j > i} \left( \frac{(y_i - y_j)^2}{2\gamma(h)} + \ln(\gamma(h)) \right)
 \end{equation}
-where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\theta}$). Minimizing Equation$~$\ref{eq:svcl} yields $\bm{\hat{\theta}}_{cl}$, the semivariogram composite likelihood estimates of $\bm{\theta}$.
+where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\theta}$). Minimizing Equation$~$\ref{eq:svcl} yields $\bm{\hat{\theta}}_{cl}$, the semivariogram composite likelihood estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using generalized least squares: $\bm{\hat{\beta}}_{cl} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{cl}$. 
 
-An advantage of the composite likelihood approach to semivariogram estimation is that it does not require arbitrarily specifying empirial semivariogram bins and cutoffs. It does tend to be more computationally demanding than the weighted least squares, however, as the composite likelihood is constructed from $\binom{n}{2}$ pairs for a sample size $n$, whereas the weighted least squares approach only requires calculating $\binom{|N(h)|}{2}$ pairs for each distance bin $N(h)$. As with the weighted least squares approach, Equation$~$\ref{eq:svcl} requires constant-mean process, so typically the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ are used to estimate $\bm{\theta}$.
+An advantage of the composite likelihood approach to semivariogram estimation is that it does not require arbitrarily specifying empircial semivariogram bins and cutoffs. It does tend to be more computationally demanding than the weighted least squares, however, as the composite likelihood is constructed from $\binom{n}{2}$ pairs for a sample size $n$, whereas the weighted least squares approach only requires calculating $\binom{|N(h)|}{2}$ pairs for each distance bin $N(h)$. As with the weighted least squares approach, Equation$~$\ref{eq:svcl} requires constant-mean process, so typically the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ are used to estimate $\bm{\theta}$.
 
 # Hypothesis Testing
 
 ## The General Linear Hypothesis Test
+
+Hypothesis tests for each element in $\hat{\bm{\beta}}$ are available in \texttt{summary()}.
+```{r}
+spmod <- splm(y ~ x + group, exdata, "exponential", xcoord, ycoord)
+summary(spmod)
+```
+
+Test statistics are the ratio of the estimate to its standard error. These tests are useful for continuous predictors, but for categorical predictors, \texttt{summary()} only provides test statistics for each level, not all levels simultaneously. To find a test statistic for a categorical variable, there are two approaches. The first is to use \texttt{anova()}. 
+```{r}
+anova(spmod)
+```
+
+Test statistics from \texttt{anova()} are formed using the general linear hypothesis test. Let $\mathbf{L}$ be an $l \times p$ contrast matrix and $l_0$ be an $l \times 1$ vector. The null hypothesis is that $\mathbf{L} \bm{\hat{\beta}} = l_0$ and the alternative hypothesis is that $\mathbf{L} \bm{\hat{\beta}} \neq l_0$. Usually, $l_0$ is the zero vector (and in spmodel, this is assumed). The test statistic, denoted $X^2$, is given by
+\begin{equation}\label{eq:glht}
+  X^2 = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
+\end{equation}
+
+It is notoriously difficult to determine appropriate p-values for linear mixed models based on the general linear hypothesis test. lme4, for example, does not report p-values by default. There are three reasons we focus on next that explain why obtaining p-values is so challenging. 
+
+  * The first (and often most important) challenge is that when estimating $\bm{\theta}$, it is usually not clear what the null distribution of the test statistic is. In certain cases such as ordinary least squares regression or certain experimental designs (e.g., blocked design, split plot design, etc.), Equation$~$\ref{eq:glht} is F-distributed (the test statistic is known) with known numerator and denominator degrees of freedom. But outside of these well-studied cases, no general results exist. 
+  * The second challenge is that the standard error of the test statistic does not account for the uncertainty in $\bm{\hat{\theta}}$. For some approaches to addressing this problem, see @kackar1984approximations, @prasad1990estimation, @harville1992mean, and @kenward1997small.
+  * The third challenge is in determining denominator degrees of freedom. Again, in certain cases, these are known -- but this is not true in general. For some approaches to addressing this problem, see @satterthwaite1946approximate, @schluchter1990small, @hrong1996approximate, @kenward1997small, @littell2006sas, @pinheiro2006mixed, and @kenward2009improved.
+
+For these reasons, spmodel assumes a large-sample, Chi-squared approximation when calculating p-values. This approach addresses the three points above by assuming that with a large enough sample size:
+
+  * The numerator in Equation$~$\ref{eq:glht} tends to be asymptotically Chi-squared (under certain conditions) with $rank(\mathbf{L})$ degrees of freedom.
+  * The uncertainty from estimating $\bm{\hat{\theta}}$ is small enough to be safely ignored.
+
+Because the approximation is asymptotic, degree of freedom adjustments can be ignored (it is also worth noting that an F distribution with infinite denominator degrees of freedom is a scaled Chi-squared distribution). A takeaway here is that this asymptotic approximation implies these p-values are likely unreliable with small samples. 
+
+A second approach to determining p-values is a likelihood ratio test for nested models. Let $l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )$ be the log-likelihood from some reduced model and $l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )$ be the log-likelihood from some full model. When the reduced model is nested in the full model (i.e., the reduced model can be obtained by fixing some parameters of the full model), $[-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]$ is asymptotically Chi-squared with degrees of freedom equal to the difference in estimated parameters between the full and reduced model. To see whether there is evidence of spatial covariance, run
+```{r}
+spmod_r <- splm(y ~ x, exdata, "none")
+spmod_f <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
+anova(spmod_r, spmod_f)
+```
+This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using REML.
 
 ## Contrasts
 
 # Random Effects
 
 ## BLUPs
+
+# The Local list
 
 # References {.unnumbered}
