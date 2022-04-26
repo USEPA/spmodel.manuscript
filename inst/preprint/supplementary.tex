@@ -376,7 +376,7 @@ that \(\mathbf{L} \bm{\hat{\beta}} = l_0\) and the alternative
 hypothesis is that \(\mathbf{L} \bm{\hat{\beta}} \neq l_0\). Usually,
 \(l_0\) is the zero vector (and in spmodel, this is assumed). The test
 statistic, denoted \(X^2\), is given by \begin{equation}\label{eq:glht}
-  X^2 = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
+  \tilde{F} = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
 \end{equation}
 
 It is notoriously difficult to determine appropriate p-values for linear
@@ -389,18 +389,17 @@ focus on next that explain why obtaining p-values is so challenging.
 \item
   The first (and often most important) challenge is that when estimating
   \(\bm{\theta}\), it is usually not clear what the null distribution of
-  the test statistic is. In certain cases such as ordinary least squares
+  \(\tilde{F}\). In certain cases such as ordinary least squares
   regression or certain experimental designs (e.g., blocked design,
-  split plot design, etc.), Equation\(~\)\ref{eq:glht} is F-distributed
-  (the test statistic is known) with known numerator and denominator
-  degrees of freedom. But outside of these well-studied cases, no
-  general results exist.
+  split plot design, etc.), \(\tilde{F}\) is F-distributed with known
+  numerator and denominator degrees of freedom. But outside of these
+  well-studied cases, no general results exist.
 \item
-  The second challenge is that the standard error of the test statistic
-  does not account for the uncertainty in \(\bm{\hat{\theta}}\). For
-  some approaches to addressing this problem, see Kackar and Harville
-  (1984), Prasad and Rao (1990), Harville and Jeske (1992), and Kenward
-  and Roger (1997).
+  The second challenge is that the standard error of \(\tilde{F}\) does
+  not account for the uncertainty in \(\bm{\hat{\theta}}\). For some
+  approaches to addressing this problem, see Kackar and Harville (1984),
+  Prasad and Rao (1990), Harville and Jeske (1992), and Kenward and
+  Roger (1997).
 \item
   The third challenge is in determining denominator degrees of freedom.
   Again, in certain cases, these are known -- but this is not true in
@@ -417,9 +416,9 @@ three points above by assuming that with a large enough sample size:
 \begin{itemize}
 \tightlist
 \item
-  The numerator in Equation\(~\)\ref{eq:glht} tends to be asymptotically
-  Chi-squared (under certain conditions) with \(rank(\mathbf{L})\)
-  degrees of freedom.
+  The numerator of \(\tilde{F}\) tends to be asymptotically Chi-squared
+  (under certain conditions) with \(rank(\mathbf{L})\) degrees of
+  freedom.
 \item
   The uncertainty from estimating \(\bm{\hat{\theta}}\) is small enough
   to be safely ignored.
@@ -427,9 +426,10 @@ three points above by assuming that with a large enough sample size:
 
 Because the approximation is asymptotic, degree of freedom adjustments
 can be ignored (it is also worth noting that an F distribution with
-infinite denominator degrees of freedom is a scaled Chi-squared
-distribution). A takeaway here is that this asymptotic approximation
-implies these p-values are likely unreliable with small samples.
+infinite denominator degrees of freedom is a scaled (by \(rank{L}\))
+Chi-squared distribution). A takeaway here is that this asymptotic
+approximation implies these p-values are likely unreliable with small
+samples.
 
 A second approach to determining p-values is a likelihood ratio test for
 nested models. Let
@@ -466,7 +466,11 @@ structure does not change. This is because the REML likelihood
 \eqref{eq:reml-lik} depends on the fixed effects through
 \(\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}\). To use
 likelihood ratio tests for assessing the importance of fixed effects,
-parameters must be estimated using REML.
+parameters must be estimated using ML. When using likelihood ratio tests
+to assess the importance of parameters on the boundary of a parameter
+space (e.g., a variance parameter being zero), p-values tend to be too
+large (Self and Liang 1987; Stram and Lee 1994; Goldman, Whelan, and
+Simon 2000; Pinheiro and Bates 2006).
 
 \hypertarget{contrasts}{%
 \subsection{Contrasts}\label{contrasts}}
@@ -497,6 +501,11 @@ Mathematical Geology} 17 (5): 563--86.
 Curriero, Frank C, and Subhash Lele. 1999. ``A Composite Likelihood
 Approach to Semivariogram Estimation.'' \emph{Journal of Agricultural,
 Biological, and Environmental Statistics}, 9--28.
+
+\leavevmode\hypertarget{ref-goldman2000statistical}{}%
+Goldman, Nick, Whelan, and Simon. 2000. ``Statistical Tests of
+Gamma-Distributed Rate Heterogeneity in Models of Sequence Evolution in
+Phylogenetics.'' \emph{Molecular Biology and Evolution} 17 (6): 975--78.
 
 \leavevmode\hypertarget{ref-harville1977maximum}{}%
 Harville, David A. 1977. ``Maximum Likelihood Approaches to Variance
@@ -559,6 +568,16 @@ Schluchter, Mark D, and Janet T Elashoff. 1990. ``Small-Sample
 Adjustments to Tests with Unbalanced Repeated Measures Assuming Several
 Covariance Structures.'' \emph{Journal of Statistical Computation and
 Simulation} 37 (1-2): 69--87.
+
+\leavevmode\hypertarget{ref-self1987asymptotic}{}%
+Self, Steven G, and Kung-Yee Liang. 1987. ``Asymptotic Properties of
+Maximum Likelihood Estimators and Likelihood Ratio Tests Under
+Nonstandard Conditions.'' \emph{Journal of the American Statistical
+Association} 82 (398): 605--10.
+
+\leavevmode\hypertarget{ref-stram1994variance}{}%
+Stram, Daniel O, and Jae Won Lee. 1994. ``Variance Components Testing in
+the Longitudinal Mixed Effects Model.'' \emph{Biometrics}, 1171--7.
 
 \leavevmode\hypertarget{ref-wolfinger1994computing}{}%
 Wolfinger, Russ, Randy Tobias, and John Sall. 1994. ``Computing Gaussian

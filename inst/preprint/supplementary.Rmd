@@ -140,21 +140,21 @@ anova(spmod)
 
 Test statistics from \texttt{anova()} are formed using the general linear hypothesis test. Let $\mathbf{L}$ be an $l \times p$ contrast matrix and $l_0$ be an $l \times 1$ vector. The null hypothesis is that $\mathbf{L} \bm{\hat{\beta}} = l_0$ and the alternative hypothesis is that $\mathbf{L} \bm{\hat{\beta}} \neq l_0$. Usually, $l_0$ is the zero vector (and in spmodel, this is assumed). The test statistic, denoted $X^2$, is given by
 \begin{equation}\label{eq:glht}
-  X^2 = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
+  \tilde{F} = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
 \end{equation}
 
 It is notoriously difficult to determine appropriate p-values for linear mixed models based on the general linear hypothesis test. lme4, for example, does not report p-values by default. There are three reasons we focus on next that explain why obtaining p-values is so challenging. 
 
-  * The first (and often most important) challenge is that when estimating $\bm{\theta}$, it is usually not clear what the null distribution of the test statistic is. In certain cases such as ordinary least squares regression or certain experimental designs (e.g., blocked design, split plot design, etc.), Equation$~$\ref{eq:glht} is F-distributed (the test statistic is known) with known numerator and denominator degrees of freedom. But outside of these well-studied cases, no general results exist. 
-  * The second challenge is that the standard error of the test statistic does not account for the uncertainty in $\bm{\hat{\theta}}$. For some approaches to addressing this problem, see @kackar1984approximations, @prasad1990estimation, @harville1992mean, and @kenward1997small.
+  * The first (and often most important) challenge is that when estimating $\bm{\theta}$, it is usually not clear what the null distribution of $\tilde{F}$. In certain cases such as ordinary least squares regression or certain experimental designs (e.g., blocked design, split plot design, etc.), $\tilde{F}$ is F-distributed with known numerator and denominator degrees of freedom. But outside of these well-studied cases, no general results exist. 
+  * The second challenge is that the standard error of $\tilde{F}$ does not account for the uncertainty in $\bm{\hat{\theta}}$. For some approaches to addressing this problem, see @kackar1984approximations, @prasad1990estimation, @harville1992mean, and @kenward1997small.
   * The third challenge is in determining denominator degrees of freedom. Again, in certain cases, these are known -- but this is not true in general. For some approaches to addressing this problem, see @satterthwaite1946approximate, @schluchter1990small, @hrong1996approximate, @kenward1997small, @littell2006sas, @pinheiro2006mixed, and @kenward2009improved.
 
 For these reasons, spmodel assumes a large-sample, Chi-squared approximation when calculating p-values. This approach addresses the three points above by assuming that with a large enough sample size:
 
-  * The numerator in Equation$~$\ref{eq:glht} tends to be asymptotically Chi-squared (under certain conditions) with $rank(\mathbf{L})$ degrees of freedom.
+  * The numerator of $\tilde{F}$ tends to be asymptotically Chi-squared (under certain conditions) with $rank(\mathbf{L})$ degrees of freedom.
   * The uncertainty from estimating $\bm{\hat{\theta}}$ is small enough to be safely ignored.
 
-Because the approximation is asymptotic, degree of freedom adjustments can be ignored (it is also worth noting that an F distribution with infinite denominator degrees of freedom is a scaled Chi-squared distribution). A takeaway here is that this asymptotic approximation implies these p-values are likely unreliable with small samples. 
+Because the approximation is asymptotic, degree of freedom adjustments can be ignored (it is also worth noting that an F distribution with infinite denominator degrees of freedom is a scaled (by $rank{L}$) Chi-squared distribution). A takeaway here is that this asymptotic approximation implies these p-values are likely unreliable with small samples. 
 
 A second approach to determining p-values is a likelihood ratio test for nested models. Let $l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )$ be the log-likelihood from some reduced model and $l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )$ be the log-likelihood from some full model. When the reduced model is nested in the full model (i.e., the reduced model can be obtained by fixing some parameters of the full model), $[-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]$ is asymptotically Chi-squared with degrees of freedom equal to the difference in estimated parameters between the full and reduced model. To see whether there is evidence of spatial covariance, run
 ```{r}
@@ -162,7 +162,7 @@ spmod_r <- splm(y ~ x, exdata, "none")
 spmod_f <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
 anova(spmod_r, spmod_f)
 ```
-This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using REML.
+This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using ML. When using likelihood ratio tests to assess the importance of parameters on the boundary of a parameter space (e.g., a variance parameter being zero), p-values tend to be too large [@self1987asymptotic; @stram1994variance; @goldman2000statistical; @pinheiro2006mixed].
 
 ## Contrasts
 
