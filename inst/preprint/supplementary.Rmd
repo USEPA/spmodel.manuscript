@@ -29,6 +29,8 @@ biblio-style: unsrt
 header-includes: |
   \usepackage{amsmath,amsfonts,amssymb}
   \usepackage{bm, bbm}
+  \usepackage{mathtools}
+  \mathtoolsset{showonlyrefs=true}
 output: rticles::arxiv_article
 ---
 
@@ -88,7 +90,7 @@ Equation$~$\eqref{eq:esv} is viewed as the average squared half-distance between
 \begin{equation}\label{eq:svwls}
   \sum_i w_i [\hat{\gamma}(h)_i - \gamma(h)_i]^2,
 \end{equation}
-where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. Minimizing Equation$~$\eqref{eq:svwls} yields $\bm{\hat{\theta}}_{wls}$, the semivariogram weighted least squares estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using generalized least squares: $\bm{\hat{\beta}}_{wls} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{wls}$. 
+where $w_i$, $\hat{\gamma}(h)_i$, and $\gamma(h)_i$ are the weights, empirical semivariogram, and semivariogram for the $i$th distance class. Minimizing Equation$~$\eqref{eq:svwls} yields $\bm{\hat{\theta}}_{wls}$, the semivariogram weighted least squares estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using (empirical) generalized least squares: $\bm{\hat{\beta}}_{wls} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{wls}$. 
 
 @cressie1985fitting recommends setting the $w_i$ in Equation$~$\eqref{eq:svwls} as $w_i = |N(h)| / \gamma(h)_i^2$, which gives more weights to distance classes with more observations ($|N(h)|$) and semivariances at shorter distances ($1 / \gamma(h)_i^2$). The default in spmodel is to use these $w_i$ -- the type of $w_i$ is changed via the \texttt{weights} argument to \texttt{splm()}. Table$~$\ref{tab:weights} contains all $w_i$ available in spmodel. 
 \begin{table}\label{tab:weights}
@@ -119,7 +121,7 @@ The composite likelihood approach involves constructing a likelihood based on co
 \begin{equation}\label{eq:svcl}
   \text{CL}(h) = \sum_{i = 1}^{n - 1} \sum_{j > i} \left( \frac{(y_i - y_j)^2}{2\gamma(h)} + \ln(\gamma(h)) \right)
 \end{equation}
-where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\theta}$). Minimizing Equation$~$\ref{eq:svcl} yields $\bm{\hat{\theta}}_{cl}$, the semivariogram composite likelihood estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using generalized least squares: $\bm{\hat{\beta}}_{cl} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{cl}$. 
+where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\theta}$). Minimizing Equation$~$\ref{eq:svcl} yields $\bm{\hat{\theta}}_{cl}$, the semivariogram composite likelihood estimates of $\bm{\theta}$. After estimating $\bm{\theta}$, $\bm{\beta}$ estimates are constructed using (empirical) generalized least squares: $\bm{\hat{\beta}}_{cl} = (\mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{X})^{-1} \mathbf{X}^\intercal \hat{\mathbf{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\mathbf{\Sigma}}^{-1}$ is $\mathbf{\Sigma}$ evaluated at $\bm{\hat{\theta}}_{cl}$. 
 
 An advantage of the composite likelihood approach to semivariogram estimation is that it does not require arbitrarily specifying empircial semivariogram bins and cutoffs. It does tend to be more computationally demanding than the weighted least squares, however, as the composite likelihood is constructed from $\binom{n}{2}$ pairs for a sample size $n$, whereas the weighted least squares approach only requires calculating $\binom{|N(h)|}{2}$ pairs for each distance bin $N(h)$. As with the weighted least squares approach, Equation$~$\ref{eq:svcl} requires constant-mean process, so typically the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ are used to estimate $\bm{\theta}$.
 
@@ -142,6 +144,7 @@ Test statistics from \texttt{anova()} are formed using the general linear hypoth
 \begin{equation}\label{eq:glht}
   \tilde{F} = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
 \end{equation}
+By default, $\mathbf{L}$ is chosen such that each variable in the data used to fit the model is tested. If this deafult is not desired, the \texttt{Terms} and \texttt{L} arguments can be used to pass user-defined $\mathbf{L}$ matrices to \texttt{anova()}. 
 
 It is notoriously difficult to determine appropriate p-values for linear mixed models based on the general linear hypothesis test. lme4, for example, does not report p-values by default. There are three reasons we focus on next that explain why obtaining p-values is so challenging. 
 
@@ -164,11 +167,41 @@ anova(spmod_r, spmod_f)
 ```
 This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using ML. When using likelihood ratio tests to assess the importance of parameters on the boundary of a parameter space (e.g., a variance parameter being zero), p-values tend to be too large [@self1987asymptotic; @stram1994variance; @goldman2000statistical; @pinheiro2006mixed].
 
-## Contrasts
-
 # Random Effects
 
 ## BLUPs
+
+# Prediction
+
+Predictions are often the primary goal of a data analysis. spmodel performs best linear unbiased prediction, which is equivalent to Kriging, using the \texttt{predict()} function. Let $\mathbf{y}_o$ be a vector of observed variables and $\mathbf{y}_u$ be a vector of unobserved variables. Let $\mathbf{X}_o$ and $\mathbf{X}_u$ be the fixed effect design matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. Let $\mathbf{\Sigma}_o$ and $\mathbf{\Sigma}_u$ be the covariance matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. The (empirical) best linear unbiased predictor (BLUP; Kriging predictor) of $\mathbf{y}_u$, denoted $\mathbf{\dot{y}_u}$ is given by
+\begin{equation}\label{eq:blup}
+  \mathbf{\dot{y}_u} =  \mathbf{X}_u \bm{\hat{\beta}} + \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o (\mathbf{y}_o - \mathbf{X}_o \bm{\hat{\beta}}) ,
+\end{equation}
+where $\mathbf{\hat{c}}_{uo} = \hat{\text{Cov}}(\mathbf{y}_u, \mathbf{y}_o)$ and $\bm{\hat{\beta}} = (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$. One can show that $\hat{\text{Cov}}(\mathbf{\dot{y}})$ is
+\begin{equation}\label{eq:vblup}
+  \text{Cov}(\mathbf{\dot{y}}) = \mathbf{\hat{\Sigma}}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{\hat{c}}_{uo}^\intercal + \mathbf{H}(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}\mathbf{H}^\intercal ,
+\end{equation}
+where $\mathbf{H} = (\mathbf{X}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{X}_o)$. When $\texttt{predict(..., interval = "none")}$, predictions are obtained using Equation$~$\ref{eq:blup}. If \texttt{se.fit = TRUE}, standard errors are the square root of the diagonal of Equation$~$\ref{eq:vblup}. When \texttt{predict(..., interval = "prediction")}, predictions are obtained using Equation$~$\ref{eq:blup} and standard errors used for the lower and upper bound of the prediction intervals are obtained via the square root of the diagonal of Equation$~$\ref{eq:vblup} (these are also what are returned if \texttt{se.fit = TRUE}). When \texttt{predict(..., interval = "confidence")}, mean estimates are obtained using $\mathbf{X}_u \bm{\hat{\beta}}$ and standard errors used for the lower and upper bound of the confidence intervals are obtained via the square root of the diagonal of $(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$ (these are also what are returned if \texttt{se.fit = TRUE}). 
+
+For autoregressive models, an extra step is required to obtain $\hat{\Sigma}^{-1}_o$ and $\hat{\Sigma}^{-1}_u$, as they depend on one another through the locations of $\mathbf{y}_o$ and $\mathbf{y}_u$. Let $\hat{\Sigma}^{-1}$ be the inverse covariance matrix of $\mathbf{y}_o$ and $\mathbf{y}_u$ (which we directly specify for autoregressive models). If the data are small enough, then $\hat{\Sigma}^{-1}$ can be inverted, yielding $\hat{\Sigma}$. Then appropriate subsets can then used to obtain the components needed for prediction. A faster way to obtain relevant components required for prediction does exist and is worth mentioning -- $\hat{\Sigma}^{-1}$ can be represented blockwise as
+\begin{equation}\label{eq:auto_hw}
+  \hat{\Sigma}^{-1} =
+  \begin{bmatrix}
+    \mathbf{\hat{\Sigma}}^{*}_{o, o} & \mathbf{\hat{\Sigma}}^{*}_{o, u} \\
+    \mathbf{\hat{\Sigma}}^{*}_{u, o} & \mathbf{\hat{\Sigma}}^{*}_{u, u}
+  \end{bmatrix},
+\end{equation}
+where the dimensions of the blocks are indexed by the matrix subscripts (rows then columns). All of the terms required for prediction can be obtained from this block representation. @wolf1978helmert shows that 
+\begin{equation}\label{eq:hw_forms}
+  \begin{split}
+    \hat{\Sigma}^{-1}_o & = \mathbf{\hat{\Sigma}}^{*}_{o, o} - \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1} \mathbf{\hat{\Sigma}}^{*}_{u, o} \\
+    \hat{\Sigma}_u & = (\mathbf{\hat{\Sigma}}^{*}_{u, u} - \mathbf{\hat{\Sigma}}^{*}_{u, o} (\mathbf{\hat{\Sigma}}^{*}_{o, o})^{-1} \mathbf{\hat{\Sigma}}^{*}_{o, u})^{-1} \\
+    \text{Cov}(\mathbf{y}_o, \mathbf{y}_u) & = - \hat{\Sigma}_o \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1}
+  \end{split}
+\end{equation}
+A similar result exists for the log determinant (used in ML and REML estimation).
+
+# Anisotropy
 
 # The Local list
 
