@@ -317,11 +317,6 @@ Hypothesis tests for each element in \(\hat{\bm{\beta}}\) are available
 in \texttt{summary()}.
 
 \begin{verbatim}
-R> spmod <- splm(y ~ x + group, exdata, "exponential", xcoord, ycoord)
-R> summary(spmod)
-\end{verbatim}
-
-\begin{verbatim}
 
 Call:
 splm(formula = y ~ x + group, data = exdata, spcov_type = "exponential", 
@@ -356,10 +351,6 @@ predictors, \texttt{summary()} only provides test statistics for each
 level, not all levels simultaneously. To find a test statistic for a
 categorical variable, there are two approaches. The first is to use
 \texttt{anova()}.
-
-\begin{verbatim}
-R> anova(spmod)
-\end{verbatim}
 
 \begin{verbatim}
 Analysis of Variance Table
@@ -448,12 +439,6 @@ parameters of the full model),
 is asymptotically Chi-squared with degrees of freedom equal to the
 difference in estimated parameters between the full and reduced model.
 To see whether there is evidence of spatial covariance, run
-
-\begin{verbatim}
-R> spmod_r <- splm(y ~ x, exdata, "none")
-R> spmod_f <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
-R> anova(spmod_r, spmod_f)
-\end{verbatim}
 
 \begin{verbatim}
 Likelihood Ratio Test
@@ -551,8 +536,66 @@ shows that \begin{equation}\label{eq:hw_forms}
 \end{equation} A similar result exists for the log determinant (used in
 ML and REML estimation).
 
-\hypertarget{anisotropy}{%
-\section{Anisotropy}\label{anisotropy}}
+\hypertarget{geometric-anisotropy}{%
+\section{(Geometric) Anisotropy}\label{geometric-anisotropy}}
+
+A spatial process is geometrically isotropic if its covariance decays
+equally in all directions. A spatial process is geometrically
+anisotropic if its covariance does not decay equally in all directions
+(i.e., is not isotropic). Let \(h\) represent distance, \(\alpha\)
+represent an angle in \([0, \pi]\), and \(\tau\) represent a scaling
+factor in \([0, 1]\). Geometric anisotropy is accommodate through a
+specific rotation and scaling of the x-coordinate and y-coordinate. Then
+a new distance, \(h*\), corresponds to an isotropic process. The scaling
+works by rotating the major axis of the covariance clockwise onto a
+transformed x-axis and scaling the minor axis of the covariance along
+the transformed y-axis. Geometrically, this transformation and
+re-scaling is achieved via \begin{equation}
+  \begin{bmatrix}
+    \mathbf{x}^* \\
+    \mathbf{y}^*
+  \end{bmatrix} = 
+  \begin{bmatrix}
+    1 & 0 \\
+    0 & 1 / \tau
+  \end{bmatrix}
+  \begin{bmatrix}
+    \cos(\alpha) & \sin(\alpha) \\
+    -\sin(\alpha) & \cos(\alpha)
+  \end{bmatrix}  
+  \begin{bmatrix}
+    \mathbf{x} \\
+    \mathbf{y}
+  \end{bmatrix}
+\end{equation}
+
+Then covariance parameters are estimated using the transformed
+coordinates to compute distances. An anisotropy transformation is
+visualized in Figure\(~\)\ref{fig:anisotropy}.
+
+\begin{figure}
+\includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-1} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-2} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-3} \caption{In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure).}\label{fig:anisotropy}
+\end{figure}
+
+In spmodel, anisotropy parameters (\(\alpha\) and \(\tau\)) can be
+estimated using ML or REML by setting the \texttt{anisotropy} argument
+to \texttt{TRUE} or by specifying one of the anisotropy parameters as
+unknown or known and different from zero in \texttt{spcov\_initial}.
+Fixed anisotropy parameters can be provided to SV-WLS and SV-CL and
+incorporated into estimation of \(\bm{\theta}\) and \(\bm{\beta}\) when
+specified in \texttt{spcov\_initial}.
+
+Estimating anisotropy can be challenging because of local minima in the
+likelihood. First note that estimation need only occur for \(\alpha\) on
+\((0, \pi)\) radians due to symmetric of the covariance ellipse at
+rotations \(\alpha\) and \(\alpha + \pi\). Second note that estimation
+need only occur for \(\tau\) on \((0, 1)\) because we have defined
+\(\tau\) as the scaling factor for the length of the minor axis relative
+to the major axis. To address the local minima problem, each
+optimization iteration actually involves two likelihood evaluations, one
+for \(\alpha = \alpha_0\) and another for \(pi - \alpha_0\), so that the
+likelhood is evaluated for \(\alpha\) parameters the quadrants on either
+side of the minor (transformed y) axis.
 
 \hypertarget{the-local-list}{%
 \section{The Local list}\label{the-local-list}}

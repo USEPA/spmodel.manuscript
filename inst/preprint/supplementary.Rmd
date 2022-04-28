@@ -35,9 +35,10 @@ output: rticles::arxiv_article
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
+knitr::opts_chunk$set(prompt=TRUE, echo = FALSE, highlight = FALSE, continue = " + ", comment = "")
 options(replace.assign=TRUE, width=90, prompt="R> ")
 library(spmodel)
+library(ggplot2)
 ```
 
 # Covariance Functions
@@ -201,7 +202,83 @@ where the dimensions of the blocks are indexed by the matrix subscripts (rows th
 \end{equation}
 A similar result exists for the log determinant (used in ML and REML estimation).
 
-# Anisotropy
+# (Geometric) Anisotropy
+
+A spatial process is geometrically isotropic if its covariance decays equally in all directions. A spatial process is geometrically anisotropic if its covariance does not decay equally in all directions (i.e., is not isotropic). Let $h$ represent distance, $\alpha$ represent an angle in $[0, \pi]$, and $\tau$ represent a scaling factor in $[0, 1]$. Geometric anisotropy is accommodate through a specific rotation and scaling of the x-coordinate and y-coordinate. Then a new distance, $h*$, corresponds to an isotropic process. The scaling works by rotating the major axis of the covariance clockwise onto a transformed x-axis and scaling the minor axis of the covariance along the transformed y-axis. Geometrically, this transformation and re-scaling is achieved via
+\begin{equation}
+  \begin{bmatrix}
+    \mathbf{x}^* \\
+    \mathbf{y}^*
+  \end{bmatrix} = 
+  \begin{bmatrix}
+    1 & 0 \\
+    0 & 1 / \tau
+  \end{bmatrix}
+  \begin{bmatrix}
+    \cos(\alpha) & \sin(\alpha) \\
+    -\sin(\alpha) & \cos(\alpha)
+  \end{bmatrix}  
+  \begin{bmatrix}
+    \mathbf{x} \\
+    \mathbf{y}
+  \end{bmatrix}
+\end{equation}
+
+Then covariance parameters are estimated using the transformed coordinates to compute distances. An anisotropy transformation is visualized in Figure$~$\ref{fig:anisotropy}.
+
+```{r anisotropy, out.width = "33%", fig.show = "hold", fig.cap = "In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure)."}
+# PRELIMINARIES
+r <- 1
+theta_seq <- seq(0, 2 * pi, length.out = 1000)
+x_orig <- r * cos(theta_seq)
+y_orig <- r * sin(theta_seq)
+df_orig <- data.frame(x = x_orig, y = y_orig)
+
+# FIRST FIGURE
+theta <- pi / 4 # (45 degrees)
+R <- 1 / 4 # (minor axis length / major axis length)
+scale <- matrix(c(1, 0, 0, R), nrow = 2, byrow = TRUE)
+rotate <- matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)), nrow = 2, byrow = TRUE)
+transform <- rotate %*% scale
+coords <- transform %*% rbind(df_orig[["x"]], df_orig[["y"]])
+df <- data.frame(x = coords[1, ], y = coords[2, ])
+ggplot(df, aes(x = x, y = y)) + 
+  geom_point() + 
+  lims(x = c(-1, 1), y = c(-1, 1))  +
+  geom_hline(yintercept = 0, col = "blue") + 
+  geom_vline(xintercept = 0, col = "blue", lty = "dashed") + 
+  geom_abline(intercept = 0, slope = 1, col = "red") +
+  geom_abline(intercept = 0, slope = -1, col = "red", lty = "dashed")
+
+# SECOND FIGURE
+rotate_anis <- matrix(c(cos(theta), sin(theta), -sin(theta), cos(theta)), nrow = 2, byrow = TRUE)
+coords_anis <- rotate_anis %*% rbind(df[["x"]], df[["y"]])
+df_anis <- data.frame(x = coords_anis[1, ], y = coords_anis[2, ])
+ggplot(df_anis, aes(x = x, y = y)) + 
+  geom_point() +
+  lims(x = c(-1, 1), y = c(-1, 1))  +
+  geom_hline(yintercept = 0, col = "red") + 
+  geom_vline(xintercept = 0, col = "red", lty = "dashed") + 
+  geom_abline(intercept = 0, slope = 1, col = "blue", lty = "dashed") +
+  geom_abline(intercept = 0, slope = -1, col = "blue")
+
+# THIRD FIGURE
+unscale <- matrix(c(1, 0, 0, 1 / R), nrow = 2, byrow = TRUE)
+coords_iso <- unscale %*% rbind(df_anis[["x"]], df_anis[["y"]])
+df_iso <- data.frame(x = coords_iso[1, ], y = coords_iso[2, ])
+ggplot(df_iso, aes(x = x, y = y)) + 
+  geom_point() +
+  lims(x = c(-1, 1), y = c(-1, 1))  +
+  geom_hline(yintercept = 0, col = "red") + 
+  geom_vline(xintercept = 0, col = "red", lty = "dashed") + 
+  geom_abline(intercept = 0, slope = 1, col = "blue", lty = "dashed") +
+  geom_abline(intercept = 0, slope = -1, col = "blue")
+```
+
+
+In spmodel, anisotropy parameters ($\alpha$ and $\tau$) can be estimated using ML or REML by setting the \texttt{anisotropy} argument to \texttt{TRUE} or by specifying one of the anisotropy parameters as unknown or known and different from zero in \texttt{spcov\_initial}. Fixed anisotropy parameters can be provided to SV-WLS and SV-CL and incorporated into estimation of $\bm{\theta}$ and $\bm{\beta}$ when specified in \texttt{spcov\_initial}.
+
+Estimating anisotropy can be challenging because of local minima in the likelihood. First note that estimation need only occur for $\alpha$ on $(0, \pi)$ radians due to symmetric of the covariance ellipse at rotations $\alpha$ and $\alpha + \pi$. Second note that estimation need only occur for $\tau$ on $(0, 1)$ because we have defined $\tau$ as the scaling factor for the length of the minor axis relative to the major axis. To address the local minima problem, each optimization iteration actually involves two likelihood evaluations, one for $\alpha = \alpha_0$ and another for $pi - \alpha_0$, so that the likelhood is evaluated for $\alpha$ parameters the quadrants on either side of the minor (transformed y) axis.
 
 # The Local list
 
