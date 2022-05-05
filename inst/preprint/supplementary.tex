@@ -269,7 +269,8 @@ typically constructed using the residuals from an ordinary least squares
 regression of \(\mathbf{y}\) on \(\mathbf{X}\) -- these residuals are
 assumed to have mean zero.
 
-After
+\hypertarget{optimization}{%
+\subsection{Optimization}\label{optimization}}
 
 \hypertarget{composite-likelihood}{%
 \subsubsection{Composite Likelihood}\label{composite-likelihood}}
@@ -462,11 +463,56 @@ space (e.g., a variance parameter being zero), p-values tend to be too
 large (Self and Liang 1987; Stram and Lee 1994; Goldman, Whelan, and
 Simon 2000; Pinheiro and Bates 2006).
 
-\hypertarget{random-effects}{%
-\section{Random Effects}\label{random-effects}}
+\hypertarget{fitted-values}{%
+\section{Fitted Values}\label{fitted-values}}
 
-\hypertarget{blups}{%
-\subsection{BLUPs}\label{blups}}
+Fitted values for the response, spatial random errors, and random
+effects are obtained in spmodel using \texttt{fitted()}. The fitted
+values for the response, denoted \(\mathbf{\hat{y}}\), are given by
+\begin{equation}\label{eq:fit_resp}
+  \mathbf{\hat{y}} = \mathbf{X} \bm{\hat{\beta}} .
+\end{equation} They are the estimated mean response given the set of
+covariates for each observation.
+
+Fitted values for spatial random errors and random effects are linked
+with best linear unbiased predictors from mixed model theory. Consider
+the standard random effects parameterization \begin{equation}
+  \mathbf{y} = \mathbf{X} \bm{\beta} + \mathbf{Z} \mathbf{u} + \bm{\epsilon},
+\end{equation} where \(\mathbf{Z}\) denotes the random effects design
+matrix, \(\mathbf{u}\) denotes the random effects, and \(\bm{\epsilon}\)
+denotes independent random error. Henderson (1975) states that the best
+linear unbiased predictor (BLUP) of a single random effect
+\(\mathbf{u}\), denoted \(\mathbf{\hat{u}}\), is given by
+\begin{equation}\label{eq:blup_mm}
+  \mathbf{\hat{u}} = \sigma^2_u \mathbf{Z} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}).
+\end{equation} Searle, Casella, and McCulloch (2009) generalizes this
+idea by showing that for a random variable \(\bm{\alpha}\), the best
+linear unbiased predictor (based on the response, \(\mathbf{y}\)) of
+\(\mathbf{\alpha}\), denoted \(\bm{\hat{\alpha}}\) is given by
+\begin{equation}\label{eq:blup_gen}
+  \bm{\hat{\alpha}} = \text{E}(\bm{\alpha}) + \Sigma_\alpha \Sigma^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation} where
+\(\Sigma_\alpha = \text{Cov}(\bm{\alpha}, \mathbf{y})\). Evaluating
+Equation\(~\)\eqref{eq:blup_gen} at the plug-in (empirical) estimates of
+the covariance parameters yields the empirical best linear unbiased
+predictor (EBLUP) of \(\bm{\alpha}\).
+
+Building from this idea and putting plug-in (empirical) estimates of the
+covariance parameters into Equation\(~\)\eqref{eq:blup_gen} yields
+predictors for each random error, which we call fitted values
+henceforth. For example, the fitted value corresponding to the spatial
+dependent random error, denoted \(\bm{\hat{\tau}}\), is given by
+\begin{equation}\label{eq:blup_sp}
+  \bm{\hat{\tau}} = \mathbf{\Sigma}_{de} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation} where
+\(\mathbf{\Sigma}_{de} = \text{Cov}(\bm{\tau}, \mathbf{y})\). To obtain
+these fitted values for the spatial random errors, run
+\texttt{fitted(object,\ type\ =\ "spcov")}. To obtain these fitted
+values for the random effects, run
+\texttt{fitted(object,\ type\ =\ "randcov")}.
+
+(Talk about assumption of independent among the random effects yields
+the EBLUPs for us?)
 
 \hypertarget{prediction}{%
 \section{Prediction}\label{prediction}}
@@ -633,6 +679,10 @@ Harville, David A, and Daniel R Jeske. 1992. ``Mean Squared Error of
 Estimation or Prediction Under a General Linear Model.'' \emph{Journal
 of the American Statistical Association} 87 (419): 724--31.
 
+\leavevmode\hypertarget{ref-henderson1975best}{}%
+Henderson, Charles R. 1975. ``Best Linear Unbiased Estimation and
+Prediction Under a Selection Model.'' \emph{Biometrics}, 423--47.
+
 \leavevmode\hypertarget{ref-hrong1996approximate}{}%
 Hrong-Tai Fai, Alex, and Paul L Cornelius. 1996. ``Approximate F-Tests
 of Multiple Degree of Freedom Hypotheses in Generalized Least Squares
@@ -684,6 +734,10 @@ Schluchter, Mark D, and Janet T Elashoff. 1990. ``Small-Sample
 Adjustments to Tests with Unbalanced Repeated Measures Assuming Several
 Covariance Structures.'' \emph{Journal of Statistical Computation and
 Simulation} 37 (1-2): 69--87.
+
+\leavevmode\hypertarget{ref-searle2009variance}{}%
+Searle, Shayle R, George Casella, and Charles E McCulloch. 2009.
+\emph{Variance Components}. John Wiley \& Sons.
 
 \leavevmode\hypertarget{ref-self1987asymptotic}{}%
 Self, Steven G, and Kung-Yee Liang. 1987. ``Asymptotic Properties of

@@ -114,7 +114,7 @@ Additionally, the number of $N(h)$ classes and maximum distance for $h$ are spec
 
 Recall that the semivariogram is defined for a constant-mean process. Generally, $\mathbf{y}$ does not necessarily have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are typically constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
 
-After 
+## Optimization
 
 ### Composite Likelihood
 
@@ -168,9 +168,35 @@ anova(spmod_r, spmod_f)
 ```
 This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using ML. When using likelihood ratio tests to assess the importance of parameters on the boundary of a parameter space (e.g., a variance parameter being zero), p-values tend to be too large [@self1987asymptotic; @stram1994variance; @goldman2000statistical; @pinheiro2006mixed].
 
-# Random Effects
+# Fitted Values
 
-## BLUPs
+Fitted values for the response, spatial random errors, and random effects are obtained in spmodel using `fitted()`. The fitted values for the response, denoted $\mathbf{\hat{y}}$, are given by
+\begin{equation}\label{eq:fit_resp}
+  \mathbf{\hat{y}} = \mathbf{X} \bm{\hat{\beta}} .
+\end{equation}
+They are the estimated mean response given the set of covariates for each observation. 
+
+Fitted values for spatial random errors and random effects are linked with best linear unbiased predictors from mixed model theory. Consider the standard random effects parameterization
+\begin{equation}
+  \mathbf{y} = \mathbf{X} \bm{\beta} + \mathbf{Z} \mathbf{u} + \bm{\epsilon},
+\end{equation}
+where $\mathbf{Z}$ denotes the random effects design matrix, $\mathbf{u}$ denotes the random effects, and $\bm{\epsilon}$ denotes independent random error. @henderson1975best states that the best linear unbiased predictor (BLUP) of a single random effect $\mathbf{u}$, denoted $\mathbf{\hat{u}}$, is given by
+\begin{equation}\label{eq:blup_mm}
+  \mathbf{\hat{u}} = \sigma^2_u \mathbf{Z} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}).
+\end{equation}
+@searle2009variance generalizes this idea by showing that for a random variable $\bm{\alpha}$, the best linear unbiased predictor (based on the response, $\mathbf{y}$) of $\mathbf{\alpha}$, denoted $\bm{\hat{\alpha}}$ is given by
+\begin{equation}\label{eq:blup_gen}
+  \bm{\hat{\alpha}} = \text{E}(\bm{\alpha}) + \Sigma_\alpha \Sigma^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation}
+where $\Sigma_\alpha = \text{Cov}(\bm{\alpha}, \mathbf{y})$. Evaluating Equation$~$\eqref{eq:blup_gen} at the plug-in (empirical) estimates of the covariance parameters yields the empirical best linear unbiased predictor (EBLUP) of $\bm{\alpha}$.
+
+Building from this idea and putting plug-in (empirical) estimates of the covariance parameters into Equation$~$\eqref{eq:blup_gen} yields predictors for each random error, which we call fitted values henceforth. For example, the fitted value corresponding to the spatial dependent random error, denoted $\bm{\hat{\tau}}$, is given by
+\begin{equation}\label{eq:blup_sp}
+  \bm{\hat{\tau}} = \mathbf{\Sigma}_{de} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation}
+where $\mathbf{\Sigma}_{de} = \text{Cov}(\bm{\tau}, \mathbf{y})$. To obtain these fitted values for the spatial random errors, run `fitted(object, type = "spcov")`. To obtain these fitted values for the random effects, run `fitted(object, type = "randcov")`. 
+
+(Talk about assumption of independent among the random effects yields the EBLUPs for us?)
 
 # Prediction
 
