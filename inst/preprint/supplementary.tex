@@ -13,7 +13,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{spmodel: Spatial Modeling in \textbf{R} -- Supplementary Material}
+\title{spmodel: Spatial Modeling in \textbf{R} -- Computatinal Details Vignette}
 
 \author{
     Michael Dumelle
@@ -55,7 +55,12 @@
 
 
 \begin{abstract}
-Enter the text of your abstract here.
+Fit, summarize, and predict for a variety of spatial models. Parameters
+of spatial linear models and spatial autoregressive models are estimated
+using a variety of methods. Additional modeling features include
+anisotropy, random effects, partition factors, big data approaches, and
+more. Model-fit statistics are used to summarize, visualize, and compare
+models. Predictions at unobserved locations are easily obtainable.
 \end{abstract}
 
 \keywords{
@@ -66,14 +71,32 @@ Enter the text of your abstract here.
     Autoregressive model
   }
 
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+This vignette covers technical details regarding the functions in
+spmodel that perform computations.
+
+A note on square roots and Cholesky solves
+
+\hypertarget{splm-and-spautor}{%
+\section{\texorpdfstring{\texttt{splm()} and
+\texttt{spautor()}}{splm() and spautor()}}\label{splm-and-spautor}}
+
+\hypertarget{splm}{%
+\subsection{`splm()}\label{splm}}
+
+\hypertarget{additional-functions}{%
+\section{Additional Functions`}\label{additional-functions}}
+
 \hypertarget{covariance-functions}{%
-\section{Covariance Functions}\label{covariance-functions}}
+\subsubsection{Covariance Functions}\label{covariance-functions}}
 
 \hypertarget{estimation}{%
-\section{Estimation}\label{estimation}}
+\subsubsection{Estimation}\label{estimation}}
 
 \hypertarget{likelihood-based-estimation}{%
-\subsection{Likelihood-based
+\paragraph{Likelihood-based
 Estimation}\label{likelihood-based-estimation}}
 
 Minus twice a profiled Gaussian log-likelihood, denoted
@@ -171,7 +194,7 @@ Cholesky decomositions is unfeasible for sample sizes larger than a few
 thousand observations.
 
 \hypertarget{semivariogram-based-estimation}{%
-\subsection{Semivariogram-based
+\paragraph{Semivariogram-based
 Estimation}\label{semivariogram-based-estimation}}
 
 An alternative approach to likelihood-based estimation is
@@ -193,7 +216,7 @@ computational burden (calculations based on pairs) scale the squared
 sample size (i.e., not the cubed sample size).
 
 \hypertarget{weighted-least-squares}{%
-\subsubsection{Weighted Least Squares}\label{weighted-least-squares}}
+\subparagraph{Weighted Least Squares}\label{weighted-least-squares}}
 
 The empirical semivariogram is a moment-based estimate of the
 semivariogram denoted by \(\hat{\gamma}(h)\) and defined as
@@ -269,11 +292,8 @@ typically constructed using the residuals from an ordinary least squares
 regression of \(\mathbf{y}\) on \(\mathbf{X}\) -- these residuals are
 assumed to have mean zero.
 
-\hypertarget{optimization}{%
-\subsection{Optimization}\label{optimization}}
-
 \hypertarget{composite-likelihood}{%
-\subsubsection{Composite Likelihood}\label{composite-likelihood}}
+\subparagraph{Composite Likelihood}\label{composite-likelihood}}
 
 The composite likelihood approach involves constructing a likelihood
 based on conditional or marginal events for which log-likelihoods are
@@ -307,61 +327,112 @@ requires constant-mean process, so typically the residuals from an
 ordinary least squares regression of \(\mathbf{y}\) on \(\mathbf{X}\)
 are used to estimate \(\bm{\theta}\).
 
+\hypertarget{optimization}{%
+\subsubsection{Optimization}\label{optimization}}
+
 \hypertarget{hypothesis-testing}{%
-\section{Hypothesis Testing}\label{hypothesis-testing}}
+\subsubsection{Hypothesis Testing}\label{hypothesis-testing}}
+
+\hypertarget{geometric-anisotropy}{%
+\subsubsection{(Geometric) Anisotropy}\label{geometric-anisotropy}}
+
+A spatial process is geometrically isotropic if its covariance decays
+equally in all directions. A spatial process is geometrically
+anisotropic if its covariance does not decay equally in all directions
+(i.e., is not isotropic). Let \(h\) represent distance, \(\alpha\)
+represent an angle in \([0, \pi]\), and \(\tau\) represent a scaling
+factor in \([0, 1]\). Geometric anisotropy is accommodate through a
+specific rotation and scaling of the x-coordinate and y-coordinate. Then
+a new distance, \(h*\), corresponds to an isotropic process. The scaling
+works by rotating the major axis of the covariance clockwise onto a
+transformed x-axis and scaling the minor axis of the covariance along
+the transformed y-axis. Geometrically, this transformation and
+re-scaling is achieved via \begin{equation}
+  \begin{bmatrix}
+    \mathbf{x}^* \\
+    \mathbf{y}^*
+  \end{bmatrix} = 
+  \begin{bmatrix}
+    1 & 0 \\
+    0 & 1 / \tau
+  \end{bmatrix}
+  \begin{bmatrix}
+    \cos(\alpha) & \sin(\alpha) \\
+    -\sin(\alpha) & \cos(\alpha)
+  \end{bmatrix}  
+  \begin{bmatrix}
+    \mathbf{x} \\
+    \mathbf{y}
+  \end{bmatrix}
+\end{equation}
+
+Then covariance parameters are estimated using the transformed
+coordinates to compute distances. An anisotropy transformation is
+visualized in Figure\(~\)\ref{fig:anisotropy}.
+
+\begin{figure}
+\includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-1} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-2} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-3} \caption{In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure).}\label{fig:anisotropy}
+\end{figure}
+
+In spmodel, anisotropy parameters (\(\alpha\) and \(\tau\)) can be
+estimated using ML or REML by setting the \texttt{anisotropy} argument
+to \texttt{TRUE} or by specifying one of the anisotropy parameters as
+unknown or known and different from zero in \texttt{spcov\_initial}.
+Fixed anisotropy parameters can be provided to SV-WLS and SV-CL and
+incorporated into estimation of \(\bm{\theta}\) and \(\bm{\beta}\) when
+specified in \texttt{spcov\_initial}.
+
+Estimating anisotropy can be challenging because of local minima in the
+likelihood. First note that estimation need only occur for \(\alpha\) on
+\((0, \pi)\) radians due to symmetric of the covariance ellipse at
+rotations \(\alpha\) and \(\alpha + \pi\). Second note that estimation
+need only occur for \(\tau\) on \((0, 1)\) because we have defined
+\(\tau\) as the scaling factor for the length of the minor axis relative
+to the major axis. To address the local minima problem, each
+optimization iteration actually involves two likelihood evaluations, one
+for \(\alpha = \alpha_0\) and another for \(pi - \alpha_0\), so that the
+likelhood is evaluated for \(\alpha\) parameters the quadrants on either
+side of the minor (transformed y) axis.
+
+\hypertarget{the-local-list}{%
+\subsubsection{The Local list}\label{the-local-list}}
+
+\hypertarget{spautor}{%
+\subsection{\texorpdfstring{\texttt{spautor()}}{spautor()}}\label{spautor}}
+
+\hypertarget{additional-functions-1}{%
+\section{Additional Functions}\label{additional-functions-1}}
+
+\hypertarget{aic-and-aicc}{%
+\subsection{\texorpdfstring{\texttt{AIC()} and
+\texttt{AICc()}}{AIC() and AICc()}}\label{aic-and-aicc}}
+
+The \texttt{AIC()} and \texttt{AICc()} functions in spmodel follow
+Hoeting et al. (2006), who define spatial AIC and AICc as
+\begin{equation*}\label{eq:sp_aic}
+  \begin{split}
+    \text{AIC} & = -2\ln(\hat{L}) + 2(npar + 1) \\
+    \text{AICc} & = -2\ln(\hat{L}) + 2n(npar + 1) / (n - npar - 2),
+  \end{split}
+\end{equation*} where \(\ln(\hat{L})\) is the log likelihood evaluated
+at its maximum given the estimated parameters, \(npar\) is the number of
+estimated parameters, and \(n\) is the sample size. AIC and AICc are
+only defined for restricted maximum likelihood and maximum likelihood
+estimation, as they are the only estimation methods in spmodel that
+maximize a likelihood. For restricted maximum likelihood, \(npar\) is
+the number of estimated covariance parameters. For maximum likelihood,
+\(npar\) is the number of estimated covariance parameters plus the
+number of estimated fixed effects. The discrepancy arises because
+restricted maximum likelihood integrates the fixed effects out of the
+likelihood, thus the likelihood does not depend on the fixed effects
+(though it does still depend on the predictor variables).
+
+\hypertarget{anova}{%
+\subsection{\texorpdfstring{\texttt{anova()}}{anova()}}\label{anova}}
 
 \hypertarget{the-general-linear-hypothesis-test}{%
-\subsection{The General Linear Hypothesis
+\subsubsection{The General Linear Hypothesis
 Test}\label{the-general-linear-hypothesis-test}}
-
-Hypothesis tests for each element in \(\hat{\bm{\beta}}\) are available
-in \texttt{summary()}.
-
-\begin{verbatim}
-
-Call:
-splm(formula = y ~ x + group, data = exdata, spcov_type = "exponential", 
-    xcoord = xcoord, ycoord = ycoord)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.91090 -0.38965  0.07808  0.56560  2.29718 
-
-Coefficients (fixed):
-            Estimate Std. Error z value Pr(>|z|)  
-(Intercept) -0.65261    0.38911  -1.677   0.0935 .
-x           -0.07809    0.07357  -1.061   0.2885  
-group2       0.29110    0.20997   1.386   0.1656  
-group3       0.37734    0.20857   1.809   0.0704 .
-group4       0.32637    0.21531   1.516   0.1296  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Pseudo R-squared: 0.04864
-
-Coefficients (spatial covariance):
-    de     ie  range 
-0.6330 0.3791 1.2350 
-
-Spatial covariance type: exponential
-\end{verbatim}
-
-Test statistics are the ratio of the estimate to its standard error.
-These tests are useful for continuous predictors, but for categorical
-predictors, \texttt{summary()} only provides test statistics for each
-level, not all levels simultaneously. To find a test statistic for a
-categorical variable, there are two approaches. The first is to use
-\texttt{anova()}.
-
-\begin{verbatim}
-Analysis of Variance Table
-
-Response: y
-                Df     X2 Pr(>X2)
-(Intercept) 1.0000 2.8129  0.0935
-x           1.0000 1.1267  0.2885
-group       3.0000 3.8742  0.2754
-\end{verbatim}
 
 Test statistics from \texttt{anova()} are formed using the general
 linear hypothesis test. Let \(\mathbf{L}\) be an \(l \times p\) contrast
@@ -439,22 +510,11 @@ parameters of the full model),
 \([-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]\)
 is asymptotically Chi-squared with degrees of freedom equal to the
 difference in estimated parameters between the full and reduced model.
-To see whether there is evidence of spatial covariance, run
 
-\begin{verbatim}
-Likelihood Ratio Test
-
-Response: y
-           Df     X2 Pr(>X2)
-1 vs 2  2.000 20.139       0
-\end{verbatim}
-
-This output suggests evidence of spatial covariance. Because the
-likelihood relies on minimized likelihoods, they are only defined for ML
-or REML estimation. Furthermore, for REML estimation, likelihood ratio
-tests can only be used to compare nested models whose fixed effect
-structure does not change. This is because the REML likelihood
-\eqref{eq:reml-lik} depends on the fixed effects through
+For REML estimation, likelihood ratio tests can only be used to compare
+nested models whose fixed effect structure does not change. This is
+because the REML likelihood \eqref{eq:reml-lik} depends on the fixed
+effects through
 \(\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}\). To use
 likelihood ratio tests for assessing the importance of fixed effects,
 parameters must be estimated using ML. When using likelihood ratio tests
@@ -463,8 +523,88 @@ space (e.g., a variance parameter being zero), p-values tend to be too
 large (Self and Liang 1987; Stram and Lee 1994; Goldman, Whelan, and
 Simon 2000; Pinheiro and Bates 2006).
 
-\hypertarget{fitted-values}{%
-\section{Fitted Values}\label{fitted-values}}
+\hypertarget{coef}{%
+\subsection{\texorpdfstring{\texttt{coef()}}{coef()}}\label{coef}}
+
+\texttt{coef()} returns relevant coefficients based on the \texttt{type}
+argument. When \texttt{type\ =\ "fixed"} (the default), \texttt{coef()}
+returns
+\(\hat{\boldsymbol{\beta}} = (\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{y}\),
+where \(\hat{\boldsymbol{\Sigma}}^{-1}\) is the inverse covariance
+matrix evaluated at the estimated covariance parameters. If the
+estimation method is restricted maximum likelihood or maximum
+likelihood, this estimator is known as the restricted maximum likelihood
+or maximum likelihood estimator of \(\boldsymbol{\beta}\). If the
+estimation method is semivariogram weighted least squares or
+semivariogram composite likelihood, this estimator is known as the
+empirical generalized least squares estimator of \(\boldsymbol{\beta}\).
+When \texttt{type\ =\ "spcov"}, the estimated spatial covariance
+parameters are returned (available for all estimation methods). When
+\texttt{type\ =\ "randcov"}, the estimated random effect variance
+parameters are returned (available for restricted maximum likelihood and
+maximum likelihood estimation methods).
+
+\hypertarget{confint}{%
+\subsection{\texorpdfstring{\texttt{confint()}}{confint()}}\label{confint}}
+
+\texttt{confint()} returns confidence intervals for estimated
+parameters. Currently, \texttt{confint()} only returns confidence
+intervals for the fixed effects. The confidence interval for \(\beta_i\)
+is
+\(\beta_i \pm z^* \sqrt{(\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}_{ii}}\),
+where \(\Phi(z^*) = 1 - \alpha / 2\), \(\Phi(\cdot)\) is the standard
+normal (Gaussian) cumulative distribution function, \(\alpha = 1 -\)
+\texttt{level}, and
+\((\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}_{ii}\)
+is the \(i\)th diagonal element in
+\((\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}\).
+The default for \texttt{level} is 0.95, which corresponds to a \(z^*\)
+of approximately 1.96.
+
+\hypertarget{cooks.distance}{%
+\subsection{\texorpdfstring{\texttt{cooks.distance()}}{cooks.distance()}}\label{cooks.distance}}
+
+Cook's distance measures the influence of an observation. For
+independent observations, the Cook's distance of a linear model
+\(\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\)
+is
+\(\hat{\boldsymbol{\epsilon}} (\mathbf{H}_{ii} / [p(1 - \mathbf{H}_{ii})]\),
+where \(p\) is the number of fixed effects and \(\mathbf{H}_{ii}\) is
+the hat matrix equal to
+\(\mathbf{X} (\mathbf{X}^\intercal \mathbf{X})^{-1} \mathbf{X}^\intercal\).
+For dependent observations, the Cook's distance can be viewed as the
+standard Cook's distance of ``whitened'' observations corresponding to
+the linear model
+\(\mathbf{y}^* = \mathbf{X}^* \boldsymbol{\beta} + \boldsymbol{\epsilon}^*\),
+where \(\mathbf{y}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}\),
+\(\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}\), and
+\(\boldsymbol{\epsilon}^* = \boldsymbol{\Sigma}^{-1/2} \boldsymbol{\epsilon}\).
+So the whitened Cook's distance is
+\((\hat{\boldsymbol{\epsilon}}^*_i (\mathbf{H}^*_{ii} / [p(1 - \mathbf{H}^*_{ii})])\),
+where \(\mathbf{H}^*_{ii}\) is the \(i\)th diagonal entry of the hat
+matrix
+\(\mathbf{H}^* = \mathbf{X}^* [(\mathbf{X}^*)^\intercal \mathbf{X})]^{-1} (\mathbf{X}^*)^\intercal\)
+and \(\hat{\boldsymbol{\Sigma}}\) is the covariance matrix evaluated at
+the estimated covariance parameters. Suggested cutoffs for identifying
+influential observations are \(4 / n\), where \(n\) is the sample size,
+or 1.
+
+\hypertarget{deviance}{%
+\subsection{\texorpdfstring{\texttt{deviance()}}{deviance()}}\label{deviance}}
+
+The deviance of a fitted model is
+\(2\ln(\hat{\mathbf{L}}_s) - 2\ln(\hat{\mathbf{L}}_f)\), where
+\(2\ln(\hat{L}_s)\) is twice the log-likelihood of a ``saturated'' model
+that fits every observation perfectly and \(2\ln(\hat{L}_f)\) is twice
+the log-likelihood of the fitted model. For normal (Gaussian) data, the
+deviance of a fitted model is
+\((\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^\intercal \hat{\boldsymbol{\Sigma}}^{-1} (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})\).
+
+\hypertarget{esv}{%
+\subsection{\texorpdfstring{\texttt{esv()}}{esv()}}\label{esv}}
+
+\hypertarget{fitted}{%
+\subsection{\texorpdfstring{\texttt{fitted()}}{fitted()}}\label{fitted}}
 
 Fitted values for the response, spatial random errors, and random
 effects are obtained in spmodel using \texttt{fitted()}. The fitted
@@ -514,8 +654,44 @@ values for the random effects, run
 (Talk about assumption of independent among the random effects yields
 the EBLUPs for us?)
 
-\hypertarget{prediction}{%
-\section{Prediction}\label{prediction}}
+\hypertarget{hatvalues}{%
+\subsection{\texorpdfstring{\texttt{hatvalues()}}{hatvalues()}}\label{hatvalues}}
+
+Hat values measure the leverage of an observation. For independent
+observations, the hat matrix of a linear model
+\(\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\)
+is
+\(\mathbf{H} = \mathbf{X} (\mathbf{X}^\intercal \mathbf{X})^{-1} \mathbf{X}^\intercal\).
+The leverage of the \(i\)th observation is the \(i\)th diagonal element
+of \(\mathbf{H}\). For dependent observations, the Hat matrix can be
+viewed as the standard Hat matrix of ``whitened'' observations
+corresponding to the linear model
+\(\mathbf{y}^* = \mathbf{X}^* \boldsymbol{\beta} + \boldsymbol{\epsilon}^*\),
+where \(\mathbf{y}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}\),
+\(\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}\), and
+\(\boldsymbol{\epsilon}^* = \boldsymbol{\Sigma}^{-1/2} \boldsymbol{\epsilon}\).
+So the whitened Hat matrix is
+\(\mathbf{H}^* = \mathbf{X}^* [(\mathbf{X}^*)^\intercal \mathbf{X}]^{-1} (\mathbf{X}^*)^\intercal\)
+and \(\hat{\boldsymbol{\Sigma}}\) is the covariance matrix evaluated at
+the estimated covariance parameters. Suggested cutoffs for identifying
+observations with high leverage are \(2p / n\) or \(3p / n\), where
+\(p\) is the number of fixed effects and \(n\) is the sample size.
+
+\hypertarget{loglik}{%
+\subsection{\texorpdfstring{\texttt{logLik()}}{logLik()}}\label{loglik}}
+
+\texttt{logLik()} returns the value of the log-likelihood for fitted
+models estimated using restricted maximum likelihood or maximum
+likelihood.
+
+\hypertarget{loocv}{%
+\subsection{\texorpdfstring{\texttt{loocv()}}{loocv()}}\label{loocv}}
+
+\hypertarget{plot}{%
+\subsection{\texorpdfstring{\texttt{plot()}}{plot()}}\label{plot}}
+
+\hypertarget{predict}{%
+\subsection{\texorpdfstring{\texttt{predict()}}{predict()}}\label{predict}}
 
 Predictions are often the primary goal of a data analysis. spmodel
 performs best linear unbiased prediction, which is equivalent to
@@ -582,69 +758,46 @@ shows that \begin{equation}\label{eq:hw_forms}
 \end{equation} A similar result exists for the log determinant (used in
 ML and REML estimation).
 
-\hypertarget{geometric-anisotropy}{%
-\section{(Geometric) Anisotropy}\label{geometric-anisotropy}}
+\hypertarget{pseudor2}{%
+\subsection{\texorpdfstring{\texttt{pseudoR2()}}{pseudoR2()}}\label{pseudor2}}
 
-A spatial process is geometrically isotropic if its covariance decays
-equally in all directions. A spatial process is geometrically
-anisotropic if its covariance does not decay equally in all directions
-(i.e., is not isotropic). Let \(h\) represent distance, \(\alpha\)
-represent an angle in \([0, \pi]\), and \(\tau\) represent a scaling
-factor in \([0, 1]\). Geometric anisotropy is accommodate through a
-specific rotation and scaling of the x-coordinate and y-coordinate. Then
-a new distance, \(h*\), corresponds to an isotropic process. The scaling
-works by rotating the major axis of the covariance clockwise onto a
-transformed x-axis and scaling the minor axis of the covariance along
-the transformed y-axis. Geometrically, this transformation and
-re-scaling is achieved via \begin{equation}
-  \begin{bmatrix}
-    \mathbf{x}^* \\
-    \mathbf{y}^*
-  \end{bmatrix} = 
-  \begin{bmatrix}
-    1 & 0 \\
-    0 & 1 / \tau
-  \end{bmatrix}
-  \begin{bmatrix}
-    \cos(\alpha) & \sin(\alpha) \\
-    -\sin(\alpha) & \cos(\alpha)
-  \end{bmatrix}  
-  \begin{bmatrix}
-    \mathbf{x} \\
-    \mathbf{y}
-  \end{bmatrix}
-\end{equation}
+\texttt{pseudoR2()} is the pseudo r-squared equaling
+\(1 - \mathbf{D}_f / \mathbf{D}_n\), where \(\mathbf{D}_f\) is the
+deviance of the fitted model and \(\mathbf{D}_n\) is the deviance of an
+intercept-only model (with the same estimated covariance parameters as
+for the fitted model). If the observations are independent and normal
+(Gaussian), this pseudo r-squared equals the classical r-squared
+\(1 - SSE / SST\) for
+\(SSE = (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^\intercal (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})\)
+and
+\(SST = (\mathbf{y} - \hat{\mu})^\intercal (\mathbf{y} - \mathbf{X} \hat{\mu})\)
+for intercept \(\hat{\mu}\).
 
-Then covariance parameters are estimated using the transformed
-coordinates to compute distances. An anisotropy transformation is
-visualized in Figure\(~\)\ref{fig:anisotropy}.
+\hypertarget{residuals}{%
+\subsection{\texorpdfstring{\texttt{residuals()}}{residuals()}}\label{residuals}}
 
-\begin{figure}
-\includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-1} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-2} \includegraphics[width=0.33\linewidth]{supplementary_files/figure-latex/anisotropy-3} \caption{In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure).}\label{fig:anisotropy}
-\end{figure}
+\texttt{residuals()} returns various fitted-model residuals. When
+\texttt{type\ =\ "raw"}, the raw residuals are returned,
+\(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}}\). When
+\texttt{type\ =\ "normalized"}, the normalized residuals are returned,
+\(\hat{\boldsymbol{\Sigma}}^{-1/2}(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})\).
+When \texttt{type\ =\ "standardized"}, the standardized residuals are
+returned,
+\(\hat{\boldsymbol{\Sigma}}^{-1/2}(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})/ \sqrt{(1 - diag(\mathbf{H}^*))}\),
+where \(diag(\mathbf{H}^*)\) is the diagonal of the ``whitened'' hat
+matrix, \(\mathbf{H}^*\).
 
-In spmodel, anisotropy parameters (\(\alpha\) and \(\tau\)) can be
-estimated using ML or REML by setting the \texttt{anisotropy} argument
-to \texttt{TRUE} or by specifying one of the anisotropy parameters as
-unknown or known and different from zero in \texttt{spcov\_initial}.
-Fixed anisotropy parameters can be provided to SV-WLS and SV-CL and
-incorporated into estimation of \(\bm{\theta}\) and \(\bm{\beta}\) when
-specified in \texttt{spcov\_initial}.
+\hypertarget{sprnorm}{%
+\subsection{\texorpdfstring{\texttt{sprnorm()}}{sprnorm()}}\label{sprnorm}}
 
-Estimating anisotropy can be challenging because of local minima in the
-likelihood. First note that estimation need only occur for \(\alpha\) on
-\((0, \pi)\) radians due to symmetric of the covariance ellipse at
-rotations \(\alpha\) and \(\alpha + \pi\). Second note that estimation
-need only occur for \(\tau\) on \((0, 1)\) because we have defined
-\(\tau\) as the scaling factor for the length of the minor axis relative
-to the major axis. To address the local minima problem, each
-optimization iteration actually involves two likelihood evaluations, one
-for \(\alpha = \alpha_0\) and another for \(pi - \alpha_0\), so that the
-likelhood is evaluated for \(\alpha\) parameters the quadrants on either
-side of the minor (transformed y) axis.
+\hypertarget{vcov}{%
+\subsection{\texorpdfstring{\texttt{vcov()}}{vcov()}}\label{vcov}}
 
-\hypertarget{the-local-list}{%
-\section{The Local list}\label{the-local-list}}
+\texttt{vcov()} returns the variance-covariance matrix of estimated
+parameters. Currently, \texttt{vcov()} only returns the
+variance-covariance matrix of the fixed effects. The variance-covariance
+matrix of the fixed effects is given by
+\((\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}\).
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
@@ -682,6 +835,11 @@ of the American Statistical Association} 87 (419): 724--31.
 \leavevmode\hypertarget{ref-henderson1975best}{}%
 Henderson, Charles R. 1975. ``Best Linear Unbiased Estimation and
 Prediction Under a Selection Model.'' \emph{Biometrics}, 423--47.
+
+\leavevmode\hypertarget{ref-hoeting2006model}{}%
+Hoeting, Jennifer A, Richard A Davis, Andrew A Merton, and Sandra E
+Thompson. 2006. ``Model Selection for Geostatistical Models.''
+\emph{Ecological Applications} 16 (1): 87--98.
 
 \leavevmode\hypertarget{ref-hrong1996approximate}{}%
 Hrong-Tai Fai, Alex, and Paul L Cornelius. 1996. ``Approximate F-Tests

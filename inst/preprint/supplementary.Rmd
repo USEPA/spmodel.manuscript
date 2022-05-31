@@ -1,6 +1,6 @@
 ---
 title: |
-  spmodel: Spatial Modeling in **R** -- Supplementary Material
+  spmodel: Spatial Modeling in **R** -- Computatinal Details Vignette
 authors:
   - name: Michael Dumelle
     thanks: Corresponding Author
@@ -19,7 +19,12 @@ authors:
     location: Marine Mammal Laboratory, Seattle, WA, 98115
     email: jay.verhoef@noaa.gov
 abstract: |
-  Enter the text of your abstract here.
+  Fit, summarize, and predict for a variety of spatial models.
+    Parameters of spatial linear models and spatial autoregressive models are
+    estimated using a variety of methods. Additional modeling features include
+    anisotropy, random effects, partition factors, big data approaches, and more.
+    Model-fit statistics are used to summarize, visualize, and compare models.
+    Predictions at unobserved locations are easily obtainable.
 keywords:
   - Spatial covariance
   - Linear Model
@@ -35,17 +40,31 @@ output: rticles::arxiv_article
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(prompt=TRUE, echo = FALSE, highlight = FALSE, continue = " + ", comment = "")
+knitr::opts_chunk$set(prompt=TRUE, echo = TRUE, highlight = FALSE, continue = " + ", comment = "")
 options(replace.assign=TRUE, width=90, prompt="R> ")
 library(spmodel)
 library(ggplot2)
+load(file = system.file("extdata", "exdata.rda", package = "spmodel"))
+load(system.file("extdata", "exdata_poly.rda", package = "spmodel"))
 ```
 
-# Covariance Functions
+# Introduction
 
-# Estimation
+This vignette covers technical details regarding the functions in spmodel that perform computations.
 
-## Likelihood-based Estimation
+A note on square roots and Cholesky solves
+
+# `splm()` and `spautor()`
+
+## `splm()
+
+# Additional Functions`
+
+### Covariance Functions
+
+### Estimation
+
+#### Likelihood-based Estimation
 
 Minus twice a profiled Gaussian log-likelihood, denoted $-2l(\bm{\theta} | \mathbf{y})$ is given by 
 \begin{equation}\label{eq:ml-lik}
@@ -71,7 +90,7 @@ Both ML and REML estimation rely on the an $n \times n$ covariance matrix invers
 
 It is worth noting that the inverses themselves are not strictly needed for estimation (or prediction), though at least their square root is needed. In spmodel, calculating this square root requires a Cholesky decomposition, which still scales cubically with the sample size. Computing the Cholesky decomposition, however, is far more computationally efficient than computing the inverse. To see why only the Cholesky decomposition is needed, recall that the Cholesky decomposition of the covariance matrix $\mathbf{\Sigma}$ is $\mathbf{C}\mathbf{C}^\intercal$, where $\mathbf{C}$ is a lower triangular matrix (so $\mathbf{C}\mathbf{C}^\intercal = \mathbf{\Sigma}$). In the ML and REML likelihoods, $\mathbf{\Sigma}^{-1}$ is not needed on its own, only $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}$ and $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$ are needed. We can rewrite the $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}$ as $\mathbf{X}^\intercal (\mathbf{C}^\intercal)^{-1} \mathbf{C}^{-1} \mathbf{X} = (\mathbf{C}^{-1} \mathbf{X})^\intercal \mathbf{C}^{-1} \mathbf{X}$. Then $\mathbf{C}^{-1} \mathbf{X}$ is efficiently solved by noticing that $\mathbf{C}^{-1} \mathbf{X} = \mathbf{A}$ for some matrix $\mathbf{A}$ implies $\mathbf{X} = \mathbf{C} \mathbf{A}$. This system can be efficiently solved for $\mathbf{A}$ using linear forward solves (forward substitution). Then $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X} = \mathbf{A}^\intercal \mathbf{A}$. A similar approach is used to solve $\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{y}$. Still, using Cholesky decomositions is unfeasible for sample sizes larger than a few thousand observations.
 
-## Semivariogram-based Estimation
+#### Semivariogram-based Estimation
 
 An alternative approach to likelihood-based estimation is semivariogram-based estimation. The semivariogram of a constant-mean process $\mathbf{y}$ is the expectation of the squared half-difference between two observations $h$ distance units apart. More formally, the semivariogram is denoted $\gamma(h)$ and defined as
 \begin{equation}\label{eq:sv}
@@ -79,7 +98,7 @@ An alternative approach to likelihood-based estimation is semivariogram-based es
 \end{equation}
 where $||y_i - y_j||_2 = h$ (the Euclidean distance). When the process $\mathbf{y}$ is second-order stationary, the semivariogram and covariance function are intimately connected: $\gamma(h) = \text{Cov}(0) - \text{Cov}(h)$, where $\text{Cov}(0)$ is the covariance function evaluated at 0 (which is the overall variance, $\sigma^2$) and $\text{Cov}(h)$is the covariance function evaluated at $h$. Both semivariogram approaches described next are more computationally efficient than ML or REML because their major computational burden (calculations based on pairs) scale the squared sample size (i.e., not the cubed sample size).
 
-### Weighted Least Squares
+##### Weighted Least Squares
 
 The empirical semivariogram is a moment-based estimate of the semivariogram denoted by $\hat{\gamma}(h)$ and defined as
 \begin{equation}\label{eq:esv}
@@ -114,9 +133,7 @@ Additionally, the number of $N(h)$ classes and maximum distance for $h$ are spec
 
 Recall that the semivariogram is defined for a constant-mean process. Generally, $\mathbf{y}$ does not necessarily have a constant mean. So the empirical semivariogram and $\bm{\hat{\theta}}_{wls}$ are typically constructed using the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ -- these residuals are assumed to have mean zero.
 
-## Optimization
-
-### Composite Likelihood
+##### Composite Likelihood
 
 The composite likelihood approach involves constructing a likelihood based on conditional or marginal events for which log-likelihoods are available and then adding together these individual components. Composite likelihoods are attractive because they behave very similar to likelihoods but are easier to handle, both from a theoretical and a computational perspective. @curriero1999composite derive a particular composite likelihood for estimating semivariogram parameters. The negative log of this composite likelihood, denoted $\text{CL}(h)$, is given by
 \begin{equation}\label{eq:svcl}
@@ -126,109 +143,11 @@ where $\gamma(h)$ is the semivariogram (that depends on parameter vector $\bm{\t
 
 An advantage of the composite likelihood approach to semivariogram estimation is that it does not require arbitrarily specifying empircial semivariogram bins and cutoffs. It does tend to be more computationally demanding than the weighted least squares, however, as the composite likelihood is constructed from $\binom{n}{2}$ pairs for a sample size $n$, whereas the weighted least squares approach only requires calculating $\binom{|N(h)|}{2}$ pairs for each distance bin $N(h)$. As with the weighted least squares approach, Equation$~$\ref{eq:svcl} requires constant-mean process, so typically the residuals from an ordinary least squares regression of $\mathbf{y}$ on $\mathbf{X}$ are used to estimate $\bm{\theta}$.
 
-# Hypothesis Testing
+### Optimization
 
-## The General Linear Hypothesis Test
+### Hypothesis Testing
 
-Hypothesis tests for each element in $\hat{\bm{\beta}}$ are available in \texttt{summary()}.
-```{r}
-spmod <- splm(y ~ x + group, exdata, "exponential", xcoord, ycoord)
-summary(spmod)
-```
-
-Test statistics are the ratio of the estimate to its standard error. These tests are useful for continuous predictors, but for categorical predictors, \texttt{summary()} only provides test statistics for each level, not all levels simultaneously. To find a test statistic for a categorical variable, there are two approaches. The first is to use \texttt{anova()}. 
-```{r}
-anova(spmod)
-```
-
-Test statistics from \texttt{anova()} are formed using the general linear hypothesis test. Let $\mathbf{L}$ be an $l \times p$ contrast matrix and $l_0$ be an $l \times 1$ vector. The null hypothesis is that $\mathbf{L} \bm{\hat{\beta}} = l_0$ and the alternative hypothesis is that $\mathbf{L} \bm{\hat{\beta}} \neq l_0$. Usually, $l_0$ is the zero vector (and in spmodel, this is assumed). The test statistic, denoted $X^2$, is given by
-\begin{equation}\label{eq:glht}
-  \tilde{F} = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
-\end{equation}
-By default, $\mathbf{L}$ is chosen such that each variable in the data used to fit the model is tested. If this deafult is not desired, the \texttt{Terms} and \texttt{L} arguments can be used to pass user-defined $\mathbf{L}$ matrices to \texttt{anova()}. 
-
-It is notoriously difficult to determine appropriate p-values for linear mixed models based on the general linear hypothesis test. lme4, for example, does not report p-values by default. There are three reasons we focus on next that explain why obtaining p-values is so challenging. 
-
-  * The first (and often most important) challenge is that when estimating $\bm{\theta}$, it is usually not clear what the null distribution of $\tilde{F}$. In certain cases such as ordinary least squares regression or certain experimental designs (e.g., blocked design, split plot design, etc.), $\tilde{F}$ is F-distributed with known numerator and denominator degrees of freedom. But outside of these well-studied cases, no general results exist. 
-  * The second challenge is that the standard error of $\tilde{F}$ does not account for the uncertainty in $\bm{\hat{\theta}}$. For some approaches to addressing this problem, see @kackar1984approximations, @prasad1990estimation, @harville1992mean, and @kenward1997small.
-  * The third challenge is in determining denominator degrees of freedom. Again, in certain cases, these are known -- but this is not true in general. For some approaches to addressing this problem, see @satterthwaite1946approximate, @schluchter1990small, @hrong1996approximate, @kenward1997small, @littell2006sas, @pinheiro2006mixed, and @kenward2009improved.
-
-For these reasons, spmodel assumes a large-sample, Chi-squared approximation when calculating p-values. This approach addresses the three points above by assuming that with a large enough sample size:
-
-  * The numerator of $\tilde{F}$ tends to be asymptotically Chi-squared (under certain conditions) with $rank(\mathbf{L})$ degrees of freedom.
-  * The uncertainty from estimating $\bm{\hat{\theta}}$ is small enough to be safely ignored.
-
-Because the approximation is asymptotic, degree of freedom adjustments can be ignored (it is also worth noting that an F distribution with infinite denominator degrees of freedom is a scaled (by $rank{L}$) Chi-squared distribution). A takeaway here is that this asymptotic approximation implies these p-values are likely unreliable with small samples. 
-
-A second approach to determining p-values is a likelihood ratio test for nested models. Let $l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )$ be the log-likelihood from some reduced model and $l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )$ be the log-likelihood from some full model. When the reduced model is nested in the full model (i.e., the reduced model can be obtained by fixing some parameters of the full model), $[-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]$ is asymptotically Chi-squared with degrees of freedom equal to the difference in estimated parameters between the full and reduced model. To see whether there is evidence of spatial covariance, run
-```{r}
-spmod_r <- splm(y ~ x, exdata, "none")
-spmod_f <- splm(y ~ x, exdata, "exponential", xcoord, ycoord)
-anova(spmod_r, spmod_f)
-```
-This output suggests evidence of spatial covariance. Because the likelihood relies on minimized likelihoods, they are only defined for ML or REML estimation. Furthermore, for REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using ML. When using likelihood ratio tests to assess the importance of parameters on the boundary of a parameter space (e.g., a variance parameter being zero), p-values tend to be too large [@self1987asymptotic; @stram1994variance; @goldman2000statistical; @pinheiro2006mixed].
-
-# Fitted Values
-
-Fitted values for the response, spatial random errors, and random effects are obtained in spmodel using `fitted()`. The fitted values for the response, denoted $\mathbf{\hat{y}}$, are given by
-\begin{equation}\label{eq:fit_resp}
-  \mathbf{\hat{y}} = \mathbf{X} \bm{\hat{\beta}} .
-\end{equation}
-They are the estimated mean response given the set of covariates for each observation. 
-
-Fitted values for spatial random errors and random effects are linked with best linear unbiased predictors from mixed model theory. Consider the standard random effects parameterization
-\begin{equation}
-  \mathbf{y} = \mathbf{X} \bm{\beta} + \mathbf{Z} \mathbf{u} + \bm{\epsilon},
-\end{equation}
-where $\mathbf{Z}$ denotes the random effects design matrix, $\mathbf{u}$ denotes the random effects, and $\bm{\epsilon}$ denotes independent random error. @henderson1975best states that the best linear unbiased predictor (BLUP) of a single random effect $\mathbf{u}$, denoted $\mathbf{\hat{u}}$, is given by
-\begin{equation}\label{eq:blup_mm}
-  \mathbf{\hat{u}} = \sigma^2_u \mathbf{Z} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}).
-\end{equation}
-@searle2009variance generalizes this idea by showing that for a random variable $\bm{\alpha}$, the best linear unbiased predictor (based on the response, $\mathbf{y}$) of $\mathbf{\alpha}$, denoted $\bm{\hat{\alpha}}$ is given by
-\begin{equation}\label{eq:blup_gen}
-  \bm{\hat{\alpha}} = \text{E}(\bm{\alpha}) + \Sigma_\alpha \Sigma^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
-\end{equation}
-where $\Sigma_\alpha = \text{Cov}(\bm{\alpha}, \mathbf{y})$. Evaluating Equation$~$\eqref{eq:blup_gen} at the plug-in (empirical) estimates of the covariance parameters yields the empirical best linear unbiased predictor (EBLUP) of $\bm{\alpha}$.
-
-Building from this idea and putting plug-in (empirical) estimates of the covariance parameters into Equation$~$\eqref{eq:blup_gen} yields predictors for each random error, which we call fitted values henceforth. For example, the fitted value corresponding to the spatial dependent random error, denoted $\bm{\hat{\tau}}$, is given by
-\begin{equation}\label{eq:blup_sp}
-  \bm{\hat{\tau}} = \mathbf{\Sigma}_{de} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
-\end{equation}
-where $\mathbf{\Sigma}_{de} = \text{Cov}(\bm{\tau}, \mathbf{y})$. To obtain these fitted values for the spatial random errors, run `fitted(object, type = "spcov")`. To obtain these fitted values for the random effects, run `fitted(object, type = "randcov")`. 
-
-(Talk about assumption of independent among the random effects yields the EBLUPs for us?)
-
-# Prediction
-
-Predictions are often the primary goal of a data analysis. spmodel performs best linear unbiased prediction, which is equivalent to Kriging, using the \texttt{predict()} function. Let $\mathbf{y}_o$ be a vector of observed variables and $\mathbf{y}_u$ be a vector of unobserved variables. Let $\mathbf{X}_o$ and $\mathbf{X}_u$ be the fixed effect design matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. Let $\mathbf{\Sigma}_o$ and $\mathbf{\Sigma}_u$ be the covariance matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. The (empirical) best linear unbiased predictor (BLUP; Kriging predictor) of $\mathbf{y}_u$, denoted $\mathbf{\dot{y}_u}$ is given by
-\begin{equation}\label{eq:blup}
-  \mathbf{\dot{y}_u} =  \mathbf{X}_u \bm{\hat{\beta}} + \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o (\mathbf{y}_o - \mathbf{X}_o \bm{\hat{\beta}}) ,
-\end{equation}
-where $\mathbf{\hat{c}}_{uo} = \hat{\text{Cov}}(\mathbf{y}_u, \mathbf{y}_o)$ and $\bm{\hat{\beta}} = (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$. One can show that $\hat{\text{Cov}}(\mathbf{\dot{y}})$ is
-\begin{equation}\label{eq:vblup}
-  \text{Cov}(\mathbf{\dot{y}}) = \mathbf{\hat{\Sigma}}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{\hat{c}}_{uo}^\intercal + \mathbf{H}(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}\mathbf{H}^\intercal ,
-\end{equation}
-where $\mathbf{H} = (\mathbf{X}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{X}_o)$. When $\texttt{predict(..., interval = "none")}$, predictions are obtained using Equation$~$\ref{eq:blup}. If \texttt{se.fit = TRUE}, standard errors are the square root of the diagonal of Equation$~$\ref{eq:vblup}. When \texttt{predict(..., interval = "prediction")}, predictions are obtained using Equation$~$\ref{eq:blup} and standard errors used for the lower and upper bound of the prediction intervals are obtained via the square root of the diagonal of Equation$~$\ref{eq:vblup} (these are also what are returned if \texttt{se.fit = TRUE}). When \texttt{predict(..., interval = "confidence")}, mean estimates are obtained using $\mathbf{X}_u \bm{\hat{\beta}}$ and standard errors used for the lower and upper bound of the confidence intervals are obtained via the square root of the diagonal of $(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$ (these are also what are returned if \texttt{se.fit = TRUE}). 
-
-For autoregressive models, an extra step is required to obtain $\hat{\Sigma}^{-1}_o$ and $\hat{\Sigma}^{-1}_u$, as they depend on one another through the locations of $\mathbf{y}_o$ and $\mathbf{y}_u$. Let $\hat{\Sigma}^{-1}$ be the inverse covariance matrix of $\mathbf{y}_o$ and $\mathbf{y}_u$ (which we directly specify for autoregressive models). If the data are small enough, then $\hat{\Sigma}^{-1}$ can be inverted, yielding $\hat{\Sigma}$. Then appropriate subsets can then used to obtain the components needed for prediction. A faster way to obtain relevant components required for prediction does exist and is worth mentioning -- $\hat{\Sigma}^{-1}$ can be represented blockwise as
-\begin{equation}\label{eq:auto_hw}
-  \hat{\Sigma}^{-1} =
-  \begin{bmatrix}
-    \mathbf{\hat{\Sigma}}^{*}_{o, o} & \mathbf{\hat{\Sigma}}^{*}_{o, u} \\
-    \mathbf{\hat{\Sigma}}^{*}_{u, o} & \mathbf{\hat{\Sigma}}^{*}_{u, u}
-  \end{bmatrix},
-\end{equation}
-where the dimensions of the blocks are indexed by the matrix subscripts (rows then columns). All of the terms required for prediction can be obtained from this block representation. @wolf1978helmert shows that 
-\begin{equation}\label{eq:hw_forms}
-  \begin{split}
-    \hat{\Sigma}^{-1}_o & = \mathbf{\hat{\Sigma}}^{*}_{o, o} - \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1} \mathbf{\hat{\Sigma}}^{*}_{u, o} \\
-    \hat{\Sigma}_u & = (\mathbf{\hat{\Sigma}}^{*}_{u, u} - \mathbf{\hat{\Sigma}}^{*}_{u, o} (\mathbf{\hat{\Sigma}}^{*}_{o, o})^{-1} \mathbf{\hat{\Sigma}}^{*}_{o, u})^{-1} \\
-    \text{Cov}(\mathbf{y}_o, \mathbf{y}_u) & = - \hat{\Sigma}_o \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1}
-  \end{split}
-\end{equation}
-A similar result exists for the log determinant (used in ML and REML estimation).
-
-# (Geometric) Anisotropy
+### (Geometric) Anisotropy
 
 A spatial process is geometrically isotropic if its covariance decays equally in all directions. A spatial process is geometrically anisotropic if its covariance does not decay equally in all directions (i.e., is not isotropic). Let $h$ represent distance, $\alpha$ represent an angle in $[0, \pi]$, and $\tau$ represent a scaling factor in $[0, 1]$. Geometric anisotropy is accommodate through a specific rotation and scaling of the x-coordinate and y-coordinate. Then a new distance, $h*$, corresponds to an isotropic process. The scaling works by rotating the major axis of the covariance clockwise onto a transformed x-axis and scaling the minor axis of the covariance along the transformed y-axis. Geometrically, this transformation and re-scaling is achieved via
 \begin{equation}
@@ -252,7 +171,7 @@ A spatial process is geometrically isotropic if its covariance decays equally in
 
 Then covariance parameters are estimated using the transformed coordinates to compute distances. An anisotropy transformation is visualized in Figure$~$\ref{fig:anisotropy}.
 
-```{r anisotropy, out.width = "33%", fig.show = "hold", fig.cap = "In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure)."}
+```{r anisotropy, echo = FALSE, out.width = "33%", fig.show = "hold", fig.cap = "In the first figure, the ellipse of an anisotropy covariance is shown. In the second figure, the ellipse is rotated so the major axis is the transformed x-axis and the minor axis is the transformed y-axis. In the third figure, the ellipse is scaled so the ellipse becomes a circle. Then covariance estimation can be performed (using the transformed coordinates that compose the third figure)."}
 # PRELIMINARIES
 r <- 1
 theta_seq <- seq(0, 2 * pi, length.out = 1000)
@@ -306,6 +225,153 @@ In spmodel, anisotropy parameters ($\alpha$ and $\tau$) can be estimated using M
 
 Estimating anisotropy can be challenging because of local minima in the likelihood. First note that estimation need only occur for $\alpha$ on $(0, \pi)$ radians due to symmetric of the covariance ellipse at rotations $\alpha$ and $\alpha + \pi$. Second note that estimation need only occur for $\tau$ on $(0, 1)$ because we have defined $\tau$ as the scaling factor for the length of the minor axis relative to the major axis. To address the local minima problem, each optimization iteration actually involves two likelihood evaluations, one for $\alpha = \alpha_0$ and another for $pi - \alpha_0$, so that the likelhood is evaluated for $\alpha$ parameters the quadrants on either side of the minor (transformed y) axis.
 
-# The Local list
+### The Local list
+
+## `spautor()`
+
+# Additional Functions
+
+## `AIC()` and `AICc()`
+
+The `AIC()` and `AICc()` functions in spmodel follow @hoeting2006model, who define spatial AIC and AICc as
+\begin{equation*}\label{eq:sp_aic}
+  \begin{split}
+    \text{AIC} & = -2\ln(\hat{L}) + 2(npar + 1) \\
+    \text{AICc} & = -2\ln(\hat{L}) + 2n(npar + 1) / (n - npar - 2),
+  \end{split}
+\end{equation*}
+where $\ln(\hat{L})$ is the log likelihood evaluated at its maximum given the estimated parameters, $npar$ is the number of estimated parameters, and $n$ is the sample size. AIC and AICc are only defined for restricted maximum likelihood and maximum likelihood estimation, as they are the only estimation methods in spmodel that maximize a likelihood. For restricted maximum likelihood, $npar$ is the number of estimated covariance parameters. For maximum likelihood, $npar$ is the number of estimated covariance parameters plus the number of estimated fixed effects. The discrepancy arises because restricted maximum likelihood integrates the fixed effects out of the likelihood, thus the likelihood does not depend on the fixed effects (though it does still depend on the predictor variables).
+
+## `anova()`
+
+### The General Linear Hypothesis Test
+
+Test statistics from \texttt{anova()} are formed using the general linear hypothesis test. Let $\mathbf{L}$ be an $l \times p$ contrast matrix and $l_0$ be an $l \times 1$ vector. The null hypothesis is that $\mathbf{L} \bm{\hat{\beta}} = l_0$ and the alternative hypothesis is that $\mathbf{L} \bm{\hat{\beta}} \neq l_0$. Usually, $l_0$ is the zero vector (and in spmodel, this is assumed). The test statistic, denoted $X^2$, is given by
+\begin{equation}\label{eq:glht}
+  \tilde{F} = [(\mathbf{L} \bm{\hat{\beta}} - l_0)^\intercal(\mathbf{L} (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}} \mathbf{X})^{-1} \mathbf{L}^\intercal)^{-1}(\mathbf{L} \bm{\hat{\beta}} - l_0)]/ rank(\mathbf{L})
+\end{equation}
+By default, $\mathbf{L}$ is chosen such that each variable in the data used to fit the model is tested. If this deafult is not desired, the \texttt{Terms} and \texttt{L} arguments can be used to pass user-defined $\mathbf{L}$ matrices to \texttt{anova()}. 
+
+It is notoriously difficult to determine appropriate p-values for linear mixed models based on the general linear hypothesis test. lme4, for example, does not report p-values by default. There are three reasons we focus on next that explain why obtaining p-values is so challenging. 
+
+  * The first (and often most important) challenge is that when estimating $\bm{\theta}$, it is usually not clear what the null distribution of $\tilde{F}$. In certain cases such as ordinary least squares regression or certain experimental designs (e.g., blocked design, split plot design, etc.), $\tilde{F}$ is F-distributed with known numerator and denominator degrees of freedom. But outside of these well-studied cases, no general results exist. 
+  * The second challenge is that the standard error of $\tilde{F}$ does not account for the uncertainty in $\bm{\hat{\theta}}$. For some approaches to addressing this problem, see @kackar1984approximations, @prasad1990estimation, @harville1992mean, and @kenward1997small.
+  * The third challenge is in determining denominator degrees of freedom. Again, in certain cases, these are known -- but this is not true in general. For some approaches to addressing this problem, see @satterthwaite1946approximate, @schluchter1990small, @hrong1996approximate, @kenward1997small, @littell2006sas, @pinheiro2006mixed, and @kenward2009improved.
+
+For these reasons, spmodel assumes a large-sample, Chi-squared approximation when calculating p-values. This approach addresses the three points above by assuming that with a large enough sample size:
+
+  * The numerator of $\tilde{F}$ tends to be asymptotically Chi-squared (under certain conditions) with $rank(\mathbf{L})$ degrees of freedom.
+  * The uncertainty from estimating $\bm{\hat{\theta}}$ is small enough to be safely ignored.
+
+Because the approximation is asymptotic, degree of freedom adjustments can be ignored (it is also worth noting that an F distribution with infinite denominator degrees of freedom is a scaled (by $rank{L}$) Chi-squared distribution). A takeaway here is that this asymptotic approximation implies these p-values are likely unreliable with small samples. 
+
+A second approach to determining p-values is a likelihood ratio test for nested models. Let $l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )$ be the log-likelihood from some reduced model and $l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )$ be the log-likelihood from some full model. When the reduced model is nested in the full model (i.e., the reduced model can be obtained by fixing some parameters of the full model), $[-2l(\bm{\hat{\theta}}_0, \bm{\hat{\beta}}_0 | \mathbf{y} )] - [-2l(\bm{\hat{\theta}}_1, \bm{\hat{\beta}}_1 | \mathbf{y} )]$ is asymptotically Chi-squared with degrees of freedom equal to the difference in estimated parameters between the full and reduced model. 
+
+For REML estimation, likelihood ratio tests can only be used to compare nested models whose fixed effect structure does not change. This is because the REML likelihood \eqref{eq:reml-lik} depends on the fixed effects through $\ln{|\mathbf{X}^\intercal \mathbf{\Sigma}^{-1} \mathbf{X}|}$. To use likelihood ratio tests for assessing the importance of fixed effects, parameters must be estimated using ML. When using likelihood ratio tests to assess the importance of parameters on the boundary of a parameter space (e.g., a variance parameter being zero), p-values tend to be too large [@self1987asymptotic; @stram1994variance; @goldman2000statistical; @pinheiro2006mixed].
+
+## `coef()`
+
+`coef()` returns relevant coefficients based on the `type` argument. When `type = "fixed"` (the default),
+`coef()` returns $\hat{\boldsymbol{\beta}} = (\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{y}$, where $\hat{\boldsymbol{\Sigma}}^{-1}$ is the inverse covariance matrix evaluated at the estimated covariance parameters. If the estimation method is restricted maximum likelihood or maximum likelihood, this estimator is known as the restricted maximum likelihood or maximum likelihood estimator of $\boldsymbol{\beta}$. If the estimation method is semivariogram weighted least squares or semivariogram composite likelihood, this estimator is known as the empirical generalized least squares estimator of $\boldsymbol{\beta}$. When `type = "spcov"`, the estimated spatial covariance parameters are returned (available for all estimation methods). When `type = "randcov"`, the estimated random effect variance parameters are returned (available for restricted maximum likelihood and maximum likelihood estimation methods).
+
+## `confint()`
+
+`confint()` returns confidence intervals for estimated parameters. Currently, `confint()` only returns confidence intervals for the fixed effects. The confidence interval for $\beta_i$ is $\beta_i \pm z^* \sqrt{(\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}_{ii}}$, where $\Phi(z^*) = 1 - \alpha / 2$, $\Phi(\cdot)$ is the standard normal (Gaussian) cumulative distribution function, $\alpha = 1 -$ `level`, and $(\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}_{ii}$ is the $i$th diagonal element in $(\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}$. The default for `level` is 0.95, which corresponds to a $z^*$ of approximately 1.96.
+
+## `cooks.distance()`
+
+Cook's distance measures the influence of an observation. For independent observations, the Cook's distance of a linear model $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ is $\hat{\boldsymbol{\epsilon}} (\mathbf{H}_{ii} / [p(1 - \mathbf{H}_{ii})]$, where $p$ is the number of fixed effects and $\mathbf{H}_{ii}$ is the hat matrix equal to $\mathbf{X} (\mathbf{X}^\intercal \mathbf{X})^{-1} \mathbf{X}^\intercal$. For dependent observations, the Cook's distance can be viewed as the standard Cook's distance of "whitened" observations corresponding to the linear model $\mathbf{y}^* = \mathbf{X}^* \boldsymbol{\beta} + \boldsymbol{\epsilon}^*$, where $\mathbf{y}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}$, $\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}$, and $\boldsymbol{\epsilon}^* = \boldsymbol{\Sigma}^{-1/2} \boldsymbol{\epsilon}$. So the whitened Cook's distance is $(\hat{\boldsymbol{\epsilon}}^*_i (\mathbf{H}^*_{ii} / [p(1 - \mathbf{H}^*_{ii})])$, where $\mathbf{H}^*_{ii}$ is the $i$th diagonal entry of the hat matrix $\mathbf{H}^* = \mathbf{X}^* [(\mathbf{X}^*)^\intercal \mathbf{X})]^{-1} (\mathbf{X}^*)^\intercal$ and $\hat{\boldsymbol{\Sigma}}$ is the covariance matrix evaluated at the estimated covariance parameters. Suggested cutoffs for identifying influential observations are $4 / n$, where $n$ is the sample size, or 1.
+
+## `deviance()`
+
+The deviance of a fitted model is $2\ln(\hat{\mathbf{L}}_s) - 2\ln(\hat{\mathbf{L}}_f)$, where $2\ln(\hat{L}_s)$ is twice the log-likelihood of a "saturated" model that fits every observation perfectly and $2\ln(\hat{L}_f)$ is twice the log-likelihood of the fitted model. For normal (Gaussian) data, the deviance of a fitted model is $(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^\intercal \hat{\boldsymbol{\Sigma}}^{-1} (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})$.
+
+## `esv()`
+
+## `fitted()`
+
+Fitted values for the response, spatial random errors, and random effects are obtained in spmodel using `fitted()`. The fitted values for the response, denoted $\mathbf{\hat{y}}$, are given by
+\begin{equation}\label{eq:fit_resp}
+  \mathbf{\hat{y}} = \mathbf{X} \bm{\hat{\beta}} .
+\end{equation}
+They are the estimated mean response given the set of covariates for each observation. 
+
+Fitted values for spatial random errors and random effects are linked with best linear unbiased predictors from mixed model theory. Consider the standard random effects parameterization
+\begin{equation}
+  \mathbf{y} = \mathbf{X} \bm{\beta} + \mathbf{Z} \mathbf{u} + \bm{\epsilon},
+\end{equation}
+where $\mathbf{Z}$ denotes the random effects design matrix, $\mathbf{u}$ denotes the random effects, and $\bm{\epsilon}$ denotes independent random error. @henderson1975best states that the best linear unbiased predictor (BLUP) of a single random effect $\mathbf{u}$, denoted $\mathbf{\hat{u}}$, is given by
+\begin{equation}\label{eq:blup_mm}
+  \mathbf{\hat{u}} = \sigma^2_u \mathbf{Z} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}).
+\end{equation}
+@searle2009variance generalizes this idea by showing that for a random variable $\bm{\alpha}$, the best linear unbiased predictor (based on the response, $\mathbf{y}$) of $\mathbf{\alpha}$, denoted $\bm{\hat{\alpha}}$ is given by
+\begin{equation}\label{eq:blup_gen}
+  \bm{\hat{\alpha}} = \text{E}(\bm{\alpha}) + \Sigma_\alpha \Sigma^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation}
+where $\Sigma_\alpha = \text{Cov}(\bm{\alpha}, \mathbf{y})$. Evaluating Equation$~$\eqref{eq:blup_gen} at the plug-in (empirical) estimates of the covariance parameters yields the empirical best linear unbiased predictor (EBLUP) of $\bm{\alpha}$.
+
+Building from this idea and putting plug-in (empirical) estimates of the covariance parameters into Equation$~$\eqref{eq:blup_gen} yields predictors for each random error, which we call fitted values henceforth. For example, the fitted value corresponding to the spatial dependent random error, denoted $\bm{\hat{\tau}}$, is given by
+\begin{equation}\label{eq:blup_sp}
+  \bm{\hat{\tau}} = \mathbf{\Sigma}_{de} \mathbf{\Sigma}^{-1}(\mathbf{y} - \mathbf{X} \bm{\hat{\beta}}),
+\end{equation}
+where $\mathbf{\Sigma}_{de} = \text{Cov}(\bm{\tau}, \mathbf{y})$. To obtain these fitted values for the spatial random errors, run `fitted(object, type = "spcov")`. To obtain these fitted values for the random effects, run `fitted(object, type = "randcov")`. 
+
+(Talk about assumption of independent among the random effects yields the EBLUPs for us?)
+
+## `hatvalues()`
+
+Hat values measure the leverage of an observation. For independent observations, the hat matrix of a linear model $\mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ is $\mathbf{H} = \mathbf{X} (\mathbf{X}^\intercal \mathbf{X})^{-1} \mathbf{X}^\intercal$. The leverage of the $i$th observation is the $i$th diagonal element of $\mathbf{H}$. For dependent observations, the Hat matrix can be viewed as the standard Hat matrix of "whitened" observations corresponding to the linear model $\mathbf{y}^* = \mathbf{X}^* \boldsymbol{\beta} + \boldsymbol{\epsilon}^*$, where $\mathbf{y}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}$, $\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2} \mathbf{y}$, and $\boldsymbol{\epsilon}^* = \boldsymbol{\Sigma}^{-1/2} \boldsymbol{\epsilon}$. So the whitened Hat matrix is $\mathbf{H}^* = \mathbf{X}^* [(\mathbf{X}^*)^\intercal \mathbf{X}]^{-1} (\mathbf{X}^*)^\intercal$ and $\hat{\boldsymbol{\Sigma}}$ is the covariance matrix evaluated at the estimated covariance parameters. Suggested cutoffs for identifying observations with high leverage are $2p / n$ or $3p / n$, where $p$ is the number of fixed effects and $n$ is the sample size.
+
+## `logLik()`
+
+`logLik()` returns the value of the log-likelihood for fitted models estimated using restricted maximum likelihood or maximum likelihood.
+
+## `loocv()`
+
+## `plot()`
+
+## `predict()`
+
+Predictions are often the primary goal of a data analysis. spmodel performs best linear unbiased prediction, which is equivalent to Kriging, using the \texttt{predict()} function. Let $\mathbf{y}_o$ be a vector of observed variables and $\mathbf{y}_u$ be a vector of unobserved variables. Let $\mathbf{X}_o$ and $\mathbf{X}_u$ be the fixed effect design matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. Let $\mathbf{\Sigma}_o$ and $\mathbf{\Sigma}_u$ be the covariance matrices of $\mathbf{y}_o$ and $\mathbf{y}_u$, respectively. The (empirical) best linear unbiased predictor (BLUP; Kriging predictor) of $\mathbf{y}_u$, denoted $\mathbf{\dot{y}_u}$ is given by
+\begin{equation}\label{eq:blup}
+  \mathbf{\dot{y}_u} =  \mathbf{X}_u \bm{\hat{\beta}} + \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o (\mathbf{y}_o - \mathbf{X}_o \bm{\hat{\beta}}) ,
+\end{equation}
+where $\mathbf{\hat{c}}_{uo} = \hat{\text{Cov}}(\mathbf{y}_u, \mathbf{y}_o)$ and $\bm{\hat{\beta}} = (\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$. One can show that $\hat{\text{Cov}}(\mathbf{\dot{y}})$ is
+\begin{equation}\label{eq:vblup}
+  \text{Cov}(\mathbf{\dot{y}}) = \mathbf{\hat{\Sigma}}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{\hat{c}}_{uo}^\intercal + \mathbf{H}(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}\mathbf{H}^\intercal ,
+\end{equation}
+where $\mathbf{H} = (\mathbf{X}_u - \mathbf{\hat{c}}_{uo} \mathbf{\hat{\Sigma}}^{-1}_o \mathbf{X}_o)$. When $\texttt{predict(..., interval = "none")}$, predictions are obtained using Equation$~$\ref{eq:blup}. If \texttt{se.fit = TRUE}, standard errors are the square root of the diagonal of Equation$~$\ref{eq:vblup}. When \texttt{predict(..., interval = "prediction")}, predictions are obtained using Equation$~$\ref{eq:blup} and standard errors used for the lower and upper bound of the prediction intervals are obtained via the square root of the diagonal of Equation$~$\ref{eq:vblup} (these are also what are returned if \texttt{se.fit = TRUE}). When \texttt{predict(..., interval = "confidence")}, mean estimates are obtained using $\mathbf{X}_u \bm{\hat{\beta}}$ and standard errors used for the lower and upper bound of the confidence intervals are obtained via the square root of the diagonal of $(\mathbf{X}^\intercal \mathbf{\hat{\Sigma}}^{-1} \mathbf{X})^{-1}$ (these are also what are returned if \texttt{se.fit = TRUE}). 
+
+For autoregressive models, an extra step is required to obtain $\hat{\Sigma}^{-1}_o$ and $\hat{\Sigma}^{-1}_u$, as they depend on one another through the locations of $\mathbf{y}_o$ and $\mathbf{y}_u$. Let $\hat{\Sigma}^{-1}$ be the inverse covariance matrix of $\mathbf{y}_o$ and $\mathbf{y}_u$ (which we directly specify for autoregressive models). If the data are small enough, then $\hat{\Sigma}^{-1}$ can be inverted, yielding $\hat{\Sigma}$. Then appropriate subsets can then used to obtain the components needed for prediction. A faster way to obtain relevant components required for prediction does exist and is worth mentioning -- $\hat{\Sigma}^{-1}$ can be represented blockwise as
+\begin{equation}\label{eq:auto_hw}
+  \hat{\Sigma}^{-1} =
+  \begin{bmatrix}
+    \mathbf{\hat{\Sigma}}^{*}_{o, o} & \mathbf{\hat{\Sigma}}^{*}_{o, u} \\
+    \mathbf{\hat{\Sigma}}^{*}_{u, o} & \mathbf{\hat{\Sigma}}^{*}_{u, u}
+  \end{bmatrix},
+\end{equation}
+where the dimensions of the blocks are indexed by the matrix subscripts (rows then columns). All of the terms required for prediction can be obtained from this block representation. @wolf1978helmert shows that 
+\begin{equation}\label{eq:hw_forms}
+  \begin{split}
+    \hat{\Sigma}^{-1}_o & = \mathbf{\hat{\Sigma}}^{*}_{o, o} - \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1} \mathbf{\hat{\Sigma}}^{*}_{u, o} \\
+    \hat{\Sigma}_u & = (\mathbf{\hat{\Sigma}}^{*}_{u, u} - \mathbf{\hat{\Sigma}}^{*}_{u, o} (\mathbf{\hat{\Sigma}}^{*}_{o, o})^{-1} \mathbf{\hat{\Sigma}}^{*}_{o, u})^{-1} \\
+    \text{Cov}(\mathbf{y}_o, \mathbf{y}_u) & = - \hat{\Sigma}_o \mathbf{\hat{\Sigma}}^{*}_{o, u} (\mathbf{\hat{\Sigma}}^{*}_{u, u})^{-1}
+  \end{split}
+\end{equation}
+A similar result exists for the log determinant (used in ML and REML estimation).
+
+## `pseudoR2()`
+
+`pseudoR2()` is the pseudo r-squared equaling $1 - \mathbf{D}_f / \mathbf{D}_n$, where $\mathbf{D}_f$ is the deviance of the fitted model and $\mathbf{D}_n$ is the deviance of an intercept-only model (with the same estimated covariance parameters as for the fitted model). If the observations are independent and normal (Gaussian), this pseudo r-squared equals the classical r-squared $1 - SSE / SST$ for $SSE = (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^\intercal (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})$ and $SST = (\mathbf{y} - \hat{\mu})^\intercal (\mathbf{y} - \mathbf{X} \hat{\mu})$ for intercept $\hat{\mu}$.
+
+## `residuals()`
+
+`residuals()` returns various fitted-model residuals. When `type = "raw"`, the raw residuals are returned, $\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}}$. When `type = "normalized"`, the normalized residuals are returned, $\hat{\boldsymbol{\Sigma}}^{-1/2}(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})$. When `type = "standardized"`, the standardized residuals are returned, $\hat{\boldsymbol{\Sigma}}^{-1/2}(\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}})/ \sqrt{(1 - diag(\mathbf{H}^*))}$, where $diag(\mathbf{H}^*)$ is the diagonal of the "whitened" hat matrix, $\mathbf{H}^*$.
+
+## `sprnorm()`
+
+## `vcov()`
+
+`vcov()` returns the variance-covariance matrix of estimated parameters. Currently, `vcov()` only returns the variance-covariance matrix of the fixed effects. The variance-covariance matrix of the fixed effects is given by $(\mathbf{X}^\intercal \hat{\boldsymbol{\Sigma}}^{-1} \mathbf{X})^{-1}$.
 
 # References {.unnumbered}

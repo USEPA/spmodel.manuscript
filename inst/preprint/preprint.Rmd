@@ -64,6 +64,16 @@ summary(spmod)
 plot(spmod, which = c(1, 2))
 ```
 
+Hypothesis tests for each element in $\hat{\bm{\beta}}$ are available in \texttt{summary()}.
+```{r}
+spmod <- splm(y ~ x + group, exdata, "exponential", xcoord, ycoord)
+summary(spmod)
+```
+
+Test statistics are the ratio of the estimate to its standard error. These tests are useful for continuous predictors, but for categorical predictors, \texttt{summary()} only provides test statistics for each level, not all levels simultaneously. To find a test statistic for a categorical variable, there are two approaches. The first is to use \texttt{anova()} (tidied). 
+```{r}
+tidy(anova(spmod))
+```
 
 ### Anisotropy
 
