@@ -13,7 +13,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{spmodel: Spatial Modeling in \textbf{R}}
+\title{spmodel: Spatial Statistical Modeling and Prediction in \textbf{R}}
 
 \author{
     Michael Dumelle
@@ -58,15 +58,22 @@ Parameters are estimated using various methods. Additional modeling
 features include anisotropy, random effects, partition factors, big data
 approaches, and more. Model-fit statistics are used to summarize,
 visualize, and compare models. Predictions at unobserved locations are
-readily obtainable.
+readily obtainable. This manuscript corresponds to spmodel version
+0.1.0.
 \end{abstract}
 
 \keywords{
-    Spatial covariance
+    Spatial linear model
    \and
-    Linear Model
+    Spatial autoregressive model
    \and
-    Autoregressive model
+    Covariance
+   \and
+    Estimation
+   \and
+    Prediction (Kriging)
+   \and
+    Big Data
   }
 
 \hypertarget{sec:introduction}{%
@@ -89,52 +96,12 @@ proceeding, we load \texttt{spmodel} by running
 R> library(spmodel)
 \end{verbatim}
 
-If you use \texttt{spmodel} in a formal publication or report, please
-cite it. Citing \texttt{spmodel} lets us devote more resources to it in
-the future. We view the \texttt{spmodel} citation by running
-
-\begin{verbatim}
-R> citation(package = "spmodel")
-\end{verbatim}
-
-\begin{verbatim}
-
-To cite spmodel in publications use:
-
-  Michael Dumelle, Matt Higham, and Jay M. Ver Hoef (2022). spmodel: Spatial
-  Statistical Modeling and Prediction. R package version 0.1.0.
-
-A BibTeX entry for LaTeX users is
-
-  @Manual{,
-    title = {spmodel: Spatial Statistical Modeling and Prediction},
-    author = {Michael Dumelle and Matt Higham and Jay M. {Ver Hoef}},
-    year = {2022},
-    note = {R package version 0.1.0},
-  }
-\end{verbatim}
-
-\begin{itemize}
-\tightlist
-\item
-  An overview of basic features in \texttt{spmodel}:
-  \texttt{vignette("basics",\ "spmodel")}
-\item
-  Technical details regarding many functions:
-  \texttt{vignette("technical",\ "spmodel")}
-\end{itemize}
-
 We will create visualizations using ggplot2 (Wickham 2016), which we
 load by running
 
 \begin{verbatim}
 R> library(ggplot2)
 \end{verbatim}
-
-ggplot2 is only installed alongside \texttt{spmodel} when
-\texttt{dependencies\ =\ TRUE} in \texttt{install.packages()}, so check
-that it is installed before reproducing any visualizations in this
-vignette.
 
 \hypertarget{sec:theomodel}{%
 \section{The Spatial Linear Model}\label{sec:theomodel}}

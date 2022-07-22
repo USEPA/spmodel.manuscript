@@ -21,11 +21,14 @@ authors:
 abstract: |
   Fit, summarize, and predict for a variety spatial statistical      models. Parameters are estimated using various methods.            Additional modeling features include anisotropy,
   random effects, partition factors, big data approaches, and more.   Model-fit statistics are used to summarize, visualize, and         compare models. Predictions at unobserved locations are
-  readily obtainable.
+  readily obtainable. This manuscript corresponds to spmodel         version 0.1.0.
 keywords:
-  - Spatial covariance
-  - Linear Model
-  - Autoregressive model
+  - Spatial linear model
+  - Spatial autoregressive model
+  - Covariance
+  - Estimation
+  - Prediction (Kriging)
+  - Big Data
 bibliography: references.bib
 biblio-style: unsrt
 header-includes: |
@@ -56,20 +59,10 @@ library(spmodel)
 library(spmodel)
 ```
 
-If you use `spmodel` in a formal publication or report, please cite it. Citing `spmodel` lets us devote more resources to it in the future. We view the `spmodel` citation by running
-```{r}
-citation(package = "spmodel")
-```
-
-* An overview of basic features in `spmodel`: `vignette("basics", "spmodel")`
-* Technical details regarding many functions: `vignette("technical", "spmodel")`
-
 We will create visualizations using ggplot2 [@wickham2016ggplot2], which we load by running
 ```{r, eval = FALSE}
 library(ggplot2)
 ```
-
-ggplot2 is only installed alongside `spmodel` when `dependencies = TRUE` in `install.packages()`, so check that it is installed before reproducing any visualizations in this vignette.
 
 # The Spatial Linear Model {#sec:theomodel}
 
