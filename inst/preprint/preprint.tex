@@ -53,13 +53,14 @@
 
 
 \begin{abstract}
-Fit, summarize, and predict for a variety spatial statistical models.
+\texttt{spmodel} is an \textbf{\textsf{R}} package used to fit,
+summarize, and predict for a variety spatial statistical models.
 Parameters are estimated using various methods. Additional modeling
 features include anisotropy, random effects, partition factors, big data
 approaches, and more. Model-fit statistics are used to summarize,
 visualize, and compare models. Predictions at unobserved locations are
-readily obtainable. This manuscript corresponds to spmodel version
-0.1.0.
+readily obtainable. This manuscript corresponds to \texttt{spmodel}
+version 0.1.0.
 \end{abstract}
 
 \keywords{
@@ -79,8 +80,46 @@ readily obtainable. This manuscript corresponds to spmodel version
 \hypertarget{sec:introduction}{%
 \section{Introduction}\label{sec:introduction}}
 
-\texttt{spmodel} is an \textbf{\textsf{R}} package used to fit,
-summarize, and predict for a variety of spatial statistical models. In
+Spatial data are ubiquitous in everyday life and the scientific
+literature. As such, it becoming is increasingly important to properly
+analyze spatial data. Spatial data can be analyzed using a statistical
+model that explicitly incorporates the spatial dependence among
+observations. Incorporating this spatial dependence can be challenging,
+but ignoring it often yields poor statistical models. \texttt{spmodel}
+provides tools to easily incorporate this spatial dependence, building
+upon commonly used \(\textbf{\textsf{R}}\) functions like \texttt{lm()}.
+
+\texttt{spmodel} implements a model-based inference, which relies on
+fitting a statistical model. This is a different way to analyze data
+than design-based inference, which relies on random sampling and
+estimators that incorporate the properties of the random sample. Spatial
+random sampling and design-based inference can be performed using the
+\texttt{spsurvey} \(\textbf{\textsf{R}}\) package. Though not explicitly
+required, random sampling can still benefit model-based inference when
+analyzing spatial data (Dumelle et al. 2022).
+
+Several \(\textbf{\textsf{R}}\) packages for analyzing point-referenced
+(i.e., geostatistical) and areal (i.e., autoregressive) spatial data
+from a model-based perspective exist. Data are point-referenced when
+they are observed at point-locations indexed by x-coordinates and
+y-coordinates on a spatially continuous surface with an infinite number
+of locations. Data are areal they are observed as part of a finite
+network of polygons whose connections are indexed by a neighborhood
+structure. For example, the polygons may represent counties in a state
+who are neighbors if they share at least one boundary. Existing
+\(\textbf{\textsf{R}}\) packages for point-referenced data include
+\texttt{fields}, \texttt{FRK}, \texttt{geoR}, \texttt{GpGp},
+\texttt{gstat}, \texttt{latticeKrig}, \texttt{spatial},
+\texttt{spBayes}, and \texttt{spNNGP}. Existing \(\textbf{\textsf{R}}\)
+packages for areal data include and \texttt{CARBayes} and \texttt{hglm}.
+\texttt{spmodel} is capable of fitting statistical models for both
+point-referenced and areal data and offers many features missing from
+the aforementioned \(\textbf{\textsf{R}}\) packages. Together in one
+\(\textbf{\textsf{R}}\) package, \texttt{spmodel} offers detailed model
+summaries, extensive model diagnostics, random effects, anisotropy, big
+data methods, prediction, and more.
+
+The rest of this article is organized as follows. In
 Section\(~\)\ref{sec:theomodel}, we give a brief theoretical
 introduction to spatial linear models. In
 Section\(~\)\ref{sec:modelfit}, we outline the variety of methods used
@@ -150,9 +189,6 @@ vector.
 
 Equation\(~\)\ref{eq:splm} is called the spatial linear model. The
 spatial linear model applies to both point-referenced and areal data.
-Data are point-referenced when the elements in \(\mathbf{y}\) are
-observed at point-locations indexed by x-coordinates and y-coordinates
-on a spatially continuous surface with an infinite number of locations.
 The \texttt{splm()} function is used to fit spatial linear models for
 point-referenced data (these are often called geostatistical models).
 One spatial covariance function available in \texttt{splm()} is the
@@ -327,7 +363,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Pseudo R-squared: 0.683
 
-Coefficients (exponential spatial covariance):
+Coefficients ( spatial covariance):
        de        ie     range 
 3.595e-01 7.897e-02 8.237e+03 
 \end{verbatim}
@@ -830,7 +866,7 @@ R> glance(sealmod)
 \begin{verbatim}
 # A tibble: 1 x 9
       n     p  npar value   AIC  AICc logLik deviance pseudo.r.squared
-  <int> <dbl> <dbl> <dbl> <dbl> <dbl>  <dbl>    <dbl>            <dbl>
+  <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>            <dbl>
 1    34     1     3 -36.9 -30.9 -30.1   18.4     32.9                0
 \end{verbatim}
 
@@ -1351,9 +1387,11 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Pseudo R-squared: 0.7048
 
-Coefficients (exponential spatial covariance):
+Coefficients ( spatial covariance):
        de        ie     range    rotate     scale 
 3.561e-01 6.812e-02 8.732e+03 2.435e+00 4.753e-01 
+attr(,"class")
+[1] "exponential"
 \end{verbatim}
 
 The \texttt{rotate} parameter is between zero and \(\pi\) radians and
@@ -1520,7 +1558,7 @@ Coefficients (fixed):
             Estimate Std. Error z value Pr(>|z|)
 (Intercept)   -1.021      0.699   -1.46    0.144
 
-Coefficients (exponential spatial covariance):
+Coefficients ( spatial covariance):
     de     ie  range 
 2.8724 0.9735 0.2644 
 \end{verbatim}
@@ -1555,7 +1593,7 @@ Coefficients (fixed):
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Coefficients (exponential spatial covariance):
+Coefficients ( spatial covariance):
     de     ie  range 
 2.5434 0.9907 0.2312 
 \end{verbatim}
@@ -1711,6 +1749,12 @@ Mathematical Geology} 17 (5): 563--86.
 Curriero, Frank C, and Subhash Lele. 1999. ``A Composite Likelihood
 Approach to Semivariogram Estimation.'' \emph{Journal of Agricultural,
 Biological, and Environmental Statistics}, 9--28.
+
+\leavevmode\hypertarget{ref-dumelle2022comparison}{}%
+Dumelle, Michael, Matt Higham, Jay M Ver Hoef, Anthony R Olsen, and Lisa
+Madsen. 2022. ``A Comparison of Design-Based and Model-Based Approaches
+for Finite Population Spatial Sampling and Inference.'' \emph{Methods in
+Ecology and Evolution}.
 
 \leavevmode\hypertarget{ref-harville1977maximum}{}%
 Harville, David A. 1977. ``Maximum Likelihood Approaches to Variance

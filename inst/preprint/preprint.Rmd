@@ -19,9 +19,10 @@ authors:
     location: Marine Mammal Laboratory, Seattle, WA, 98115
     email: jay.verhoef@noaa.gov
 abstract: |
-  Fit, summarize, and predict for a variety spatial statistical      models. Parameters are estimated using various methods.            Additional modeling features include anisotropy,
-  random effects, partition factors, big data approaches, and more.   Model-fit statistics are used to summarize, visualize, and         compare models. Predictions at unobserved locations are
-  readily obtainable. This manuscript corresponds to spmodel         version 0.1.0.
+  \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
+  for a variety spatial statistical models. Parameters are estimated using various
+  methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
+  readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0.
 keywords:
   - Spatial linear model
   - Spatial autoregressive model
@@ -53,8 +54,14 @@ library(spmodel)
 
 # Introduction {#sec:introduction}
 
+Spatial data are ubiquitous in everyday life and the scientific literature. As such, it becoming is increasingly important to properly analyze spatial data. Spatial data can be analyzed using a statistical model that explicitly incorporates the spatial dependence among observations. Incorporating this spatial dependence can be challenging, but ignoring it often yields poor statistical models.  `spmodel` provides tools to easily incorporate this spatial dependence, building upon commonly used $\textbf{\textsf{R}}$ functions like `lm()`.
 
-`spmodel` is an \textbf{\textsf{R}} package used to fit, summarize, and predict for a variety of spatial statistical models. In Section$~$\ref{sec:theomodel}, we give a brief theoretical introduction to spatial linear models. In Section$~$\ref{sec:modelfit}, we outline the variety of methods used to estimate the parameters of spatial linear models. In Section$~$\ref{sec:prediction}, we explain how to obtain predictions at unobserved locations. In Section$~$\ref{sec:advfeatures}, we detail some advanced modeling features, including random effects, partition factors, anisotropy, and big data approaches. In Section$~$\ref{sec:discussion}, we end with a short discussion. Before proceeding, we load `spmodel` by running
+`spmodel` implements a model-based inference, which relies on fitting a statistical model. This is a different way to analyze data than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample. Spatial random sampling and design-based inference can be performed using the `spsurvey` $\textbf{\textsf{R}}$ package. Though not explicitly required, random sampling can still benefit model-based inference when analyzing spatial data [@dumelle2022comparison].
+
+Several $\textbf{\textsf{R}}$ packages for analyzing point-referenced (i.e., geostatistical) and areal (i.e., autoregressive) spatial data from a model-based perspective exist. Data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Data are areal they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Existing $\textbf{\textsf{R}}$ packages for point-referenced data include `fields`, `FRK`, `geoR`, `GpGp`, `gstat`, `latticeKrig`, `spatial`, `spBayes`, and `spNNGP`. Existing $\textbf{\textsf{R}}$ packages for areal data include and `CARBayes` and `hglm`. `spmodel` is capable of fitting statistical models for both point-referenced and areal data and offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages. Together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, random effects, anisotropy, big data methods, prediction, and more.
+
+
+The rest of this article is organized as follows. In Section$~$\ref{sec:theomodel}, we give a brief theoretical introduction to spatial linear models. In Section$~$\ref{sec:modelfit}, we outline the variety of methods used to estimate the parameters of spatial linear models. In Section$~$\ref{sec:prediction}, we explain how to obtain predictions at unobserved locations. In Section$~$\ref{sec:advfeatures}, we detail some advanced modeling features, including random effects, partition factors, anisotropy, and big data approaches. In Section$~$\ref{sec:discussion}, we end with a short discussion. Before proceeding, we load `spmodel` by running
 ```{r, eval = FALSE}
 library(spmodel)
 ```
@@ -78,7 +85,7 @@ The model in Equation$~$\ref{eq:lm} assumes the elements of $\mathbf{y}$ are unc
 \end{equation}
 where $\text{E}(\boldsymbol{\tau}) = \mathbf{0}$, $\text{Cov}(\boldsymbol{\tau}) = \sigma^2_\tau \mathbf{R}$, and $\mathbf{R}$ is a matrix that determines the spatial dependence structure in $\mathbf{y}$ and depends on a range parameter, $\phi$. The parameter $\sigma^2_\tau$ is called the spatially dependent random error variance or partial sill. The parameter $\sigma^2_\epsilon$ is called the spatially independent random error variance or nugget. These two variance parameters are henceforth more intuitively written as $\sigma^2_{de}$ and $\sigma^2_{ie}$, respectively. The covariance of $\mathbf{y}$ is denoted $\boldsymbol{\Sigma}$ and given by $\sigma^2_{de} \mathbf{R} + \sigma^2_{ie} \mathbf{I}$. The parameters that compose this covariance are typically referenced by the vector $\boldsymbol{\theta}$, which is called the covariance parameter vector.
 
-Equation$~$\ref{eq:splm} is called the spatial linear model. The spatial linear model applies to both point-referenced and areal data. Data are point-referenced when the elements in $\mathbf{y}$ are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. The `splm()` function is used to fit spatial linear models for point-referenced data (these are often called geostatistical models). One spatial covariance function available in `splm()` is the exponential spatial covariance function, which has an $\mathbf{R}$ matrix given by
+Equation$~$\ref{eq:splm} is called the spatial linear model. The spatial linear model applies to both point-referenced and areal data. The `splm()` function is used to fit spatial linear models for point-referenced data (these are often called geostatistical models). One spatial covariance function available in `splm()` is the exponential spatial covariance function, which has an $\mathbf{R}$ matrix given by
 \begin{equation*}
   \mathbf{R} = \exp(-\mathbf{h} / \phi),
 \end{equation*}  
