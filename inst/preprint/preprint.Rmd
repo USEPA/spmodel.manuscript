@@ -25,13 +25,13 @@ abstract: |
   readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0.
 keywords:
   - Spatial linear model
-  - Spatial autoregressive model
-  - Covariance
-  - Estimation
+  - Geostatistical model
+  - Autoregressive model
+  - Spatial Covariance
   - Prediction (Kriging)
   - Big Data
 bibliography: references.bib
-biblio-style: unsrt
+biblio-style: natbib
 header-includes: |
   \usepackage{amsmath,amsfonts,amssymb}
   \usepackage{bm, bbm}
@@ -56,9 +56,9 @@ library(spmodel)
 
 Spatial data are ubiquitous in everyday life and the scientific literature. As such, it becoming is increasingly important to properly analyze spatial data. Spatial data can be analyzed using a statistical model that explicitly incorporates the spatial dependence among observations. Incorporating this spatial dependence can be challenging, but ignoring it often yields poor statistical models.  `spmodel` provides tools to easily incorporate this spatial dependence, building upon commonly used $\textbf{\textsf{R}}$ functions like `lm()`.
 
-`spmodel` implements a model-based inference, which relies on fitting a statistical model. This is a different way to analyze data than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample. Spatial random sampling and design-based inference can be performed using the `spsurvey` $\textbf{\textsf{R}}$ package. Though not explicitly required, random sampling can still benefit model-based inference when analyzing spatial data [@dumelle2022comparison].
+`spmodel` implements a model-based inference, which relies on fitting a statistical model. This is a different way to analyze data than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample. Spatial random sampling and design-based inference can be performed using the `spsurvey` $\textbf{\textsf{R}}$ package [@dumelle2022spsurvey]. Though not explicitly required, random sampling can still benefit model-based inference when analyzing spatial data [@dumelle2022comparison].
 
-Several $\textbf{\textsf{R}}$ packages for analyzing point-referenced (i.e., geostatistical) and areal (i.e., autoregressive) spatial data from a model-based perspective exist. Data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Data are areal they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Existing $\textbf{\textsf{R}}$ packages for point-referenced data include `fields`, `FRK`, `geoR`, `GpGp`, `gstat`, `latticeKrig`, `spatial`, `spBayes`, and `spNNGP`. Existing $\textbf{\textsf{R}}$ packages for areal data include and `CARBayes` and `hglm`. `spmodel` is capable of fitting statistical models for both point-referenced and areal data and offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages. Together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, random effects, anisotropy, big data methods, prediction, and more.
+Several $\textbf{\textsf{R}}$ packages for analyzing point-referenced (i.e., geostatistical) and areal (i.e., autoregressive) spatial data from a model-based perspective exist. Data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Data are areal they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Existing $\textbf{\textsf{R}}$ packages for point-referenced data include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. Existing $\textbf{\textsf{R}}$ packages for areal data include and `CARBayes` [@lee2013carbayes] and `hglm` [@ronnegard2010hglm]. `spmodel` is capable of fitting statistical models for both point-referenced and areal data and offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages. Together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, random effects, anisotropy, big data methods, prediction, and more.
 
 
 The rest of this article is organized as follows. In Section$~$\ref{sec:theomodel}, we give a brief theoretical introduction to spatial linear models. In Section$~$\ref{sec:modelfit}, we outline the variety of methods used to estimate the parameters of spatial linear models. In Section$~$\ref{sec:prediction}, we explain how to obtain predictions at unobserved locations. In Section$~$\ref{sec:advfeatures}, we detail some advanced modeling features, including random effects, partition factors, anisotropy, and big data approaches. In Section$~$\ref{sec:discussion}, we end with a short discussion. Before proceeding, we load `spmodel` by running

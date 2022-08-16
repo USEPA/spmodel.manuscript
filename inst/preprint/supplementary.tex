@@ -13,7 +13,8 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{spmodel: Spatial Modeling in \textbf{R} -- Computatinal Details Vignette}
+\title{spmodel: Spatial Statistical Modeling and Prediction in
+\textbf{R} -- Tehnical Details}
 
 \author{
     Michael Dumelle
@@ -86,30 +87,67 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 
+% Pandoc citation processing
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{bm, bbm}
 \usepackage{mathtools}
 \mathtoolsset{showonlyrefs=true}
+
 \begin{document}
 \maketitle
 
 
 \begin{abstract}
-Fit, summarize, and predict for a variety of spatial models. Parameters
-of spatial linear models and spatial autoregressive models are estimated
-using a variety of methods. Additional modeling features include
-anisotropy, random effects, partition factors, big data approaches, and
-more. Model-fit statistics are used to summarize, visualize, and compare
-models. Predictions at unobserved locations are easily obtainable.
+Fit, summarize, and predict for a variety spatial statistical models.
+Parameters are estimated using various methods. Additional modeling
+features include anisotropy, random effects, partition factors, big data
+approaches, and more. Model-fit statistics are used to summarize,
+visualize, and compare models. Predictions at unobserved locations are
+readily obtainable. This manuscript corresponds to spmodel version
+0.1.0.
 \end{abstract}
 
 \keywords{
-    Spatial covariance
+    Spatial linear model
    \and
-    Linear Model
+    Spatial autoregressive model
    \and
-    Autoregressive model
+    Covariance
+   \and
+    Estimation
+   \and
+    Prediction (Kriging)
+   \and
+    Big Data
   }
 
 \hypertarget{introduction}{%
@@ -125,7 +163,7 @@ the future. To view the \texttt{spmodel} citation, run
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{citation}\NormalTok{(}\DataTypeTok{package =} \StringTok{"spmodel"}\NormalTok{)}
+\FunctionTok{citation}\NormalTok{(}\AttributeTok{package =} \StringTok{"spmodel"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -434,7 +472,7 @@ set \(N(h)\) contains observations that are \(h \pm c\) apart, where
 \(c\) is some constant. This approach is known as ``binning'' the
 empirical semivariogram. The default in \texttt{spmodel} is to construct
 the semivariogram using 15 equally spaced bins where \(h\) is contained
-in \((0, h_{max}]\), and \(h_{max}\) is known as a ``distance cutoff''.
+in \((0, h_{max}]\), and \(h_{max}\) is known as a ``distance cutoff.''
 Distance cutoffs are commonly used when constructing
 Equation\(~\)\ref{eq:esv} because there tend to be few pairs with large
 distances. The default in \texttt{spmodel} is to use a cutoff of half
@@ -1292,11 +1330,11 @@ next.
 \texttt{spmodel} uses a grid search to find suitable initial values for
 use in optimization. For spatial linear models without random effects,
 the spatially dependent variance (\(\sigma^2_{de}\)) and spatially
-independent variance (\(\sigma^2_{ie}\)) parameters are given ``low'',
-``medium'', and ``high'' values. The sample variance of a non-spatial
+independent variance (\(\sigma^2_{ie}\)) parameters are given ``low,''
+``medium,'' and ``high'' values. The sample variance of a non-spatial
 linear model is slightly inflated by a factor of 1.2 (non-spatial models
 can underestimate the variance when there is spatial dependence) and
-these ``low'', ``medium'', and ``high'' values correspond to 10\%, 50\%,
+these ``low,'' ``medium,'' and ``high'' values correspond to 10\%, 50\%,
 and 90\% of the inflated sample variance. Only combinations of
 \(\sigma^2_{de}\) and \(\sigma^2_{ie}\) whose proportions sum to 100\%
 are considered. The range (\(\phi\)) and extra (\(\xi\)) parameters are
@@ -1304,7 +1342,7 @@ given ``low'' and ``high'' values that are unique to each spatial
 covariance function. The anisotropy (Section\(~\)\ref{sec:anisotropy})
 rotation parameter (\(\alpha\)) is given six values that correspond to
 0, \(\pi/6\), \(2\pi/6\), \(4\pi/6\), \(5\pi/6\), and \(\pi\) radians.
-The anisotropy scale parameter (\(S\)) is given ``low'', ``medium'', and
+The anisotropy scale parameter (\(S\)) is given ``low,'' ``medium,'' and
 ``high'' values that correspond to scaling factors of 0.25, 0.75, and 1.
 Note that the anisotropy parameters are only used during grid searches
 for point-referenced data.
@@ -1812,81 +1850,83 @@ easier to communicate using square root notation.
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
 \leavevmode\hypertarget{ref-brent1971algorithm}{}%
-Brent, Richard P. 1971. ``An Algorithm with Guaranteed Convergence for
-Finding a Zero of a Function.'' \emph{The Computer Journal} 14 (4):
+Brent, Richard P. 1971. {``An Algorithm with Guaranteed Convergence for
+Finding a Zero of a Function.''} \emph{The Computer Journal} 14 (4):
 422--25.
 
 \leavevmode\hypertarget{ref-cook1979influential}{}%
-Cook, R Dennis. 1979. ``Influential Observations in Linear Regression.''
-\emph{Journal of the American Statistical Association} 74 (365):
-169--74.
+Cook, R Dennis. 1979. {``Influential Observations in Linear
+Regression.''} \emph{Journal of the American Statistical Association} 74
+(365): 169--74.
 
 \leavevmode\hypertarget{ref-cook1982residuals}{}%
 Cook, R Dennis, and Sanford Weisberg. 1982. \emph{Residuals and
 Influence in Regression}. New York: Chapman; Hall.
 
 \leavevmode\hypertarget{ref-cressie1985fitting}{}%
-Cressie, Noel. 1985. ``Fitting Variogram Models by Weighted Least
-Squares.'' \emph{Journal of the International Association for
+Cressie, Noel. 1985. {``Fitting Variogram Models by Weighted Least
+Squares.''} \emph{Journal of the International Association for
 Mathematical Geology} 17 (5): 563--86.
 
 \leavevmode\hypertarget{ref-cressie1993statistics}{}%
 ---------. 1993. \emph{Statistics for Spatial Data}. John Wiley \& Sons.
 
 \leavevmode\hypertarget{ref-curriero1999composite}{}%
-Curriero, Frank C, and Subhash Lele. 1999. ``A Composite Likelihood
-Approach to Semivariogram Estimation.'' \emph{Journal of Agricultural,
+Curriero, Frank C, and Subhash Lele. 1999. {``A Composite Likelihood
+Approach to Semivariogram Estimation.''} \emph{Journal of Agricultural,
 Biological, and Environmental Statistics}, 9--28.
 
 \leavevmode\hypertarget{ref-goldman2000statistical}{}%
-Goldman, Nick, and Simon Whelan. 2000. ``Statistical Tests of
+Goldman, Nick, and Simon Whelan. 2000. {``Statistical Tests of
 Gamma-Distributed Rate Heterogeneity in Models of Sequence Evolution in
-Phylogenetics.'' \emph{Molecular Biology and Evolution} 17 (6): 975--78.
+Phylogenetics.''} \emph{Molecular Biology and Evolution} 17 (6):
+975--78.
 
 \leavevmode\hypertarget{ref-golub2013matrix}{}%
 Golub, Gene H, and Charles F Van Loan. 2013. \emph{Matrix Computations}.
 JHU press.
 
 \leavevmode\hypertarget{ref-harville1977maximum}{}%
-Harville, David A. 1977. ``Maximum Likelihood Approaches to Variance
-Component Estimation and to Related Problems.'' \emph{Journal of the
+Harville, David A. 1977. {``Maximum Likelihood Approaches to Variance
+Component Estimation and to Related Problems.''} \emph{Journal of the
 American Statistical Association} 72 (358): 320--38.
 
 \leavevmode\hypertarget{ref-harville1992mean}{}%
-Harville, David A, and Daniel R Jeske. 1992. ``Mean Squared Error of
-Estimation or Prediction Under a General Linear Model.'' \emph{Journal
+Harville, David A, and Daniel R Jeske. 1992. {``Mean Squared Error of
+Estimation or Prediction Under a General Linear Model.''} \emph{Journal
 of the American Statistical Association} 87 (419): 724--31.
 
 \leavevmode\hypertarget{ref-henderson1975best}{}%
-Henderson, Charles R. 1975. ``Best Linear Unbiased Estimation and
-Prediction Under a Selection Model.'' \emph{Biometrics}, 423--47.
+Henderson, Charles R. 1975. {``Best Linear Unbiased Estimation and
+Prediction Under a Selection Model.''} \emph{Biometrics}, 423--47.
 
 \leavevmode\hypertarget{ref-hoeting2006model}{}%
 Hoeting, Jennifer A, Richard A Davis, Andrew A Merton, and Sandra E
-Thompson. 2006. ``Model Selection for Geostatistical Models.''
+Thompson. 2006. {``Model Selection for Geostatistical Models.''}
 \emph{Ecological Applications} 16 (1): 87--98.
 
 \leavevmode\hypertarget{ref-hrong1996approximate}{}%
-Hrong-Tai Fai, Alex, and Paul L Cornelius. 1996. ``Approximate F-Tests
+Hrong-Tai Fai, Alex, and Paul L Cornelius. 1996. {``Approximate f-Tests
 of Multiple Degree of Freedom Hypotheses in Generalized Least Squares
-Analyses of Unbalanced Split-Plot Experiments.'' \emph{Journal of
+Analyses of Unbalanced Split-Plot Experiments.''} \emph{Journal of
 Statistical Computation and Simulation} 54 (4): 363--78.
 
 \leavevmode\hypertarget{ref-kackar1984approximations}{}%
-Kackar, Raghu N, and David A Harville. 1984. ``Approximations for
+Kackar, Raghu N, and David A Harville. 1984. {``Approximations for
 Standard Errors of Estimators of Fixed and Random Effects in Mixed
-Linear Models.'' \emph{Journal of the American Statistical Association}
+Linear Models.''} \emph{Journal of the American Statistical Association}
 79 (388): 853--62.
 
 \leavevmode\hypertarget{ref-kenward1997small}{}%
-Kenward, Michael G, and James H Roger. 1997. ``Small Sample Inference
-for Fixed Effects from Restricted Maximum Likelihood.''
+Kenward, Michael G, and James H Roger. 1997. {``Small Sample Inference
+for Fixed Effects from Restricted Maximum Likelihood.''}
 \emph{Biometrics}, 983--97.
 
 \leavevmode\hypertarget{ref-kenward2009improved}{}%
----------. 2009. ``An Improved Approximation to the Precision of Fixed
-Effects from Restricted Maximum Likelihood.'' \emph{Computational
+---------. 2009. {``An Improved Approximation to the Precision of Fixed
+Effects from Restricted Maximum Likelihood.''} \emph{Computational
 Statistics \& Data Analysis} 53 (7): 2583--95.
 
 \leavevmode\hypertarget{ref-littell2006sas}{}%
@@ -1895,10 +1935,10 @@ Wolfinger, and Schabenberber Oliver. 2006. \emph{SAS for Mixed Models}.
 SAS publishing.
 
 \leavevmode\hypertarget{ref-macqueen1967some}{}%
-MacQueen, James, and others. 1967. ``Some Methods for Classification and
-Analysis of Multivariate Observations.'' In \emph{Proceedings of the
-Fifth Berkeley Symposium on Mathematical Statistics and Probability},
-1:281--97. 14. Oakland, CA, USA.
+MacQueen, James, and others. 1967. {``Some Methods for Classification
+and Analysis of Multivariate Observations.''} In \emph{Proceedings of
+the Fifth Berkeley Symposium on Mathematical Statistics and
+Probability}, 1:281--97. 14. Oakland, CA, USA.
 
 \leavevmode\hypertarget{ref-montgomery2021introduction}{}%
 Montgomery, Douglas C, Elizabeth A Peck, and G Geoffrey Vining. 2021.
@@ -1910,32 +1950,32 @@ Robinson. 2012. \emph{Generalized Linear Models: With Applications in
 Engineering and the Sciences}. John Wiley \& Sons.
 
 \leavevmode\hypertarget{ref-nelder1965simplex}{}%
-Nelder, John A, and Roger Mead. 1965. ``A Simplex Method for Function
-Minimization.'' \emph{The Computer Journal} 7 (4): 308--13.
+Nelder, John A, and Roger Mead. 1965. {``A Simplex Method for Function
+Minimization.''} \emph{The Computer Journal} 7 (4): 308--13.
 
 \leavevmode\hypertarget{ref-patterson1971recovery}{}%
-Patterson, H Desmond, and Robin Thompson. 1971. ``Recovery of
-Inter-Block Information When Block Sizes Are Unequal.''
+Patterson, H Desmond, and Robin Thompson. 1971. {``Recovery of
+Inter-Block Information When Block Sizes Are Unequal.''}
 \emph{Biometrika} 58 (3): 545--54.
 
 \leavevmode\hypertarget{ref-pinheiro2006mixed}{}%
-Pinheiro, José, and Douglas Bates. 2006. \emph{Mixed-Effects Models in S
-and S-Plus}. Springer science \& business media.
+Pinheiro, José, and Douglas Bates. 2006. \emph{Mixed-Effects Models in s
+and s-PLUS}. Springer science \& business media.
 
 \leavevmode\hypertarget{ref-prasad1990estimation}{}%
-Prasad, NG Narasimha, and Jon NK Rao. 1990. ``The Estimation of the Mean
-Squared Error of Small-Area Estimators.'' \emph{Journal of the American
-Statistical Association} 85 (409): 163--71.
+Prasad, NG Narasimha, and Jon NK Rao. 1990. {``The Estimation of the
+Mean Squared Error of Small-Area Estimators.''} \emph{Journal of the
+American Statistical Association} 85 (409): 163--71.
 
 \leavevmode\hypertarget{ref-satterthwaite1946approximate}{}%
-Satterthwaite, Franklin E. 1946. ``An Approximate Distribution of
-Estimates of Variance Components.'' \emph{Biometrics Bulletin} 2 (6):
+Satterthwaite, Franklin E. 1946. {``An Approximate Distribution of
+Estimates of Variance Components.''} \emph{Biometrics Bulletin} 2 (6):
 110--14.
 
 \leavevmode\hypertarget{ref-schluchter1990small}{}%
-Schluchter, Mark D, and Janet T Elashoff. 1990. ``Small-Sample
+Schluchter, Mark D, and Janet T Elashoff. 1990. {``Small-Sample
 Adjustments to Tests with Unbalanced Repeated Measures Assuming Several
-Covariance Structures.'' \emph{Journal of Statistical Computation and
+Covariance Structures.''} \emph{Journal of Statistical Computation and
 Simulation} 37 (1-2): 69--87.
 
 \leavevmode\hypertarget{ref-searle2009variance}{}%
@@ -1943,25 +1983,28 @@ Searle, Shayle R, George Casella, and Charles E McCulloch. 2009.
 \emph{Variance Components}. John Wiley \& Sons.
 
 \leavevmode\hypertarget{ref-self1987asymptotic}{}%
-Self, Steven G, and Kung-Yee Liang. 1987. ``Asymptotic Properties of
+Self, Steven G, and Kung-Yee Liang. 1987. {``Asymptotic Properties of
 Maximum Likelihood Estimators and Likelihood Ratio Tests Under
-Nonstandard Conditions.'' \emph{Journal of the American Statistical
+Nonstandard Conditions.''} \emph{Journal of the American Statistical
 Association} 82 (398): 605--10.
 
 \leavevmode\hypertarget{ref-stram1994variance}{}%
-Stram, Daniel O, and Jae Won Lee. 1994. ``Variance Components Testing in
-the Longitudinal Mixed Effects Model.'' \emph{Biometrics}, 1171--7.
+Stram, Daniel O, and Jae Won Lee. 1994. {``Variance Components Testing
+in the Longitudinal Mixed Effects Model.''} \emph{Biometrics}, 1171--77.
 
 \leavevmode\hypertarget{ref-wolf1978helmert}{}%
-Wolf, Helmut. 1978. ``The Helmert Block Method-Its Origin and
-Development.'' In \emph{Proceedings of the Second International
+Wolf, Helmut. 1978. {``The Helmert Block Method-Its Origin and
+Development.''} In \emph{Proceedings of the Second International
 Symposium on Problems Related to the Redefinition of North American
 Geodetic Networks,(NOAA, Arlington-Va, 1978)}, 319--26.
 
 \leavevmode\hypertarget{ref-wolfinger1994computing}{}%
-Wolfinger, Russ, Randy Tobias, and John Sall. 1994. ``Computing Gaussian
-Likelihoods and Their Derivatives for General Linear Mixed Models.''
-\emph{SIAM Journal on Scientific Computing} 15 (6): 1294--1310.
+Wolfinger, Russ, Randy Tobias, and John Sall. 1994. {``Computing
+Gaussian Likelihoods and Their Derivatives for General Linear Mixed
+Models.''} \emph{SIAM Journal on Scientific Computing} 15 (6):
+1294--1310.
+
+\end{CSLReferences}
 
 \bibliographystyle{unsrt}
 \bibliography{references.bib}
