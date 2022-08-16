@@ -19,24 +19,23 @@ authors:
     location: Marine Mammal Laboratory, Seattle, WA, 98115
     email: jay.verhoef@noaa.gov
 abstract: |
-  Fit, summarize, and predict for a variety spatial statistical      models. Parameters are estimated using various methods.            Additional modeling features include anisotropy,
-  random effects, partition factors, big data approaches, and more.   Model-fit statistics are used to summarize, visualize, and         compare models. Predictions at unobserved locations are
-  readily obtainable. This manuscript corresponds to spmodel         version 0.1.0.
-keywords:
-  - Spatial linear model
-  - Spatial autoregressive model
-  - Covariance
-  - Estimation
-  - Prediction (Kriging)
-  - Big Data
+  \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
+  for a variety spatial statistical models. Parameters are estimated using various
+  methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
+  readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0. \par
+  \textbf{Keywords}: Spatial linear model, Geostatistical model, autoregressive model, Spatial covariance, Prediction (Kriging), Big Data
 bibliography: references.bib
-biblio-style: unsrt
+biblio-style: natbib
 header-includes: |
   \usepackage{amsmath,amsfonts,amssymb}
   \usepackage{bm, bbm}
   \usepackage{mathtools}
   \mathtoolsset{showonlyrefs=true}
-output: rticles::arxiv_article
+output:
+    pdf_document:
+      number_sections: true
+      toc: true
+date: ""
 ---
 
 ```{r setup, include = FALSE}
