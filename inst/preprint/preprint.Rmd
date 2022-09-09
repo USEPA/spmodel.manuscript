@@ -458,13 +458,13 @@ augment(sealmod, newdata = sealmod$newdata)
 
 # Advanced Features {#sec:advfeatures}
 
-`spmodel` offers several advanced features for fitting spatial linear models. We briefly discuss each next using the `moss` data and simulated data, though technical details for each advanced feature can be seen by running `vignette("technical", "spmodel")`.
+`spmodel` offers several advanced features for fitting spatial linear models. We briefly discuss some of these features next using the `moss` data and some simulated data. Technical details for each advanced feature can be seen by running `vignette("technical", "spmodel")`.
 
 ## Fixing Spatial Covariance Parameters
 
-We may desire to fix specific spatial covariance parameters at a particular value. Perhaps some parameter value is known, for example. Or perhaps we want to compare nested models where a reduced model uses a fixed parameter value while the full model estimates the parameter. Fixing spatial covariance parameters while fitting a model is possible using the `spcov_initial` argument to `spmod()` and `spautor()`. The `spcov_initial` argument takes an `spcov_initial` object (run `help("spcov_initial", "spmodel")` for more). `spcov_initial` objects can also be used to specify initial values used during optimization, even if they are not assumed to be fixed. By default, `spmodel` uses a grid search to find suitable initial values to use during optimization.
+We may desire to fix specific spatial covariance parameters at a particular value. Perhaps some parameter value is known, for example. Or perhaps we want to compare nested models where a reduced model uses a fixed parameter value while the full model estimates the parameter. Fixing spatial covariance parameters while fitting a model is possible using the `spcov_initial` argument to `splm()` and `spautor()`. The `spcov_initial` argument takes an `spcov_initial` object (run `help("spcov_initial", "spmodel")` for more). `spcov_initial` objects can also be used to specify initial values used during optimization, even if they are not assumed to be fixed. By default, `spmodel` uses a grid search to find suitable initial values to use during optimization.
 
-Suppose the goal is to compare the full model to a model that assumes the independent random error variance (nugget) is zero. First, the `spcov_initial` object is specified:
+As an example, suppose our goal is to compare a model with an exponential covariance with dependent error variance, independent error variance, and range parameters to a model that assumes the independent random error variance parameter (nugget) is zero. First, the `spcov_initial` object is specified for the latter model:
 ```{r}
 init <- spcov_initial("exponential", ie = 0, known = "ie")
 print(init)
@@ -481,7 +481,7 @@ The lower AIC and AICc of the full model compared to the reduced model indicates
 
 ## Random Effects
 
-Random effects incorporate additional sources of variability into model fitting. They are accommodated in `spmodel` using similar syntax as for random effects in the nlme [@pinheiro2006mixed] and lme4 [@bates2015lme4] \textbf{\textsf{R}} packages. Random effects are specified via a formula passed to the `random` argument. Next we show two examples incorporating random effects into the spatial linear model using the `moss` data.
+Non-spatial random effects incorporate additional sources of variability into model fitting. They are accommodated in `spmodel` using similar syntax as for random effects in the nlme [@pinheiro2006mixed] and lme4 [@bates2015lme4] \textbf{\textsf{R}} packages. Random effects are specified via a formula passed to the `random` argument. Next we show two examples incorporating random effects into the spatial linear model using the `moss` data.
 
 The first example explores random intercepts for the `sample` variable. The `sample` variable indexes each unique location, which can have replicate observations due to field duplicates (`field_dup`) and lab replicates (`lab_rep`). We create extra correlation for repeated observations from a sample by creating a random intercept for each level of `sample`. We incorporate the random intercepts for `sample` by running
 ```{r}
@@ -492,7 +492,7 @@ rand1 <- splm(
   random = ~ sample
 )
 ```
-Note that `sample` is shorthand for `(1 | sample)`, which is more explicit notation that indicates random intercepts for each level of `sample`.
+Note that `~ sample` is shorthand for `(1 | sample)`, which is more explicit notation that indicates random intercepts for each level of `sample`.
 
 The second example adds a random intercept for `year`, which creates extra correlation for observations within a year. It also adds a random slope for `log_dist2road` within `year`, which lets the effect of `log_dist2road` vary between years. We fit this model by running
 ```{r}
@@ -515,7 +515,7 @@ It is possible to fix random effect variances using the `randcov_initial` argume
 
 ## Partition Factors
 
-A partition factor is a variable that assumes observations are uncorrelated when they are from different levels of the partition factor. Partition factors are specified in `spmodel` by providing a formula with a single variable to the `partition_factor` argument. Suppose that for the `moss` data, it is appropriate to assume observations in different years (`year`) are uncorrelated. We fit a model that treats year as a partition factor by running
+A partition factor is a variable that allows observations to be uncorrelated when they are from different levels of the partition factor. Partition factors are specified in `spmodel` by providing a formula with a single variable to the `partition_factor` argument. Suppose that for the `moss` data, we would like observations in different years (`year`) to be uncorrelated. We fit a model that treats year as a partition factor by running
 ```{r}
 part <- splm(
   log_Zn ~ log_dist2road,
@@ -565,7 +565,7 @@ ggplot(df, aes(x = x, y = y)) +
 ```
 The black outline of each ellipse is a level curve of equal correlation. The left ellipse (a circle) represents an isotropic covariance function. The distance at which the correlation between two observations lays on the level curve is the same in all directions. The right ellipse represents an anisotropic covariance function. The distance at which the correlation between two observations lays on the level curve is different in different directions. 
 
-Accounting for anisotropy involves a rotation and scaling of the x-coordinates and y-coordinates such that the spatial covariance function that uses these transformed distances is isotropic. We fit a model with anisotropy by running
+Accounting for anisotropy involves a rotation and scaling of the x-coordinates and y-coordinates such that the spatial covariance function that uses these transformed distances is isotropic. We use the `anisotropy` argument to `splm()` to fit a model with anisotropy by running
 ```{r}
 spmod_anis <- splm(
   log_Zn ~ log_dist2road,
@@ -576,7 +576,7 @@ spmod_anis <- splm(
 summary(spmod_anis)
 ```
 
-The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. Figure$~$\ref{fig:anisotropy_fit} shows the transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle). This transformation requires rotating the the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
+The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse such that the major axis of the ellipse is the transformed x-axis. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. Figure$~$\ref{fig:anisotropy_fit} shows the transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle). This transformation requires rotating the the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
 
 ```{r, anisotropy_fit, echo = FALSE, out.width = "33%", fig.show = "hold", fig.cap = "A visual representation of the anisotropy transformation. In the left figure, the first step is to rotate the anisotropic ellipse clockwise by the \\texttt{rotate} parameter. In the middle figure, the second step is to scale the minor axis by the reciprocal of the \\texttt{scale} parameter. In the right figure, the anisotropic ellipse has been transformed into an isotropic one (i.e., a circle). The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances."}
 spcov_params_val <- coef(spmod_anis, type = "spcov")
@@ -651,6 +651,7 @@ The `sprnorm()` function is used to simulate normal (Gaussian) spatial data. To 
 ```{r}
 sim_params <- spcov_params("exponential", de = 5, ie = 1, range = 0.5)
 ```
+
 We set a reproducible seed and then simulate data at 3000 random locations in the unit square using the spatial covariance parameters in `sim_params` by running
 ```{r}
 set.seed(0)
@@ -669,23 +670,23 @@ ggplot(sim_data, aes(x = x, y = y, color = sim_resp)) +
   scale_color_viridis_c(limits = c(-7, 7)) + 
   theme_gray(base_size = 18)
 ```
-There is noticeable spatial patterning in the response variable (`sim_resp`). The default mean in `sprnorm()` is zero for all observations, though a mean vector can be provided using the `mean` argument. The default number of samples generated in `sprnorm()` is one, though this is changed using the `samples` argument. Because `dat` is a `tibble` (`data.frame`) and not an `sf` object, the columns in `dat` representing the x-coordinates and y-coordinates must be provided to `sprnorm()`.
+There is noticeable spatial patterning in the response variable (`sim_resp`). The default mean in `sprnorm()` is zero for all observations, though a mean vector can be provided using the `mean` argument. The default number of samples generated in `sprnorm()` is one, though this can be changed using the `samples` argument. Because `sim_data` is a `tibble` (`data.frame`) and not an `sf` object, the columns in `sim_data` representing the x-coordinates and y-coordinates must be provided to `sprnorm()`.
 
-Note that the output from `coef(object, type = "spcov")` is a `spcov_params` object. This is useful if one wants to simulate data given the estimated spatial covariance parameters from a fitted model. Random effects are incorporated into simulation via the `randcov_params` argument.
+Note that the output from `coef(object, type = "spcov")` is a `spcov_params` object. This is useful we want to simulate data given the estimated spatial covariance parameters from a fitted model. Random effects are incorporated into simulation via the `randcov_params` argument.
 
 ## Big Data
 
-The computational cost associated with model fitting is exponential in the sample size for all estimation methods. For maximum likelihood and restricted maximum likelihood, the computational cost of estimating $\boldsymbol{\theta}$ is cubic. For semivariogram weighted least squares and semivariogram composite likelihood, the computational cost of estimating $\boldsymbol{\theta}$ is quadratic. The computational cost associated with estimating $\boldsymbol{\beta}$ and prediction is cubic in the model-fitting sample size, regardless of estimation method. Typically samples sizes approaching 10,000 make the computational cost of model fitting and prediction infeasible, which necessitates the use of big data methods. `spmodel` offers big data methods for model fitting of point-referenced data via the `local` argument to `splm()`, capable of fitting models with hundreds of thousands to millions of observations rather quickly. Because of the neighborhood structure of areal data, the big data methods used for point-referenced data do not apply to areal data. Thus there is no big data method for areal data or `local` argument to `spautor()` and model fitting sample sizes cannot be too large.
+The computational cost associated with model fitting is exponential in the sample size for all estimation methods. For maximum likelihood and restricted maximum likelihood, the computational cost of estimating $\boldsymbol{\theta}$ is cubic. For semivariogram weighted least squares and semivariogram composite likelihood, the computational cost of estimating $\boldsymbol{\theta}$ is quadratic. The computational cost associated with estimating $\boldsymbol{\beta}$ and prediction is cubic in the model-fitting sample size, regardless of estimation method. Typically samples sizes approaching 10,000 make the computational cost of model fitting and prediction infeasible, which necessitates the use of big data methods. `spmodel` offers big data methods for model fitting of point-referenced data via the `local` argument to `splm()`, capable of fitting models with hundreds of thousands to millions of observations rather quickly. Because of the neighborhood structure of areal data, the big data methods used for point-referenced data do not apply to areal data. Thus there is no big data method for areal data or `local` argument to `spautor()`, so model fitting sample sizes cannot be too large.
 
-`spmodel` offers big data methods for prediction of point-referenced data or areal data via the `local` argument to `predict()`, capable of making predictions at hundreds of thousands to millions of locations rather quickly. To show how to use `spmodel` for big data estimation and prediction, we use the `sim_data` data from Section$~$\ref{sec:sim_data}. Because `sim_data` is a `tibble` (`data.frame`) and not an `sf` object, the column in `data` representing the x-coordinates and y-coordinates must be explicitly provided to `splm()`. Though the sample sizes used next for model fitting and prediction are relatively small, the purpose of the following examples is simply to illustrate the big data approaches.
+`spmodel` offers big data methods for prediction of point-referenced data or areal data via the `local` argument to `predict()`, capable of making predictions at hundreds of thousands to millions of locations rather quickly. To show how to use `spmodel` for big data estimation and prediction, we use the `sim_data` data from Section$~$\ref{sec:sim_data}. Because `sim_data` is a `tibble` (`data.frame`) and not an `sf` object, the columns in `data` representing the x-coordinates and y-coordinates must be explicitly provided to `splm()`.
 
 ### Model-fitting 
 
-`spmodel` uses a "local indexing" approximation for big data model fitting of point-referenced data. Observations are first assigned an index. Then for the purposes of model fitting, observations with different indexes are assumed uncorrelated. This approach has some connections to composite likelihood and to the partition factors discussed earlier. 
+`spmodel` uses a "local indexing" approximation for big data model fitting of point-referenced data. Observations are first assigned an index. Then for the purposes of model fitting, observations with different indexes are assumed uncorrelated. Assuming observations with different indexes are uncorrelated induces sparsity in the covariance matrix, which greatly reduces the computational time of operations that involve the covariance matrix.
 
 The `local` argument to `splm()` controls the big data options. `local` is a list with several arguments. The arguments to the `local` list control the method used to assign the indexes, the number of observations with the same index, the number of unique indexes, variance adjustments to the covariance matrix of $\hat{\boldsymbol{\beta}}$, whether or not to use parallel processing, and if parallel processing is used, the number of cores.
 
-The simplest way to accommodate big data is to set `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which creates groups with approximately 50 observations each using a random assignment of groups to indexes, uses the theoretically-correct variance adjustment, and does not use parallel processing. 
+The simplest way to accommodate big data is to set `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which randomly assigns observations to groups, ensures each group has approximately 50 observations, uses the theoretically-correct variance adjustment, and does not use parallel processing. 
 ```{r}
 local1 <- splm(sim_resp ~ 1, sim_data, spcov_type = "exponential", 
                xcoord = x, ycoord = y, local = TRUE)
@@ -693,7 +694,7 @@ summary(local1)
 ```
 
 
-Instead of using `local = TRUE`, we can explicitly set `local`. For example, we fit a model using using k-means clustering [@macqueen1967some]  on the x-coordinates and y-coordinates to create 60 groups (clusters), the pooled variance adjustment, and parallel processing with two cores by running
+Instead of using `local = TRUE`, we can explicitly set `local`. For example, we can fit a model using using k-means clustering [@macqueen1967some]  on the x-coordinates and y-coordinates to create 60 groups (clusters), use the pooled variance adjustment, and use parallel processing with two cores by running
 ```{r}
 local2_list <- list(method = "kmeans", groups = 60, var_adjust = "pooled",
                     parallel = TRUE, ncores = 2)
@@ -702,16 +703,11 @@ local2 <- splm(sim_resp ~ 1, sim_data, spcov_type = "exponential",
 summary(local2)
 ```
 
-We can use `loocv()` to evaluate model fit. Note that `loocv()` has big data options that are passed to `predict()`, which we discuss in Section$~$\ref{sec:predict}.
-```{r}
-loocv(local1, local = list(method = "distance", parallel = TRUE, ncores = 2))
-loocv(local2, local = list(method = "distance", parallel = TRUE, ncores = 2))
-```
 Likelihood-based statistics like `AIC()`, `AICc()`, `logLik()`, and `deviance()` should not be used to compare a model fit with a big data approximation to a model fit without a big data approximation, as the two approaches maximize different likelihoods.
 
 ### Prediction {#sec:predict}
 
-For point-referenced data, `spmodel` uses a "local neighborhood" approximation for big data prediction. Each prediction is computed using a subset of the observed data instead of all the observed data. Before further discussing big data prediction, we simulate 1000 locations in the unit square requiring prediction:
+For point-referenced data, `spmodel` uses a "local neighborhood" approximation for big data prediction. Each prediction is computed using a subset of the observed data instead of all of the observed data. Before further discussing big data prediction, we simulate 1000 locations in the unit square requiring prediction:
 ```{r}
 n_pred <- 1000
 x <- runif(n_pred)
@@ -721,7 +717,7 @@ sim_preds <- tibble::tibble(x = x, y = y)
 
 The `local` argument to `predict()` controls the big data options. `local` is a list with several arguments. The arguments to the `local` list control the method used to subset the observed data, the number of observations in each subset, whether or not to use parallel processing, and if parallel processing is used, the number of cores.
 
-The simplest way to accommodate big data prediction is to set `local` to `TRUE`. This is shorthand for `local = list(method = "covariance", size = 50, parallel = FALSE)`, which implies that uniquely for each location requiring prediction, only the 50 observations in the data most correlated with it are used in the computation and parallel processing is not used. Using the `local1` fitted model, we store these predictions as a variable called `preds` in the `sim_preds` data by running
+The simplest way to accommodate big data prediction is to set `local` to `TRUE`. This is shorthand for `local = list(method = "covariance", size = 50, parallel = FALSE)`, which implies that, for each location requiring prediction, only the 50 observations in the data most correlated with it are used in the computation and parallel processing is not used. Using the `local1` fitted model, we store these predictions as a variable called `preds` in the `sim_preds` data by running
 ```{r, results = "hide"}
 sim_preds$preds <- predict(local1, newdata = sim_preds, local = TRUE)
 ```
@@ -755,10 +751,7 @@ pred_list <- list(method = "distance", size = 30, parallel = TRUE, ncores = 2)
 predict(local1, newdata = sim_preds, local = pred_list)
 ```
 
-For areal data, no local neighborhood approximation exists because of the data's underlying neighborhood structure. Thus all of the data must be used to compute predictions and by consequence, `method` and `distance` are not components of the `local` list. The only components of the `local` list for areal data are `parallel` and `ncores`:
-```{r, results = "hide"}
-predict(sealmod, local = list(parallel = TRUE, ncores = 2))
-```
+For areal data, no local neighborhood approximation exists because of the data's underlying neighborhood structure. Thus, all of the data must be used to compute predictions and by consequence, `method` and `distance` are not components of the `local` list. The only components of the `local` list for areal data are `parallel` and `ncores`.
 
 # Discussion {#sec:discussion}
 
@@ -778,7 +771,7 @@ We appreciate feedback from users regarding `spmodel`. To learn more about how t
 
 ## An Additional Example Using `caribou` {#app:caribou}
 
-The `caribou` data are observed on an equally spaced lattice and can be analyzed as point-referenced or areal data. We view the first few rows of `caribou` by running
+The purpose of this example is to show more applications of the `splm()` and `spautor()` functions when the data are not an `sf` object, as well as to show a few other functions in `spmodel`. The `caribou` data are observed on an equally spaced lattice and can be analyzed as point-referenced or areal data. We view the first few rows of `caribou` by running
 ```{r}
 caribou
 ```
