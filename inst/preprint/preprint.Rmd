@@ -1,44 +1,37 @@
 ---
 title: |
-  spmodel: Spatial Statistical Modeling and Prediction in **R**
-authors:
+  spmodel: spatial statistical modeling and prediction in **R**
+author:
   - name: Michael Dumelle
-    thanks: Corresponding Author
-    department: United States
-    affiliation: Environmental Protection Agency
-    location: 200 SW 35th St, Corvallis, OR, 97333
     email: Dumelle.Michael@epa.gov
+    affiliation: USEPA
+    corresponding: Dumelle.Michael@epa.gov
   - name: Matt Higham
-    department: Department of Math, Computer Science, and Statistics
-    affiliation: St. Lawrence University
-    location: 23 Romoda Drive, Canton, NY, 13617
     email: mhigham@stlawu.edu
+    affiliation: STLAWU
   - name: Jay M. Ver Hoef
-    department: National Oceanic and Atmospheric Administration
-    affiliation: Alaska Fisheries Science Center
-    location: Marine Mammal Laboratory, Seattle, WA, 98115
     email: jay.verhoef@noaa.gov
+    affiliation: NOAA
+address:
+  - code: USEPA
+    address: United States Environmental Protection Agency, 200 SW 35th St, Corvallis, OR, 97333
+  - code: STLAWU
+    address: St. Lawrence University Department of Math, Computer Science, and Statistics
+  - code: NOAA
+    address: National Oceanic and Atmospheric Administration Alaska Fisheries Science Center, Marine Mammal Laboratory, Seattle, WA, 98115 
 abstract: |
   \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
-  for a variety of spatial statistical models applied to point-referenced or areal (lattice) data.
-  Parameters are estimated using various methods. Additional modeling features
-  include anisotropy, random effects, partition factors, big data approaches, and more.
-  Model-fit statistics are used to summarize, visualize, and compare models.
-  Predictions at unobserved locations are readily obtainable.
-  This manuscript corresponds to \texttt{spmodel} version 0.1.0.
-  \par
-  \textbf{Keywords}: Spatial linear model, Geostatistical model, autoregressive model,
-  Spatial covariance, Prediction (Kriging), Big Data
+  for a variety spatial statistical models. Parameters are estimated using various
+  methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
+  readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0.
 bibliography: references.bib
-biblio-style: natbib
+output: rticles::plos_article
+# plos.csl can be download and used locally
+# csl: http://www.zotero.org/styles/plos
+csl: plos.csl
 header-includes: |
   \usepackage{amsmath,amsfonts,amssymb}
   \usepackage{bm, bbm}
-output:
-    pdf_document:
-      number_sections: true
-      toc: false
-date: ""
 ---
 
 ```{r setup, include = FALSE}
@@ -117,7 +110,7 @@ In this section, we show how to use the `splm()` and `spautor()` functions to es
 * `data`: a `data.frame` or `sf` object that contains the response variable, explanatory variables, and spatial information
 * `spcov_type`: the spatial covariance type (`"exponential"`, `"matern"`, `"car"`, etc)
 
-If `data` is an `sf` [@pebesma2018sf] object, spatial information is stored in the object's geometry. If `data` is a `data.frame`, then the x-coordinates and y-coordinates must be provided via the `xcoord` and `ycoord` arguments (for point-referenced data) or the weight matrix must be provided via the `W` argument (for areal data). Appendix$~$\ref{app:caribou} uses the `caribou` data, a `tibble` (a special `data.frame`), to show how to provide spatial information via `xcoord` and `ycoord` (in `splm()`) or `W` (in `spautor()`).
+If `data` is an `sf` [@pebesma2018sf] object, spatial information is stored in the object's geometry. If `data` is a `data.frame`, then the x-coordinates and y-coordinates must be provided via the `xcoord` and `ycoord` arguments (for point-referenced data) or the weight matrix must be provided via the `W` argument (for areal data). 
 
 In the following subsections, we use the point-referenced `moss` data, an `sf` object that contains data on heavy metals in mosses near a mining road in Alaska. We view the first few rows of `moss` by running
 ```{r}
@@ -519,7 +512,7 @@ rand2 <- splm(
   random = ~ sample + (log_dist2road | year)
 )
 ```
-Note that `sample + (log_dist2road | year)` is shorthand for `(1 | sample) + (log_dist2road | year)`. If only random slopes within a year are desired (and no random intercepts), a `- 1` is given to the relevant portion of the formula: `(log_dist2road - 1 | year)`. When there is more than one term in `random`, each term must be surrounded by parentheses (recall that the random intercept shorthand automatically includes relevant parentheses). More examples of random effect syntax are provided in Appendix$~$\ref{app:rand}.
+Note that `sample + (log_dist2road | year)` is shorthand for `(1 | sample) + (log_dist2road | year)`. If only random slopes within a year are desired (and no random intercepts), a `- 1` is given to the relevant portion of the formula: `(log_dist2road - 1 | year)`. When there is more than one term in `random`, each term must be surrounded by parentheses (recall that the random intercept shorthand automatically includes relevant parentheses). 
 
 We glance at all three models by running
 ```{r}
@@ -777,74 +770,18 @@ For areal data, no local neighborhood approximation exists because of the data's
 
 We appreciate feedback from users regarding `spmodel`. To learn more about how to provide feedback or contribute to `spmodel`, please visit our GitHub repository at [https://github.com/USEPA/spmodel](https://github.com/USEPA/spmodel). 
 
+# Acknowledgements {.unnumbered}
+
+The views expressed in this manuscript are those of the authors and do not necessarily
+represent the views or policies of the U.S. Environmental Protection
+Agency or the National Oceanic and Atmospheric Administration.
+Any mention of trade names, products, or services does not imply
+an endorsement by the U.S. government, the U.S. Environmental
+Protection Agency, or the National Oceanic and Atmospheric
+Administration. The U.S. Environmental Protection Agency and the
+National Oceanic and Atmospheric Administration do not endorse
+any commercial products, services or enterprises.
+
 # References {.unnumbered}
 
 <div id="refs"></div>
-
-\newpage
-
-# Appendices {.unnumbered}
-
-\renewcommand{\thesubsection}{\Alph{subsection}}
-
-## An Additional Example Using `caribou` {#app:caribou}
-
-The purpose of this example is to show more applications of the `splm()` and `spautor()` functions when the data are not an `sf` object, as well as to show a few other functions in `spmodel`. The `caribou` data are are designed experiment with two treatments observed on an equally spaced grid and can be analyzed as point-referenced or areal data. We view the first few rows of `caribou` by running
-```{r}
-caribou
-```
-
-First we analyze `caribou` as point-referenced data. Because `caribou` is not an `sf` object, we must provide the columns in `caribou` that represent the x-coordinates and y-coordinates. We fit a spatial linear model regressing nitrogen percentage (`z`) on water presence (`water`) and tarp cover (`tarp`) by running
-```{r}
-cariboumod <- splm(z ~ water + tarp, data = caribou,
-                   spcov_type = "exponential", xcoord = x, ycoord = y)
-```
-
-An analysis of variance can be conducted to assess the overall impact of the `tarp` variable, which has three levels (clear, shade, and none), and the `water` variable, which has two levels (water and no water). We perform an analysis of variance and tidy the results by running
-```{r}
-tidy(anova(cariboumod))
-```
-There is significant evidence that at least one tarp cover impacts nitrogen. Note that, like in `summary()`, these p-values are associated with an asymptotic hypothesis test (here, an asymptotic Chi-squared test).
-
-Next we analyze `caribou` as areal data. Because `caribou` is not an `sf` object, we must create a weights matrix. We define two observations as neighbors if they are adjacent (directly east, west, north, or south) to one another. Two observations in `caribou` are adjacent if the distance between them equals one (recall that observations are not neighbors with themselves):
-```{r}
-coords <- cbind(caribou$x, caribou$y)
-dists <- as.matrix(dist(coords))
-W <- dists == 1
-```
-
-Currently, `W` is a logical matrix with `TRUE`s and `FALSE`s. We coerce it to a numeric matrix by running
-```{r}
-W <- W * 1
-```
-
-The $ij$th value in `W` is `1` if the observation in the $i$th row is neighbors with the observation in the $j$th row and `0` otherwise. We fit a spatial autoregressive model regressing the nitrogen percentage (`z`) on water presence (`water`) and tarp cover (`tarp`) by running
-```{r}
-cariboumod <- spautor(z ~ water + tarp, data = caribou,
-                      spcov_type = "car", W = W)
-```
-
-We perform an analysis of variance and tidy the results by running
-```{r}
-tidy(anova(cariboumod))
-```
-There is significant evidence that at least one tarp cover impacts nitrogen. Note that, like in `summary()`, these p-values are associated with an asymptotic hypothesis test (here, an asymptotic Chi-squared test).
-
-## Random Effect Syntax {#app:rand}
-
-A couple of common ways to specify random effects in the `random` argument to `splm()` or `spautor()` include:
-
-*   `~ (1 | group)` : Random intercepts for each level of `group`. `~ group` is shorthand for `~ (1 | group)`.
-*   `~ (var | group)`: Random intercepts for each level of `group` and random slopes that depend on the variable `var` for each level of `group`.
-
-Some additional syntax for more complicated random effects structures include:
-
-*   `~ (var - 1 | group)`: Random slopes (without intercepts) that depend on the variable `var` for each level of `group`.
-*   `~ (1 | group:subgroup)`: Random intercepts for each combination of levels in `group` and levels in `subgroup`. `~ group:subgroup` is shorthand for `~ (1 | group:subgroup)`.
-*   `~ (var | group:subgroup)`: Random intercepts for each combination of levels in `group` and levels in `subgroup` and random slopes that depend on the variable `var` for each combination of levels in `group` and levels in `subgroup`.
-*   `~ (var - 1 | group:subgroup)`: Random slopes (without intercepts) that depend on the variable `var` for each combination of levels in `group` and levels in `subgroup`.
-*   `~ (1 | group/subgroup)`: Shorthand for `~ (1 | group) + (1 | group:subgroup)`. Commonly, the `group/subgroup` notation implies `subgroup` is nested within `group`.
-*   `~ (var | group/subgroup)`: Shorthand for `~ (var | group) + (var | group:subgroup)`. Commonly, the `group/subgroup` notation implies `subgroup` is nested within `group`.
-*   `~ (var - 1 | group/subgroup)`: Shorthand for `~ (var - 1 | group) + (var - 1 | group:subgroup)`. Commonly, the `group/subgroup` notation implies `subgroup` is nested within `group`.
-
-Distinct random effects terms are separated in `random` by `+`. Each term must be wrapped in parentheses. For example, to incorporate random intercepts for `group` and `subgroup`, `random` looks like `~ (1 | group) + (1 | subgroup)`. For random intercepts, recall that `~ group` is shorthand for `~ (1 | group)`. Thus, an equivalent representation of `~ (1 | group) + (1 | subgroup)` is `~ group + subgroup`. Note that for both random intercepts and random slopes, the variable on the right-hand side of `|` (i.e., `group`, `subgroup`, `group:subgroup`) must be a factor (or character) variable.
