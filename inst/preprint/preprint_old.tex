@@ -239,13 +239,12 @@ Matt Higham\textsuperscript{\getAff{STLAWU}},
 Jay M. Ver Hoef\textsuperscript{\getAff{NOAA}}\\
 \bigskip
 \textbf{\getAff{USEPA}}United States Environmental Protection Agency,
-Corvallis, Oregon, United States of America\\
+200 SW 35th St, Corvallis, OR, 97333\\
 \textbf{\getAff{STLAWU}}St.~Lawrence University Department of Math,
-Computer Science, and Statistics, Canton, New York, United States of
-America\\
+Computer Science, and Statistics\\
 \textbf{\getAff{NOAA}}National Oceanic and Atmospheric Administration
-Alaska Fisheries Science Center, Marine Mammal Laboratory, Seattle,
-Washington, United States of America\\
+Alaska Fisheries Science Center, Marine Mammal Laboratory, Seattle, WA,
+98115\\
 \bigskip
 * Corresponding author: Dumelle.Michael@epa.gov\\
 \end{flushleft}
@@ -496,19 +495,19 @@ Dimension:     XY
 Bounding box:  xmin: -445884.1 ymin: 1929616 xmax: -383656.8 ymax: 2061414
 Projected CRS: NAD83 / Alaska Albers
 # A tibble: 365 x 8
-   sample field_dup lab_rep year  sideroad log_dist2road log_Zn
-   <fct>  <fct>     <fct>   <fct> <fct>            <dbl>  <dbl>
- 1 001PR  1         1       2001  N                 2.68   7.33
- 2 001PR  1         2       2001  N                 2.68   7.38
- 3 002PR  1         1       2001  N                 2.54   7.58
- 4 003PR  1         1       2001  N                 2.97   7.63
- 5 004PR  1         1       2001  N                 2.72   7.26
- 6 005PR  1         1       2001  N                 2.76   7.65
- 7 006PR  1         1       2001  S                 2.30   7.59
- 8 007PR  1         1       2001  N                 2.78   7.16
- 9 008PR  1         1       2001  N                 2.93   7.19
-10 009PR  1         1       2001  N                 2.79   8.07
-# ... with 355 more rows, and 1 more variable: geometry <POINT [m]>
+   sample field_dup lab_rep year  sideroad log_dist2road log_Zn            geometry
+   <fct>  <fct>     <fct>   <fct> <fct>            <dbl>  <dbl>         <POINT [m]>
+ 1 001PR  1         1       2001  N                 2.68   7.33 (-413585.3 1997623)
+ 2 001PR  1         2       2001  N                 2.68   7.38 (-413585.3 1997623)
+ 3 002PR  1         1       2001  N                 2.54   7.58 (-415367.2 1996769)
+ 4 003PR  1         1       2001  N                 2.97   7.63   (-417186 1995645)
+ 5 004PR  1         1       2001  N                 2.72   7.26 (-411756.6 1999907)
+ 6 005PR  1         1       2001  N                 2.76   7.65 (-419008.8 1994950)
+ 7 006PR  1         1       2001  S                 2.30   7.59 (-420822.6 1994480)
+ 8 007PR  1         1       2001  N                 2.78   7.16 (-404383.2 2007420)
+ 9 008PR  1         1       2001  N                 2.93   7.19 (-409964.1 2003323)
+10 009PR  1         1       2001  N                 2.79   8.07 (-424469.7 1992184)
+# ... with 355 more rows
 \end{verbatim}
 
 We can learn more about \texttt{moss} by running
@@ -525,7 +524,7 @@ R> ggplot(moss, aes(color = log_Zn)) +
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.65\linewidth]{preprint_files/figure-latex/log_zn-1} 
+{\centering \includegraphics[width=0.65\linewidth]{preprint_old_files/figure-latex/log_zn-1} 
 
 }
 
@@ -631,7 +630,7 @@ R> plot(spmod, which = 7)
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.75\linewidth]{preprint_files/figure-latex/emp_spcov-1} 
+{\centering \includegraphics[width=0.75\linewidth]{preprint_old_files/figure-latex/emp_spcov-1} 
 
 }
 
@@ -965,11 +964,10 @@ R> glances(spmod, lmod)
 
 \begin{verbatim}
 # A tibble: 2 x 10
-  model     n     p  npar value   AIC  AICc logLik deviance
-  <chr> <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>
-1 spmod   365     2     3  367.  373.  373.  -184.     363 
-2 lmod    365     2     1  634.  636.  636.  -317.     363.
-# ... with 1 more variable: pseudo.r.squared <dbl>
+  model     n     p  npar value   AIC  AICc logLik deviance pseudo.r.squared
+  <chr> <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>            <dbl>
+1 spmod   365     2     3  367.  373.  373.  -184.     363             0.683
+2 lmod    365     2     1  634.  636.  636.  -317.     363.            0.671
 \end{verbatim}
 
 Finally, the \texttt{augment()} function augments the original data with
@@ -1034,18 +1032,18 @@ Dimension:     XY
 Bounding box:  xmin: 913618.8 ymin: 1007542 xmax: 1116002 ymax: 1145054
 Projected CRS: NAD83 / Alaska Albers
 # A tibble: 62 x 2
-   log_trend                    geometry
-       <dbl>               <POLYGON [m]>
- 1  NA       ((1035002 1054710, 1035002~
- 2  -0.282   ((1037002 1039492, 1037006~
- 3  -0.00121 ((1070158 1030216, 1070185~
- 4   0.0354  ((1054906 1034826, 1054931~
- 5  -0.0160  ((1025142 1056940, 1025184~
- 6   0.0872  ((1026035 1044623, 1026037~
- 7  -0.266   ((1100345 1060709, 1100287~
- 8   0.0743  ((1030247 1029637, 1030248~
- 9  NA       ((1043093 1020553, 1043097~
-10  -0.00961 ((1116002 1024542, 1116002~
+   log_trend                                                                      geometry
+       <dbl>                                                                 <POLYGON [m]>
+ 1  NA       ((1035002 1054710, 1035002 1054542, 1035002 1053542, 1035002 1052542, 103500~
+ 2  -0.282   ((1037002 1039492, 1037006 1039490, 1037017 1039492, 1037035 1039496, 103704~
+ 3  -0.00121 ((1070158 1030216, 1070185 1030207, 1070187 1030207, 1070211 1030207, 107027~
+ 4   0.0354  ((1054906 1034826, 1054931 1034821, 1054936 1034822, 1055001 1034828, 105500~
+ 5  -0.0160  ((1025142 1056940, 1025184 1056889, 1025222 1056836, 1025256 1056780, 102527~
+ 6   0.0872  ((1026035 1044623, 1026037 1044605, 1026072 1044610, 1026083 1044612, 102611~
+ 7  -0.266   ((1100345 1060709, 1100287 1060706, 1100228 1060706, 1100170 1060711, 110011~
+ 8   0.0743  ((1030247 1029637, 1030248 1029637, 1030265 1029642, 1030328 1029656, 103039~
+ 9  NA       ((1043093 1020553, 1043097 1020550, 1043101 1020550, 1043166 1020557, 104323~
+10  -0.00961 ((1116002 1024542, 1116002 1023542, 1116002 1022542, 1116002 1021554, 111598~
 # ... with 52 more rows
 \end{verbatim}
 
@@ -1064,7 +1062,7 @@ R> ggplot(seal, aes(fill = log_trend)) +
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.65\linewidth]{preprint_files/figure-latex/log_trend-1} 
+{\centering \includegraphics[width=0.65\linewidth]{preprint_old_files/figure-latex/log_trend-1} 
 
 }
 
@@ -1127,22 +1125,19 @@ Dimension:     XY
 Bounding box:  xmin: 980001.5 ymin: 1010815 xmax: 1116002 ymax: 1145054
 Projected CRS: NAD83 / Alaska Albers
 # A tibble: 34 x 7
-   log_trend .fitted  .resid   .hat
- *     <dbl>   <dbl>   <dbl>  <dbl>
- 1  -0.282   -0.0710 -0.211  0.0179
- 2  -0.00121 -0.0710  0.0698 0.0699
- 3   0.0354  -0.0710  0.106  0.0218
- 4  -0.0160  -0.0710  0.0550 0.0343
- 5   0.0872  -0.0710  0.158  0.0229
- 6  -0.266   -0.0710 -0.195  0.0280
- 7   0.0743  -0.0710  0.145  0.0480
- 8  -0.00961 -0.0710  0.0614 0.0143
- 9  -0.182   -0.0710 -0.111  0.0131
-10   0.00351 -0.0710  0.0745 0.0340
-# ... with 24 more rows, and 3 more
-#   variables: .cooksd <dbl>,
-#   .std.resid <dbl>,
-#   geometry <POLYGON [m]>
+   log_trend .fitted  .resid   .hat .cooksd .std.resid                            geometry
+ *     <dbl>   <dbl>   <dbl>  <dbl>   <dbl>      <dbl>                       <POLYGON [m]>
+ 1  -0.282   -0.0710 -0.211  0.0179 0.0233      -1.14  ((1037002 1039492, 1037006 1039490~
+ 2  -0.00121 -0.0710  0.0698 0.0699 0.0412       0.767 ((1070158 1030216, 1070185 1030207~
+ 3   0.0354  -0.0710  0.106  0.0218 0.0109       0.705 ((1054906 1034826, 1054931 1034821~
+ 4  -0.0160  -0.0710  0.0550 0.0343 0.00633      0.430 ((1025142 1056940, 1025184 1056889~
+ 5   0.0872  -0.0710  0.158  0.0229 0.0299       1.14  ((1026035 1044623, 1026037 1044605~
+ 6  -0.266   -0.0710 -0.195  0.0280 0.0493      -1.33  ((1100345 1060709, 1100287 1060706~
+ 7   0.0743  -0.0710  0.145  0.0480 0.0818       1.30  ((1030247 1029637, 1030248 1029637~
+ 8  -0.00961 -0.0710  0.0614 0.0143 0.00123      0.293 ((1116002 1024542, 1116002 1023542~
+ 9  -0.182   -0.0710 -0.111  0.0131 0.0155      -1.09  ((1079864 1025088, 1079895 1025084~
+10   0.00351 -0.0710  0.0745 0.0340 0.0107       0.561 ((1110363 1037056, 1110346 1037040~
+# ... with 24 more rows
 \end{verbatim}
 
 \hypertarget{sec:prediction}{%
@@ -1196,7 +1191,7 @@ R> ggplot(sulfate_preds, aes(color = preds)) +
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sulfate-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sulfate-2} 
+{\centering \includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/sulfate-1} \includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/sulfate-2} 
 
 }
 
@@ -1255,12 +1250,7 @@ We then view the first few rows of \texttt{sulfate\_preds} augmented
 with a 90\% prediction interval by running
 
 \begin{verbatim}
-R> augment(
-+   sulfmod,
-+   newdata = sulfate_preds,
-+   interval = "prediction",
-+   level = 0.90
-+ )
+R> augment(sulfmod, newdata = sulfate_preds, interval = "prediction", level = 0.90)
 \end{verbatim}
 
 \begin{verbatim}
@@ -1406,20 +1396,19 @@ Dimension:     XY
 Bounding box:  xmin: 913618.8 ymin: 1007542 xmax: 1115097 ymax: 1132682
 Projected CRS: NAD83 / Alaska Albers
 # A tibble: 28 x 3
-   log_trend .fitted
- *     <dbl>   <dbl>
- 1        NA -0.113 
- 2        NA -0.0108
- 3        NA -0.0608
- 4        NA -0.0383
- 5        NA -0.0730
- 6        NA -0.0556
- 7        NA -0.0968
- 8        NA -0.0716
- 9        NA -0.0776
-10        NA -0.0647
-# ... with 18 more rows, and 1 more
-#   variable: geometry <POLYGON [m]>
+   log_trend .fitted                                                              geometry
+ *     <dbl>   <dbl>                                                         <POLYGON [m]>
+ 1        NA -0.113  ((1035002 1054710, 1035002 1054542, 1035002 1053542, 1035002 1052542~
+ 2        NA -0.0108 ((1043093 1020553, 1043097 1020550, 1043101 1020550, 1043166 1020557~
+ 3        NA -0.0608 ((1099737 1054310, 1099752 1054262, 1099788 1054278, 1099849 1054301~
+ 4        NA -0.0383 ((1099002 1036542, 1099134 1036462, 1099139 1036431, 1099145 1036366~
+ 5        NA -0.0730 ((1076902 1053189, 1076912 1053179, 1076931 1053179, 1076996 1053177~
+ 6        NA -0.0556 ((1070501 1046969, 1070317 1046598, 1070308 1046542, 1070306 1046534~
+ 7        NA -0.0968 ((1072995 1054942, 1072996 1054910, 1072997 1054878, 1072997 1054847~
+ 8        NA -0.0716 ((960001.5 1127667, 960110.8 1127542, 960144.1 1127495, 960178.6 112~
+ 9        NA -0.0776 ((1031308 1079817, 1031293 1079754, 1031289 1079741, 1031257 1079627~
+10        NA -0.0647 ((998923.7 1053647, 998922.5 1053609, 998950 1053631, 999001.5 10536~
+# ... with 18 more rows
 \end{verbatim}
 
 \hypertarget{sec:advfeatures}{%
@@ -1492,11 +1481,10 @@ R> glances(spmod, spmod_red)
 
 \begin{verbatim}
 # A tibble: 2 x 10
-  model         n     p  npar value   AIC  AICc logLik deviance
-  <chr>     <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>
-1 spmod       365     2     3  367.  373.  373.  -184.     363 
-2 spmod_red   365     2     2  378.  382.  382.  -189.     374.
-# ... with 1 more variable: pseudo.r.squared <dbl>
+  model         n     p  npar value   AIC  AICc logLik deviance pseudo.r.squared
+  <chr>     <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>            <dbl>
+1 spmod       365     2     3  367.  373.  373.  -184.     363             0.683
+2 spmod_red   365     2     2  378.  382.  382.  -189.     374.            0.703
 \end{verbatim}
 
 The lower AIC and AICc of the full model compared to the reduced model
@@ -1597,12 +1585,11 @@ R> glances(spmod, rand1, rand2)
 
 \begin{verbatim}
 # A tibble: 3 x 10
-  model     n     p  npar value   AIC  AICc logLik deviance
-  <chr> <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>
-1 rand2   365     2     6  190.  202.  202.  -94.9     363.
-2 rand1   365     2     4  335.  343.  343. -168.      363 
-3 spmod   365     2     3  367.  373.  373. -184.      363 
-# ... with 1 more variable: pseudo.r.squared <dbl>
+  model     n     p  npar value   AIC  AICc logLik deviance pseudo.r.squared
+  <chr> <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>            <dbl>
+1 rand2   365     2     6  190.  202.  202.  -94.9     363.            0.215
+2 rand1   365     2     4  335.  343.  343. -168.      363             0.661
+3 spmod   365     2     3  367.  373.  373. -184.      363             0.683
 \end{verbatim}
 
 \texttt{rand2} has the lowest AIC and AICc.
@@ -1646,7 +1633,7 @@ anisotropic covariance function centered at the origin (a distance of
 zero).
 
 \begin{figure}
-\includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/anisotropy-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/anisotropy-2} \caption{Ellipses for an isotropic (left) and anisotropic (right) covariance function centered at the origin. The black outline of each ellipse is a level curve of equal correlation.}\label{fig:anisotropy}
+\includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/anisotropy-1} \includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/anisotropy-2} \caption{Ellipses for an isotropic (left) and anisotropic (right) covariance function centered at the origin. The black outline of each ellipse is a level curve of equal correlation.}\label{fig:anisotropy}
 \end{figure}
 
 The black outline of each ellipse is a level curve of equal correlation.
@@ -1713,7 +1700,7 @@ The transformed coordinates are then used instead of the original
 coordinates to compute distances and spatial covariances.
 
 \begin{figure}
-\includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-1} \includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-2} \includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-3} \caption{A visual representation of the anisotropy transformation. In the left figure, the first step is to rotate the anisotropic ellipse clockwise by the \texttt{rotate} parameter (here \texttt{rotate} is 0.75 radians or 135 degrees). In the middle figure, the second step is to scale the y axis by the reciprocal of the \texttt{scale} parameter (here \texttt{scale} is 0.5). In the right figure, the anisotropic ellipse has been transformed into an isotropic one (i.e., a circle). The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.}\label{fig:anisotropy_fit}
+\includegraphics[width=0.33\linewidth]{preprint_old_files/figure-latex/anisotropy_fit-1} \includegraphics[width=0.33\linewidth]{preprint_old_files/figure-latex/anisotropy_fit-2} \includegraphics[width=0.33\linewidth]{preprint_old_files/figure-latex/anisotropy_fit-3} \caption{A visual representation of the anisotropy transformation. In the left figure, the first step is to rotate the anisotropic ellipse clockwise by the \texttt{rotate} parameter (here \texttt{rotate} is 0.75 radians or 135 degrees). In the middle figure, the second step is to scale the y axis by the reciprocal of the \texttt{scale} parameter (here \texttt{scale} is 0.5). In the right figure, the anisotropic ellipse has been transformed into an isotropic one (i.e., a circle). The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.}\label{fig:anisotropy_fit}
 \end{figure}
 
 Note that specifying an initial value for \texttt{rotate} that is
@@ -1753,12 +1740,7 @@ R> n <- 3000
 R> x <- runif(n)
 R> y <- runif(n)
 R> sim_coords <- tibble::tibble(x, y)
-R> sim_response <- sprnorm(
-+   sim_params,
-+   data = sim_coords,
-+   xcoord = x,
-+   ycoord = y
-+ )
+R> sim_response <- sprnorm(sim_params, data = sim_coords, xcoord = x, ycoord = y)
 R> sim_data <- tibble::tibble(sim_coords, sim_response)
 \end{verbatim}
 
@@ -1848,14 +1830,8 @@ approximately 50 observations, uses the theoretically-correct variance
 adjustment, and does not use parallel processing.
 
 \begin{verbatim}
-R> local1 <- splm(
-+   sim_response ~ 1,
-+   sim_data,
-+   spcov_type = "exponential",
-+   xcoord = x,
-+   ycoord = y,
-+   local = TRUE
-+ )
+R> local1 <- splm(sim_response ~ 1, sim_data, spcov_type = "exponential", 
++                xcoord = x, ycoord = y, local = TRUE)
 R> summary(local1)
 \end{verbatim}
 
@@ -1884,21 +1860,10 @@ groups (clusters), use the pooled variance adjustment, and use parallel
 processing with two cores by running
 
 \begin{verbatim}
-R> local2_list <- list(
-+   method = "kmeans",
-+   groups = 60,
-+   var_adjust = "pooled",
-+   parallel = TRUE,
-+   ncores = 2
-+ )
-R> local2 <- splm(
-+   sim_response ~ 1,
-+   sim_data,
-+   spcov_type = "exponential",
-+   xcoord = x,
-+   ycoord = y,
-+   local = local2_list
-+ )
+R> local2_list <- list(method = "kmeans", groups = 60, var_adjust = "pooled",
++                     parallel = TRUE, ncores = 2)
+R> local2 <- splm(sim_response ~ 1, sim_data, spcov_type = "exponential", 
++                xcoord = x, ycoord = y, local = local2_list)
 R> summary(local2)
 \end{verbatim}
 
@@ -1978,7 +1943,7 @@ They display a similar pattern as the observed data.
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sim_preds-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sim_preds-2} 
+{\centering \includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/sim_preds-1} \includegraphics[width=0.49\linewidth]{preprint_old_files/figure-latex/sim_preds-2} 
 
 }
 
@@ -1989,12 +1954,7 @@ Instead of using \texttt{local\ =\ TRUE}, we can explicitly set
 \texttt{local}:
 
 \begin{verbatim}
-R> pred_list <- list(
-+   method = "distance",
-+   size = 30,
-+   parallel = TRUE,
-+   ncores = 2
-+ )
+R> pred_list <- list(method = "distance", size = 30, parallel = TRUE, ncores = 2)
 R> predict(local1, newdata = sim_preds, local = pred_list)
 \end{verbatim}
 
