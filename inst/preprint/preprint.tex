@@ -252,13 +252,13 @@ Washington, United States of America\\
 % Please keep the abstract below 300 words
 \section*{Abstract}
 \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit,
-summarize, and predict for a variety spatial statistical models.
-Parameters are estimated using various methods. Additional modeling
-features include anisotropy, random effects, partition factors, big data
-approaches, and more. Model-fit statistics are used to summarize,
-visualize, and compare models. Predictions at unobserved locations are
-readily obtainable. This manuscript corresponds to \texttt{spmodel}
-version 0.1.0.
+summarize, and predict for a variety spatial statistical models applied
+to point-referenced or areal (lattice) data. Parameters are estimated
+using various methods. Additional modeling features include anisotropy,
+random effects, partition factors, big data approaches, and more.
+Model-fit statistics are used to summarize, visualize, and compare
+models. Predictions at unobserved locations are readily obtainable. This
+manuscript corresponds to \texttt{spmodel} version 0.1.0.
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLOS ONE authors please skip this step.
@@ -513,8 +513,7 @@ Projected CRS: NAD83 / Alaska Albers
 
 We can learn more about \texttt{moss} by running
 \texttt{help("moss",\ "spmodel")}, and we can visualize the distribution
-of log zinc concentration in \texttt{moss} (Figure\(~\)\ref{fig:log_zn})
-by running
+of log zinc concentration in \texttt{moss} (Fig 1) by running
 
 \begin{verbatim}
 R> ggplot(moss, aes(color = log_Zn)) +
@@ -523,14 +522,14 @@ R> ggplot(moss, aes(color = log_Zn)) +
 +   theme_gray(base_size = 14)
 \end{verbatim}
 
-\begin{figure}
+\textbf{Fig 1.Distribution of log zinc concentration in the moss data.}
 
-{\centering \includegraphics[width=0.65\linewidth]{preprint_files/figure-latex/log_zn-1} 
+Log zinc concentration can be viewed interactively in \texttt{mapview}
+by running
 
-}
-
-\caption{Distribution of log zinc concentration in the moss data.}\label{fig:log_zn}
-\end{figure}
+\begin{verbatim}
+R> mapview(moss, zcol = "log_Zn")
+\end{verbatim}
 
 \hypertarget{estimation}{%
 \subsection{Estimation}\label{estimation}}
@@ -622,24 +621,21 @@ parameters affect the modeling of anisotropy
 (Section\(~\)\ref{sec:anisotropy}). By default, they are assumed to be
 zero and one, respectively, which means that anisotropy is not modeled
 (i.e., the spatial covariance is assumed isotropic, or independent of
-direction). We plot the fitted spatial covariance function
-(Figure\(~\)\ref{fig:emp_spcov}) by running
+direction). We plot the fitted spatial covariance function (Fig 2) by
+running
 
 \begin{verbatim}
 R> plot(spmod, which = 7)
 \end{verbatim}
 
-\begin{figure}
-
-{\centering \includegraphics[width=0.75\linewidth]{preprint_files/figure-latex/emp_spcov-1} 
-
-}
-
-\caption{Empirical spatial covariance of fitted model. The open circle at a distance of zero represents the $\sigma^2_{de} + \sigma^2_{ie}$. The solid line at positive distances represents the product of $\sigma^2_{de}$ and the correlation function at a particular distance.}\label{fig:emp_spcov}
-\end{figure}
-
 We can learn more about the plots available for fitted models by running
 \texttt{help("plot.spmod",\ "spmodel")}.
+
+\textbf{Fig 2. Empirical spatial covariance of fitted model.} The open
+circle at a distance of zero represents the
+\(\sigma^2_{de} + \sigma^2_{ie}\). The solid line at positive distances
+represents the product of \(\sigma^2_{de}\) and the correlation function
+at a particular distance.
 
 \hypertarget{model-fit-statistics}{%
 \subsection{Model-Fit Statistics}\label{model-fit-statistics}}
@@ -677,12 +673,13 @@ number of explanatory variables using the \texttt{adjust} argument.
 Pseudo R-squared (and the adjusted version) is most helpful for
 comparing models that have the same covariance structure.
 
-The next two model-fit statistics we consider are the spatial AIC and
-AICc {[}26{]}. The AIC and AICc evaluate the fit of a model with a
-penalty for the number of parameters estimated. This penalty balances
-model fit and model parsimony. Lower AIC and AICc indicate a better
-balance of model fit and parsimony. The AICc is a correction to AIC for
-small sample sizes. As the sample size increases, AIC and AICc converge.
+The next two model-fit statistics we consider are the AIC and AICc that
+{[}26{]} derive for spatial data. The AIC and AICc evaluate the fit of a
+model with a penalty for the number of parameters estimated. This
+penalty balances model fit and model parsimony. Lower AIC and AICc
+indicate a better balance of model fit and parsimony. The AICc is a
+correction to AIC for small sample sizes. As the sample size increases,
+AIC and AICc converge.
 
 The spatial AIC and AICc are given by \begin{equation*}\label{eq:sp_aic}
   \begin{split}
@@ -1053,7 +1050,7 @@ We can learn more about the data by running
 \texttt{help("seal",\ "spmodel")}.
 
 We can visualize the distribution of log seal trends in the
-\texttt{seal} data (Figure\(~\)\ref{fig:log_trend}) by running
+\texttt{seal} data (Fig 3) by running
 
 \begin{verbatim}
 R> ggplot(seal, aes(fill = log_trend)) +
@@ -1062,14 +1059,14 @@ R> ggplot(seal, aes(fill = log_trend)) +
 +   theme_bw(base_size = 14)
 \end{verbatim}
 
-\begin{figure}
+\textbf{Fig 3. Distribution of log seal trends in the seal data.}
+Polygons are gray if seal trends are missing.
 
-{\centering \includegraphics[width=0.65\linewidth]{preprint_files/figure-latex/log_trend-1} 
+Log trends can be viewed interactively in \texttt{mapview} by running
 
-}
-
-\caption{Distribution of log seal trends in the seal data. Polygons are gray if seal trends are missing.}\label{fig:log_trend}
-\end{figure}
+\begin{verbatim}
+R> mapview(seal, zcol = "log_trend")
+\end{verbatim}
 
 The gray polygons denote areas where the log trend is missing. These
 missing areas need to be kept in the data while fitting the model to
@@ -1157,8 +1154,8 @@ the point-referenced \texttt{sulfate\_preds} data, an \texttt{sf} object
 that contains locations in the conterminous United States at which to
 predict sulfate.
 
-We first visualize the distribution of the sulfate data
-(Figure\(~\)\ref{fig:sulfate}, left) by running
+We first visualize the distribution of the sulfate data (Fig 4A) by
+running
 
 \begin{verbatim}
 R> ggplot(sulfate, aes(color = sulfate)) +
@@ -1183,8 +1180,7 @@ the locations at which to predict, storing them as a new variable in
 R> sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 \end{verbatim}
 
-We can then visualize the model predictions
-(Figure\(~\)\ref{fig:sulfate}, right) by running
+We can then visualize the model predictions (Fig 4B) by running
 
 \begin{verbatim}
 R> sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
@@ -1194,14 +1190,9 @@ R> ggplot(sulfate_preds, aes(color = preds)) +
 +   theme_gray(base_size = 18)
 \end{verbatim}
 
-\begin{figure}
-
-{\centering \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sulfate-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sulfate-2} 
-
-}
-
-\caption{Distribution of observed sulfate (left) and sulfate predictions (right) in the conterminous United States.}\label{fig:sulfate}
-\end{figure}
+\textbf{Fig 4. Distribution of observed sulfate and sulfate predictions
+in the conterminous United States.} In A (top), observed sulfate is
+visualized. In B (bottom), sulfate predictions are visualized.
 
 Before making predictions, it is important to properly specify the
 \texttt{newdata} object. If explanatory variables were used to fit the
@@ -1387,7 +1378,7 @@ structure used to fit the model. Thus, predictions are only possible for
 observations in \texttt{data} whose response values are missing
 (\texttt{NA}), as their locations are incorporated into the neighborhood
 structure. For example, we make predictions of log seal trends at the
-missing polygons from Figure\(~\)\ref{fig:log_trend} by running
+missing polygons from Fig 3 by running
 
 \begin{verbatim}
 R> predict(sealmod)
@@ -1640,14 +1631,9 @@ direction) as a function of distance. An anisotropic covariance function
 does not behave similarly in all directions as a function of distance.
 Consider the spatial covariance imposed by an eastward-moving wind
 pattern. A one-unit distance in the x-direction likely means something
-different than a one-unit distance in the y-direction.
-Figure\(~\)\ref{fig:anisotropy} shows ellipses for an isotropic and
-anisotropic covariance function centered at the origin (a distance of
-zero).
-
-\begin{figure}
-\includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/anisotropy-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/anisotropy-2} \caption{Ellipses for an isotropic (left) and anisotropic (right) covariance function centered at the origin. The black outline of each ellipse is a level curve of equal correlation.}\label{fig:anisotropy}
-\end{figure}
+different than a one-unit distance in the y-direction. Fig 5 shows
+ellipses for an isotropic and anisotropic covariance function centered
+at the origin (a distance of zero).
 
 The black outline of each ellipse is a level curve of equal correlation.
 The left ellipse (a circle) represents an isotropic covariance function.
@@ -1656,6 +1642,12 @@ the level curve is the same in all directions. The right ellipse
 represents an anisotropic covariance function. The distance at which the
 correlation between two observations lays on the level curve is
 different in different directions.
+
+\textbf{Fig 5. Ellipses for an isotropic and anisotropic covariance
+function centered at the origin.} In A (top), the isotropic covariance
+function is visualized. In B (bottom), the anisotropic covariance
+function is visualized. The black outline of each ellipse is a level
+curve of equal correlation.
 
 Accounting for anisotropy involves a rotation and scaling of the
 x-coordinates and y-coordinates such that the spatial covariance
@@ -1704,17 +1696,12 @@ the major axis of the ellipse is the new x-axis and the minor axis of
 the ellipse is the new y-axis. The \texttt{scale} parameter is between
 zero and one and represents the ratio of the distance between the origin
 and the edge of the ellipse along the minor axis to the distance between
-the origin and the edge of the ellipse along the major axis.
-Figure\(~\)\ref{fig:anisotropy_fit} shows a transformation that turns an
-anisotropic ellipse into an isotropic one (i.e., a circle). This
-transformation requires rotating the coordinates clockwise by
+the origin and the edge of the ellipse along the major axis. The
+transformation that turns an anisotropic ellipse into an isotropic one
+(i.e., a circle) requires rotating the coordinates clockwise by
 \texttt{rotate} and then scaling them the reciprocal of \texttt{scale}.
 The transformed coordinates are then used instead of the original
 coordinates to compute distances and spatial covariances.
-
-\begin{figure}
-\includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-1} \includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-2} \includegraphics[width=0.33\linewidth]{preprint_files/figure-latex/anisotropy_fit-3} \caption{A visual representation of the anisotropy transformation. In the left figure, the first step is to rotate the anisotropic ellipse clockwise by the \texttt{rotate} parameter (here \texttt{rotate} is 0.75 radians or 135 degrees). In the middle figure, the second step is to scale the y axis by the reciprocal of the \texttt{scale} parameter (here \texttt{scale} is 0.5). In the right figure, the anisotropic ellipse has been transformed into an isotropic one (i.e., a circle). The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.}\label{fig:anisotropy_fit}
-\end{figure}
 
 Note that specifying an initial value for \texttt{rotate} that is
 different from zero, specifying an initial value for \texttt{scale} that
@@ -1752,29 +1739,28 @@ R> set.seed(0)
 R> n <- 3000
 R> x <- runif(n)
 R> y <- runif(n)
-R> sim_coords <- tibble::tibble(x, y)
-R> sim_response <- sprnorm(
+R> coords <- tibble::tibble(x, y)
+R> resp <- sprnorm(
 +   sim_params,
-+   data = sim_coords,
++   data = coords,
 +   xcoord = x,
 +   ycoord = y
 + )
-R> sim_data <- tibble::tibble(sim_coords, sim_response)
+R> sim_data <- tibble::tibble(coords, resp)
 \end{verbatim}
 
-We can visualize the simulated data (Figure\(~\)\ref{fig:sim_preds},
-left) by running
+We can visualize the simulated data (Fig 6A) by running
 
 \begin{verbatim}
-R> ggplot(sim_data, aes(x = x, y = y, color = sim_response)) +
+R> ggplot(sim_data, aes(x = x, y = y, color = resp)) +
 +   geom_point(size = 1.5) +
 +   scale_color_viridis_c(limits = c(-7, 7)) + 
 +   theme_gray(base_size = 18)
 \end{verbatim}
 
 There is noticeable spatial patterning in the response variable
-(\texttt{sim\_response}). The default mean in \texttt{sprnorm()} is zero
-for all observations, though a mean vector can be provided using the
+(\texttt{resp}). The default mean in \texttt{sprnorm()} is zero for all
+observations, though a mean vector can be provided using the
 \texttt{mean} argument. The default number of samples generated in
 \texttt{sprnorm()} is one, though this can be changed using the
 \texttt{samples} argument. Because \texttt{sim\_data} is a
@@ -1849,7 +1835,7 @@ adjustment, and does not use parallel processing.
 
 \begin{verbatim}
 R> local1 <- splm(
-+   sim_response ~ 1,
++   resp ~ 1,
 +   sim_data,
 +   spcov_type = "exponential",
 +   xcoord = x,
@@ -1861,7 +1847,7 @@ R> summary(local1)
 
 \begin{verbatim}
 Call:
-splm(formula = sim_response ~ 1, data = sim_data, spcov_type = "exponential", 
+splm(formula = resp ~ 1, data = sim_data, spcov_type = "exponential", 
     xcoord = x, ycoord = y, local = TRUE)
 
 Residuals:
@@ -1892,7 +1878,7 @@ R> local2_list <- list(
 +   ncores = 2
 + )
 R> local2 <- splm(
-+   sim_response ~ 1,
++   resp ~ 1,
 +   sim_data,
 +   spcov_type = "exponential",
 +   xcoord = x,
@@ -1904,7 +1890,7 @@ R> summary(local2)
 
 \begin{verbatim}
 Call:
-splm(formula = sim_response ~ 1, data = sim_data, spcov_type = "exponential", 
+splm(formula = resp ~ 1, data = sim_data, spcov_type = "exponential", 
     xcoord = x, ycoord = y, local = local2_list)
 
 Residuals:
@@ -1964,8 +1950,7 @@ called \texttt{preds} in the \texttt{sim\_preds} data by running
 R> sim_preds$preds <- predict(local1, newdata = sim_preds, local = TRUE)
 \end{verbatim}
 
-The predictions are visualized (Figure\(~\)\ref{fig:sim_preds}, right)
-by running
+The predictions are visualized (Fig 6B) by running
 
 \begin{verbatim}
 R> ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
@@ -1976,14 +1961,11 @@ R> ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
 
 They display a similar pattern as the observed data.
 
-\begin{figure}
-
-{\centering \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sim_preds-1} \includegraphics[width=0.49\linewidth]{preprint_files/figure-latex/sim_preds-2} 
-
-}
-
-\caption{Observed data and big data predictions at unobserved locations. In the left figure, spatial data are simulated in the unit square. A spatial linear model is fit using the default big data approximation for model-fitting. In the right figure, predictions are made using the fitted model and the default big data approximation for prediction.}\label{fig:sim_preds}
-\end{figure}
+\textbf{Fig 6. Observed data and big data predictions at unobserved
+locations.} In A (top), spatial data are simulated in the unit square. A
+spatial linear model is fit using the default big data approximation for
+model-fitting. In B (bottom), predictions are made using the fitted
+model and the default big data approximation for prediction.
 
 Instead of using \texttt{local\ =\ TRUE}, we can explicitly set
 \texttt{local}:
@@ -2033,6 +2015,14 @@ We appreciate feedback from users regarding \texttt{spmodel}. To learn
 more about how to provide feedback or contribute to \texttt{spmodel},
 please visit our GitHub repository at
 \url{https://github.com/USEPA/spmodel}.
+
+\hypertarget{data-and-code-availability}{%
+\section{Data and Code Availability}\label{data-and-code-availability}}
+
+This manuscript has a supplementary \textbf{R} package that contains all
+of the data, code, and figures used in its creation. The supplementary
+\textbf{R} package is hosted on GitHub and available at
+\url{https://github.com/michaeldumelle/spmodel.manuscript}.
 
 \hypertarget{acknowledgements}{%
 \section*{Acknowledgements}\label{acknowledgements}}

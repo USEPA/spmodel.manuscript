@@ -9,7 +9,7 @@ width <- 789 * 2
 height <- 789 * 2
 units_val <- "px"
 dpi_val <- 300
-comp_val <- "zip"
+comp_val <- "lzw"
 
 # figure 1
 fig1 <- ggplot(moss, aes(color = log_Zn)) +
@@ -18,7 +18,7 @@ fig1 <- ggplot(moss, aes(color = log_Zn)) +
   theme_gray(base_size = 14)
 fig1
 ggsave(
-  here("inst", "preprint", "figures", "fig1.tiff"),
+  here("inst", "preprint", "figures", "Fig1.tiff"),
   fig1,
   width = width,
   height = height,
@@ -30,7 +30,7 @@ ggsave(
 # figure 2
 spmod <- splm(log_Zn ~ log_dist2road, moss, spcov_type = "exponential")
 tiff(
-  here("inst", "preprint", "figures", "fig2.tiff"),
+  here("inst", "preprint", "figures", "Fig2.tiff"),
   width = width,
   height = height * 3/4,
   res = dpi_val,
@@ -46,7 +46,7 @@ fig3 <- ggplot(seal, aes(fill = log_trend)) +
   theme_bw(base_size = 14)
 fig3
 ggsave(
-  here("inst", "preprint", "figures", "fig3.tiff"),
+  here("inst", "preprint", "figures", "Fig3.tiff"),
   fig3,
   width = width,
   height = height,
@@ -70,7 +70,7 @@ fig4b <- ggplot(sulfate_preds, aes(color = preds)) +
 fig4 <- ggarrange(fig4a, fig4b, ncol = 1)
 fig4
 ggsave(
-  here("inst", "preprint", "figures", "fig4.tiff"),
+  here("inst", "preprint", "figures", "Fig4.tiff"),
   fig4,
   width = width,
   height = height,
@@ -117,7 +117,7 @@ fig5b <- ggplot(df, aes(x = x, y = y)) +
 fig5 <- ggarrange(fig5a, fig5b, nrow = 1)
 fig5
 ggsave(
-  here("inst", "preprint", "figures", "fig5.tiff"),
+  here("inst", "preprint", "figures", "Fig5.tiff"),
   fig5,
   width = width,
   height = height,
@@ -172,7 +172,7 @@ fig6 <- ggarrange(fig6a, fig6b, ncol = 1)
 fig6
 
 ggsave(
-  here("inst", "preprint", "figures", "fig6.tiff"),
+  here("inst", "preprint", "figures", "Fig6.tiff"),
   fig6,
   width = width,
   height = height,

@@ -21,7 +21,7 @@ address:
     address: National Oceanic and Atmospheric Administration Alaska Fisheries Science Center, Marine Mammal Laboratory, Seattle, Washington, United States of America
 abstract: |
   \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
-  for a variety spatial statistical models. Parameters are estimated using various
+  for a variety spatial statistical models applied to point-referenced or areal (lattice) data. Parameters are estimated using various
   methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
   readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0.
 bibliography: references.bib
@@ -128,13 +128,19 @@ moss
 options(width = 80)
 ```
 
-We can learn more about `moss` by running `help("moss", "spmodel")`, and we can visualize the distribution of log zinc concentration in `moss` (Figure$~$\ref{fig:log_zn}) by running
-
-```{r log_zn, fig.cap="Distribution of log zinc concentration in the moss data.", out.width = "65%", fig.align="center"}
+We can learn more about `moss` by running `help("moss", "spmodel")`, and we can visualize the distribution of log zinc concentration in `moss` (Fig 1) by running
+```{r log_zn, eval = FALSE}
 ggplot(moss, aes(color = log_Zn)) +
   geom_sf(size = 2) +
   scale_color_viridis_c() +
   theme_gray(base_size = 14)
+```
+
+**Fig 1.Distribution of log zinc concentration in the moss data.**
+
+Log zinc concentration can be viewed interactively in `mapview` by running
+```{r, eval = FALSE}
+mapview(moss, zcol = "log_Zn")
 ```
 
 ## Estimation
@@ -169,12 +175,13 @@ The model summary also contains the exponential spatial covariance parameter est
 coef(spmod, type = "spcov")
 ```
 
-The dependent random error variance ($\sigma^2_{de}$) is estimated to be approximately `r de_val` and the independent random error variance ($\sigma^2_{ie}$) is estimated to be approximately `r ie_val`. The range ($\phi$) is estimated to be approximately `r format(range_val, big.mark = ",")`. The effective range is the distance at which the spatial covariance is approximately zero. For the exponential covariance, the effective range is $3\phi$. This means that observations whose distance is greater than `r format(eff_range_val, big.mark = ",")` meters are approximately uncorrelated. The `rotate` and `scale` parameters affect the modeling of anisotropy (Section$~$\ref{sec:anisotropy}). By default, they are assumed to be zero and one, respectively, which means that anisotropy is not modeled (i.e., the spatial covariance is assumed isotropic, or independent of direction). We plot the fitted spatial covariance function (Figure$~$\ref{fig:emp_spcov}) by running
-```{r emp_spcov, fig.cap="Empirical spatial covariance of fitted model. The open circle at a distance of zero represents the $\\sigma^2_{de} + \\sigma^2_{ie}$. The solid line at positive distances represents the product of $\\sigma^2_{de}$ and the correlation function at a particular distance.", out.width="75%", fig.align="center"}
+The dependent random error variance ($\sigma^2_{de}$) is estimated to be approximately `r de_val` and the independent random error variance ($\sigma^2_{ie}$) is estimated to be approximately `r ie_val`. The range ($\phi$) is estimated to be approximately `r format(range_val, big.mark = ",")`. The effective range is the distance at which the spatial covariance is approximately zero. For the exponential covariance, the effective range is $3\phi$. This means that observations whose distance is greater than `r format(eff_range_val, big.mark = ",")` meters are approximately uncorrelated. The `rotate` and `scale` parameters affect the modeling of anisotropy (Section$~$\ref{sec:anisotropy}). By default, they are assumed to be zero and one, respectively, which means that anisotropy is not modeled (i.e., the spatial covariance is assumed isotropic, or independent of direction). We plot the fitted spatial covariance function (Fig 2) by running
+```{r emp_spcov, eval = FALSE}
 plot(spmod, which = 7)
 ```
 We can learn more about the plots available for fitted models by running `help("plot.spmod", "spmodel")`.
 
+**Fig 2. Empirical spatial covariance of fitted model.** The open circle at a distance of zero represents the $\sigma^2_{de} + \sigma^2_{ie}$. The solid line at positive distances represents the product of $\sigma^2_{de}$ and the correlation function at a particular distance.
 
 ## Model-Fit Statistics
 
@@ -190,7 +197,7 @@ pseudoR2(spmod)
 ```
 Roughly `r 100 * round(pseudoR2(spmod), digits = 2)`% of the variability in log zinc is explained by log distance from the road. The pseudo R-squared can be adjusted to account for the number of explanatory variables using the `adjust` argument. Pseudo R-squared (and the adjusted version) is most helpful for comparing models that have the same covariance structure. 
 
-The next two model-fit statistics we consider are the spatial AIC and AICc [@hoeting2006model]. The AIC and AICc evaluate the fit of a model with a penalty for the number of parameters estimated. This penalty balances model fit and model parsimony. Lower AIC and AICc indicate a better balance of model fit and parsimony. The AICc is a correction to AIC for small sample sizes. As the sample size increases, AIC and AICc converge. 
+The next two model-fit statistics we consider are the AIC and AICc that [@hoeting2006model] derive for spatial data. The AIC and AICc evaluate the fit of a model with a penalty for the number of parameters estimated. This penalty balances model fit and model parsimony. Lower AIC and AICc indicate a better balance of model fit and parsimony. The AICc is a correction to AIC for small sample sizes. As the sample size increases, AIC and AICc converge. 
 
 The spatial AIC and AICc are given by
 \begin{equation*}\label{eq:sp_aic}
@@ -364,12 +371,19 @@ options(width = 80)
 
 We can learn more about the data by running `help("seal", "spmodel")`.
 
-We can visualize the distribution of log seal trends in the `seal` data (Figure$~$\ref{fig:log_trend}) by running
-```{r log_trend, fig.cap="Distribution of log seal trends in the seal data. Polygons are gray if seal trends are missing.", out.width = "65%", fig.align="center"}
+We can visualize the distribution of log seal trends in the `seal` data (Fig 3) by running
+```{r log_trend, eval = FALSE}
 ggplot(seal, aes(fill = log_trend)) +
   geom_sf(size = 0.75) +
   scale_fill_viridis_c() +
   theme_bw(base_size = 14)
+```
+
+**Fig 3. Distribution of log seal trends in the seal data.** Polygons are gray if seal trends are missing.
+
+Log trends can be viewed interactively in `mapview` by running
+```{r, eval = FALSE}
+mapview(seal, zcol = "log_trend")
 ```
 
 The gray polygons denote areas where the log trend is missing. These missing areas need to be kept in the data while fitting the model to preserve the overall neighborhood structure.
@@ -405,7 +419,7 @@ options(width = 80)
 
 In this section, we show how to use `predict()` to perform spatial prediction (also called Kriging) in `spmodel`. We will fit a model using the point-referenced `sulfate` data, an `sf` object that contains sulfate measurements in the conterminous United States, and make predictions for each location in the point-referenced `sulfate_preds` data, an `sf` object that contains locations in the conterminous United States at which to predict sulfate.
 
-We first visualize the distribution of the sulfate data (Figure$~$\ref{fig:sulfate}, left) by running
+We first visualize the distribution of the sulfate data (Fig 4A) by running
 ```{r, eval = FALSE}
 ggplot(sulfate, aes(color = sulfate)) +
   geom_sf(size = 2.5) +
@@ -422,7 +436,7 @@ Then we obtain best linear unbiased predictions (Kriging predictions) using `pre
 sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 ```
 
-We can then visualize the model predictions (Figure$~$\ref{fig:sulfate}, right) by running
+We can then visualize the model predictions (Fig 4B) by running
 ```{r, eval = FALSE}
 sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 ggplot(sulfate_preds, aes(color = preds)) +
@@ -431,7 +445,7 @@ ggplot(sulfate_preds, aes(color = preds)) +
   theme_gray(base_size = 18)
 ```
 
-```{r sulfate, fig.cap="Distribution of observed sulfate (left) and sulfate predictions (right) in the conterminous United States.", out.width = "49%", fig.align="center", fig.show="hold", echo = FALSE}
+```{r sulfate, eval = FALSE, echo = FALSE}
 ggplot(sulfate, aes(color = sulfate)) +
   geom_sf(size = 2.5) +
   scale_color_viridis_c(limits = c(0, 45)) +
@@ -443,6 +457,8 @@ ggplot(sulfate_preds, aes(color = preds)) +
   scale_color_viridis_c(limits = c(0, 45)) +
   theme_gray(base_size = 18)
 ```
+
+**Fig 4. Distribution of observed sulfate and sulfate predictions in the conterminous United States.** In A (top), observed sulfate is visualized. In B (bottom), sulfate predictions are visualized.
 
 Before making predictions, it is important to properly specify the `newdata` object. If explanatory variables were used to fit the model, the same explanatory variables must be included in `newdata` with the same names they have in `data`. If `data` is a `data.frame`, coordinates must be included in `newdata` with the same names as they have in `data`. If `data` is an `sf` object, coordinates must be included in `newdata` with the same geometry name as they have in `data`. When using projected coordinates, the projection for `newdata` should be the same as the projection for `data`.
 
@@ -507,7 +523,7 @@ augment(sulfmod_with_NA, newdata = sulfmod_with_NA$newdata)
 ```
 Unlike `predict()`, `augment()` explicitly requires the `newdata` argument be specified in order to obtain predictions. Omitting `newdata` (e.g., running `augment(sulfmod_with_NA)`) returns model diagnostics, not predictions.
 
-For areal data models fit with `spautor()`, predictions cannot be computed at locations that were not incorporated in the neighborhood structure used to fit the model. Thus, predictions are only possible for observations in `data` whose response values are missing (`NA`), as their locations are incorporated into the neighborhood structure. For example, we make predictions of log seal trends at the missing polygons from Figure$~$\ref{fig:log_trend} by running
+For areal data models fit with `spautor()`, predictions cannot be computed at locations that were not incorporated in the neighborhood structure used to fit the model. Thus, predictions are only possible for observations in `data` whose response values are missing (`NA`), as their locations are incorporated into the neighborhood structure. For example, we make predictions of log seal trends at the missing polygons from Fig 3 by running
 ```{r, results = "hide"}
 predict(sealmod)
 ```
@@ -624,8 +640,8 @@ part <- splm(
 
 ## Anisotropy {#sec:anisotropy}
 
-A spatial covariance function for point-referenced data is isotropic if it behaves similarly in all directions (i.e., is independent of direction) as a function of distance. An anisotropic covariance function does not behave similarly in all directions as a function of distance. Consider the spatial covariance imposed by an eastward-moving wind pattern. A one-unit distance in the x-direction likely means something different than a one-unit distance in the y-direction. Figure$~$\ref{fig:anisotropy} shows ellipses for an isotropic and anisotropic covariance function centered at the origin (a distance of zero).
-```{r anisotropy, echo = FALSE, out.width = "49%", fig.show = "hold", fig.cap = "Ellipses for an isotropic (left) and anisotropic (right) covariance function centered at the origin. The black outline of each ellipse is a level curve of equal correlation."}
+A spatial covariance function for point-referenced data is isotropic if it behaves similarly in all directions (i.e., is independent of direction) as a function of distance. An anisotropic covariance function does not behave similarly in all directions as a function of distance. Consider the spatial covariance imposed by an eastward-moving wind pattern. A one-unit distance in the x-direction likely means something different than a one-unit distance in the y-direction. Fig 5 shows ellipses for an isotropic and anisotropic covariance function centered at the origin (a distance of zero).
+```{r anisotropy, echo = FALSE, eval = FALSE}
 # PRELIMINARIES 
 r <- 1
 theta_seq <- seq(0, 2 * pi, length.out = 1000)
@@ -662,6 +678,8 @@ ggplot(df, aes(x = x, y = y)) +
 ```
 The black outline of each ellipse is a level curve of equal correlation. The left ellipse (a circle) represents an isotropic covariance function. The distance at which the correlation between two observations lays on the level curve is the same in all directions. The right ellipse represents an anisotropic covariance function. The distance at which the correlation between two observations lays on the level curve is different in different directions. 
 
+**Fig 5. Ellipses for an isotropic and anisotropic covariance function centered at the origin.** In A (top), the isotropic covariance function is visualized. In B (bottom), the anisotropic covariance function is visualized. The black outline of each ellipse is a level curve of equal correlation.
+
 Accounting for anisotropy involves a rotation and scaling of the x-coordinates and y-coordinates such that the spatial covariance function that uses these transformed distances is isotropic. We use the `anisotropy` argument to `splm()` to fit a model with anisotropy by running
 ```{r}
 spmod_anis <- splm(
@@ -673,9 +691,9 @@ spmod_anis <- splm(
 summary(spmod_anis)
 ```
 
-The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse such that the major axis of the ellipse is the new x-axis and the minor axis of the ellipse is the new y-axis. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. Figure$~$\ref{fig:anisotropy_fit} shows a transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle). This transformation requires rotating the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
+The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse such that the major axis of the ellipse is the new x-axis and the minor axis of the ellipse is the new y-axis. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. The transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle) requires rotating the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
 
-```{r, anisotropy_fit, echo = FALSE, out.width = "33%", fig.show = "hold", fig.cap = "A visual representation of the anisotropy transformation. In the left figure, the first step is to rotate the anisotropic ellipse clockwise by the \\texttt{rotate} parameter (here \\texttt{rotate} is 0.75 radians or 135 degrees). In the middle figure, the second step is to scale the y axis by the reciprocal of the \\texttt{scale} parameter (here \\texttt{scale} is 0.5). In the right figure, the anisotropic ellipse has been transformed into an isotropic one (i.e., a circle). The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances."}
+```{r, anisotropy_fit, echo = FALSE, eval = FALSE}
 spcov_params_val <- coef(spmod_anis, type = "spcov")
 # FIRST FIGURE
 theta <- spcov_params_val["rotate"]
@@ -765,7 +783,7 @@ resp <- sprnorm(
 sim_data <- tibble::tibble(coords, resp)
 ```
 
-We can visualize the simulated data (Figure$~$\ref{fig:sim_preds}, left) by running
+We can visualize the simulated data (Fig 6A) by running
 ```{r sim, fig.align="center", out.width = "75%", fig.cap = "Spatial data simulated in the unit square.", eval = FALSE}
 ggplot(sim_data, aes(x = x, y = y, color = resp)) +
   geom_point(size = 1.5) +
@@ -841,7 +859,7 @@ The simplest way to accommodate big data prediction is to set `local` to `TRUE`.
 sim_preds$preds <- predict(local1, newdata = sim_preds, local = TRUE)
 ```
 
-The predictions are visualized (Figure$~$\ref{fig:sim_preds}, right) by running
+The predictions are visualized (Fig 6B) by running
 ```{r, eval = FALSE}
 ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
   geom_point(size = 1.5) +
@@ -851,8 +869,7 @@ ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
 
 They display a similar pattern as the observed data.
 
-```{r sim_preds, echo = FALSE, fig.align="center", fig.show = "hold", out.width = "49%", fig.cap = "Observed data and big data predictions at unobserved locations. In the left figure, spatial data are simulated in the unit square. A spatial linear model is fit using the default big data approximation for model-fitting. In the right figure, predictions are made using the fitted model and the default big data approximation for prediction."}
-
+```{r sim_preds, echo = FALSE, eval = FALSE}
 ggplot(sim_data, aes(x = x, y = y, color = resp)) +
   geom_point(size = 1.5) +
   scale_color_viridis_c(limits = c(-7, 7)) + 
@@ -863,6 +880,8 @@ ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
   scale_color_viridis_c(limits = c(-7, 7)) + 
   theme_gray(base_size = 18)
 ```
+
+**Fig 6. Observed data and big data predictions at unobserved locations.** In A (top), spatial data are simulated in the unit square. A spatial linear model is fit using the default big data approximation for model-fitting. In B (bottom), predictions are made using the fitted model and the default big data approximation for prediction.
 
 Instead of using `local = TRUE`, we can explicitly set `local`:
 ```{r, results = "hide"}
@@ -884,6 +903,10 @@ For areal data, no local neighborhood approximation exists because of the data's
 `spmodel` is a novel, relevant contribution used to fit, summarize, and predict for a variety of spatial statistical models. Spatial linear models for point-referenced data (i.e., geostatistical models) are fit using the `splm()` function. Spatial linear models for areal data (i.e., spatial autoregressive models) are fit using the `spautor()` function. Both functions share use a common framework and syntax structure. Several model-fit statistics and diagnostics are available. The broom functions `tidy()` and `glance()` are used to tidy and glance at a fitted model. The broom function `augment()` is used to augment `data` with model diagnostics and augment `newdata` with predictions. Several advanced features are available to accommodate fixed covariance parameter values, random effects, partition factors, anisotropy, simulated data, and big data approximations for model fitting and prediction.
 
 We appreciate feedback from users regarding `spmodel`. To learn more about how to provide feedback or contribute to `spmodel`, please visit our GitHub repository at [https://github.com/USEPA/spmodel](https://github.com/USEPA/spmodel). 
+
+# Data and Code Availability
+
+This manuscript has a supplementary **R** package that contains all of the data, code, and figures used in its creation. The supplementary **R** package is hosted on GitHub and available at [https://github.com/michaeldumelle/spmodel.manuscript](https://github.com/michaeldumelle/spmodel.manuscript).
 
 # Acknowledgements {.unnumbered}
 
