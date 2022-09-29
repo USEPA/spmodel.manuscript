@@ -317,7 +317,8 @@ We also show code that can be used to create interactive visualizations
 of spatial data with \texttt{mapview} {[}16{]}. \texttt{mapview} has
 many backgrounds available that contextualize spatial data with
 topographical information. Before running the \texttt{mapview} code
-provided interactively, make sure that \texttt{mapview} is loaded.
+provided interactively, make sure that \texttt{mapview} is installed and
+loaded.
 
 \hypertarget{sec:theomodel}{%
 \section{The Spatial Linear Model}\label{sec:theomodel}}
@@ -368,27 +369,28 @@ vector.
 Equation\(~\)\ref{eq:splm} is called the spatial linear model. The
 spatial linear model applies to both point-referenced and areal data.
 The \texttt{splm()} function is used to fit spatial linear models for
-point-referenced data (these models are often called geostatistical
-models). One spatial covariance function available in \texttt{splm()} is
-the exponential spatial covariance function, which has an \(\mathbf{R}\)
-matrix given by \begin{equation*}
+point-referenced data (i.e., geostatistical models). One spatial
+covariance function available in \texttt{splm()} is the exponential
+spatial covariance function, which has an \(\mathbf{R}\) matrix given by
+\begin{equation}\label{eq:r_exp}
   \mathbf{R} = \exp(-\mathbf{M} / \phi),
-\end{equation*}\\
+\end{equation}\\
 where \(\mathbf{M}\) is a matrix of Euclidean distances among
 observations. Recall that \(\phi\) is the range parameter, and it
-controls the behavior of \(\mathbf{R}\) as a function of distance.
-Parameterizations for other \texttt{splm()} spatial covariance types and
-their \(\mathbf{R}\) matrices can be seen by running
-\texttt{help("splm",\ "spmodel")} or
+controls the behavior of \(\mathbf{R}\) as a function of distance. In
+Equation\(~\)\ref{eq:r_exp}, as the distance between two observations
+increases, the correlation between them decreases. Parameterizations for
+other \texttt{splm()} spatial covariance types and their \(\mathbf{R}\)
+matrices can be viewed by running \texttt{help("splm",\ "spmodel")} or
 \texttt{vignette("technical",\ "spmodel")}. Some of these spatial
 covariance types (e.g., Mat\(\acute{e}\)rn) depend on an extra parameter
 beyond \(\sigma^2_{de}\), \(\sigma^2_{ie}\), and \(\phi\).
 
 The \texttt{spautor()} function is used to fit spatial linear models for
-areal data (these models are often called spatial autoregressive
-models). One spatial autoregressive covariance function available in
-\texttt{spautor()} is the simultaneous autoregressive spatial covariance
-function, which has an \(\mathbf{R}\) matrix given by \begin{equation*}
+areal data (i.e., spatial autoregressive models). One spatial
+autoregressive covariance function available in \texttt{spautor()} is
+the simultaneous autoregressive spatial covariance function, which has
+an \(\mathbf{R}\) matrix given by \begin{equation*}
   \mathbf{R} = [(\mathbf{I} - \phi \mathbf{W})(\mathbf{I} - \phi \mathbf{W})^\top]^{-1},
 \end{equation*} where \(\mathbf{W}\) is a weight matrix describing the
 neighborhood structure in \(\mathbf{y}\). Parameterizations for
@@ -416,9 +418,9 @@ In this section, we show how to use the \texttt{splm()} and
 linear model. We also explore diagnostic tools in \texttt{spmodel} that
 evaluate model fit. The \texttt{splm()} and \texttt{spautor()} functions
 share similar syntactic structure with the \texttt{lm()} function used
-to fit non-spatial linear models (linear models without spatial
-dependence) from Equation\(~\)\ref{eq:lm}. \texttt{splm()} and
-\texttt{spautor()} generally require at least three arguments:
+to fit non-spatial linear models from Equation\(~\)\ref{eq:lm}.
+\texttt{splm()} and \texttt{spautor()} generally require at least three
+arguments:
 
 \begin{itemize}
 \tightlist
@@ -597,14 +599,13 @@ We visualize the fitted spatial covariance function (Fig 2) by running
 R> plot(spmod, which = 7)
 \end{verbatim}
 
-We can learn more about the visualizations available for fitted models
-by running \texttt{help("plot.spmod",\ "spmodel")}.
-
 \textbf{Fig 2. Empirical spatial covariance of the fitted model.} The
 open circle at a distance of zero represents the
 \(\sigma^2_{de} + \sigma^2_{ie}\). The solid line at positive distances
-represents the product of \(\sigma^2_{de}\) and the correlation function
-at a particular distance.
+represents \(\sigma^2_{de} \mathbf{R}\) at a particular distance.
+
+We can learn more about the visualizations available for fitted models
+by running \texttt{help("plot.spmod",\ "spmodel")}.
 
 \hypertarget{model-fit-statistics}{%
 \subsection{Model-Fit Statistics}\label{model-fit-statistics}}
@@ -655,16 +656,16 @@ log-likelihood of the data evaluated at the estimated parameter vector
 cardinality of \(\hat{\boldsymbol{\Theta}}\), and \(n\) is the sample
 size. For maximum likelihood,
 \(\hat{\boldsymbol{\Theta}} = \{\hat{\boldsymbol{\theta}}, \hat{\boldsymbol{\beta}}\}\),
-and for restricted maximum likelihood
+and for restricted maximum likelihood,
 \(\hat{\boldsymbol{\Theta}} = \{\hat{\boldsymbol{\theta}}\}\). There are
 some nuances to consider when comparing AIC across models: AIC
 comparisons between a model fit using restricted maximum likelihood and
 a model fit using maximum likelihood are meaningless, as the models are
-fit with different likelihoods; AIC comparisons between models fit using
-restricted maximum likelihood are only valid when the models have the
-same fixed effect structure; AIC comparisons between models fit using
-maximum likelihood are valid even when the models have different fixed
-effect structures {[}27{]}.
+fit with different likelihoods; and AIC comparisons between models fit
+using restricted maximum likelihood are only valid when the models have
+the same fixed effect structure; AIC comparisons between models fit
+using maximum likelihood are valid even when the models have different
+fixed effect structures {[}27{]}.
 
 Suppose we want to quantify the difference in model quality between the
 spatial model and a non-spatial model using the AIC and AICc criteria.
@@ -675,8 +676,9 @@ We fit a non-spatial model (Equation\(~\)\ref{eq:lm}) in
 R> lmod <- splm(log_Zn ~ log_dist2road, moss, spcov_type = "none")
 \end{verbatim}
 
-We compute the spatial AIC and AICc of the spatial model and non-spatial
-model by running
+This model is equivalent to one fit using \texttt{lm()}. We compute the
+spatial AIC and AICc of the spatial model and non-spatial model by
+running
 
 \begin{verbatim}
 R> AIC(spmod, lmod)
@@ -774,8 +776,8 @@ the observation's explanatory variable values and the model fit:
 R> fitted(spmod)
 \end{verbatim}
 
-Fitted values for the spatially dependent random errors
-(\(\boldsymbol{\tau}\)), spatially independent random errors
+Best linear unbiased predictions for the spatially dependent random
+errors (\(\boldsymbol{\tau}\)), spatially independent random errors
 (\(\boldsymbol{\epsilon}\)), and random effects can also be obtained via
 \texttt{fitted()} by changing the \texttt{type} argument.
 
@@ -967,8 +969,8 @@ returned alongside the diagnostics. All original columns of
 \texttt{sf} object because model diagnostics can be easily visualized
 spatially. For example, we could subset the augmented object so that it
 only includes observations whose standardized residuals have absolute
-values greater than some cutoff and map them. To learn more about the
-broom functions for spatial linear models, run
+values greater than some cutoff and then map them. To learn more about
+the broom functions for spatial linear models, run
 \texttt{help("tidy.spmod",\ "spmodel")},
 \texttt{help("glance.spmod",\ "spmodel")}, and
 \texttt{help("augment.spmod",\ "spmodel")}.
@@ -1147,7 +1149,6 @@ R> sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 We can then visualize the model predictions (Fig 4B) by running
 
 \begin{verbatim}
-R> sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 R> ggplot(sulfate_preds, aes(color = preds)) +
 +   geom_sf(size = 2.5) +
 +   scale_color_viridis_c(limits = c(0, 45)) +
@@ -1174,7 +1175,7 @@ R> predict(sulfmod, newdata = sulfate_preds, se.fit = TRUE)
 
 The \texttt{interval} argument determines the type of interval returned.
 If \texttt{interval} is \texttt{"none"} (the default), no intervals are
-returned. If \texttt{interval} is \texttt{"prediction"},
+returned. If \texttt{interval} is \texttt{"prediction"}, then
 \texttt{100\ *\ level}\% prediction intervals are returned (the default
 is 95\% prediction intervals):
 
@@ -1184,8 +1185,8 @@ R> predict(sulfmod, newdata = sulfate_preds, interval = "prediction")
 
 If \texttt{interval} is \texttt{"confidence"}, the predictions are
 instead the estimated mean given each observation's explanatory variable
-values. The corresponding \texttt{100\ *\ level}\% confidence intervals
-are returned:
+values (i.e., fitted values) and the corresponding
+\texttt{100\ *\ level}\% confidence intervals are returned:
 
 \begin{verbatim}
 R> predict(sulfmod, newdata = sulfate_preds, interval = "confidence")
@@ -1237,9 +1238,9 @@ Projected CRS: NAD83 / Conus Albers
 \end{verbatim}
 
 Here \texttt{.fitted} represents the predictions, \texttt{.lower}
-represents the lower bound of the 90\% prediction interval, and
+represents the lower bound of the 90\% prediction intervals, and
 \texttt{.upper} represents the upper bound of the 95\% prediction
-interval.
+intervals.
 
 An alternative (but equivalent) approach can be used for model fitting
 and prediction that circumvents the need to keep \texttt{data} and
@@ -1257,7 +1258,11 @@ R> sulfate_with_NA <- rbind(sulfate, sulfate_preds)
 We can then fit a spatial linear model by running
 
 \begin{verbatim}
-R> sulfmod_with_NA <- splm(sulfate ~ 1, sulfate_with_NA, spcov_type = "spherical")
+R> sulfmod_with_NA <- splm(
++   sulfate ~ 1,
++   sulfate_with_NA,
++   spcov_type = "spherical"
++ )
 \end{verbatim}
 
 The missing values are ignored for model-fitting but stored in
@@ -1300,7 +1305,7 @@ The call to \texttt{predict()} finds in \texttt{sulfmod\_with\_NA} the
 R> predict(sulfmod_with_NA, newdata = sulfmod_with_NA$newdata)
 \end{verbatim}
 
-We can also use \texttt{augment()} to make the predictions on the data
+We can also use \texttt{augment()} to make the predictions for the data
 set with missing values by running
 
 \begin{verbatim}
@@ -1679,7 +1684,7 @@ estimation, but fixed anisotropy parameters can be accommodated for
 semivariogram weighted least squares or semivariogram composite
 likelihood estimation. Also note that anisotropy is not relevant for
 areal data because the spatial covariance function depends on a
-neighborhood structure instead of distances between points.
+neighborhood structure instead of distances between locations.
 
 \hypertarget{sec:sim_data}{%
 \subsection{Simulating Spatial Data}\label{sec:sim_data}}
@@ -1966,22 +1971,21 @@ components of the \texttt{local} list for areal data are
 summarize, and predict for a variety of spatial statistical models.
 Spatial linear models for point-referenced data (i.e., geostatistical
 models) are fit using the \texttt{splm()} function. Spatial linear
-models for areal data (i.e., spatial autoregressive models) are fit
-using the \texttt{spautor()} function. Both functions use a common
-framework and syntax structure. Several model-fit statistics and
-diagnostics are available. The broom functions \texttt{tidy()} and
-\texttt{glance()} are used to tidy and glance at a fitted model. The
-broom function \texttt{augment()} is used to augment \texttt{data} with
-model diagnostics and augment \texttt{newdata} with predictions. Several
+models for areal data (i.e., autoregressive models) are fit using the
+\texttt{spautor()} function. Both functions use a common framework and
+syntax structure. Several model-fit statistics and diagnostics are
+available. The broom functions \texttt{tidy()} and \texttt{glance()} are
+used to tidy and glance at a fitted model. The broom function
+\texttt{augment()} is used to augment \texttt{data} with model
+diagnostics and augment \texttt{newdata} with predictions. Several
 advanced features are available to accommodate fixed covariance
 parameter values, random effects, partition factors, anisotropy,
-simulated data, and big data approximations for model fitting and
+simulating data, and big data approximations for model fitting and
 prediction.
 
 We appreciate feedback from users regarding \texttt{spmodel}. To learn
-more about how to provide feedback or contribute to \texttt{spmodel},
-please visit our GitHub repository at
-\url{https://github.com/USEPA/spmodel}.
+more about \texttt{spmodel} or provide feedback, please visit our GitHub
+repository at \url{https://github.com/USEPA/spmodel}.
 
 \hypertarget{data-and-code-availability}{%
 \section*{Data and Code Availability}\label{data-and-code-availability}}
