@@ -52,11 +52,9 @@ library(spmodel)
 
 Spatial data are ubiquitous in everyday life and the scientific literature. As such, it is becoming increasingly important to properly analyze spatial data. Spatial data can be analyzed using a statistical model that explicitly incorporates the spatial dependence among nearby observations. Incorporating this spatial dependence can be challenging, but ignoring it often yields poor statistical models that incorrectly quantify uncertainty, impacting the validity of hypothesis tests, confidence intervals, and predictions intervals. `spmodel` provides tools to easily incorporate spatial dependence into statistical models, building upon commonly used $\textbf{\textsf{R}}$ functions like `lm()`.
 
-`spmodel` implements model-based inference, which relies on fitting a statistical model. Model-based inference is different than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample. Spatial random sampling and design-based inference can be performed using the `spsurvey` $\textbf{\textsf{R}}$ package [@dumelle2022spsurvey]. Random sampling, while not explicitly required, can still benefit model-based inference when analyzing spatial data [@dumelle2022comparison].
+`spmodel` implements model-based inference, which relies on fitting a statistical model. Model-based inference is different than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample [@brus1997random]. @cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (areal data are sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. For thorough overviews model-based inference in a spatial context, see @cressie1993statistics, @banerjee2003hierarchical, and @schabenberger2017statistical.
 
-@cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (areal data are sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. 
-
-Several $\textbf{\textsf{R}}$ packages exist on CRAN that analyze either point-referenced or areal spatial data. For point-referenced data, they include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `R-inla` [@lindgren2015bayesian], `rstan` [@rstan2023rstan], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. For areal data, they include `brms` [@burkner2017brms], `CARBayes` [@lee2013carbayes] and `hglm` [@ronnegard2010hglm]. Unlike these aforementioned packages, `spmodel` is designed to analyze both point-referenced and areal data using a common framework and syntax structure. `spmodel` also offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages -- together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, non-spatial random effects, anisotropy, big data methods, prediction, the option to fix spatial covariance parameters at known values, and more.
+Several $\textbf{\textsf{R}}$ packages exist on CRAN that analyze either point-referenced or areal spatial data. For point-referenced data, they include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `R-inla` [@lindgren2015bayesian], `rstan` [@rstan2023rstan], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. For areal data, they include `brms` [@burkner2017brms], `CARBayes` [@lee2013carbayes], bigDM [@adin2022bigdm], and `hglm` [@ronnegard2010hglm]. Unlike these aforementioned packages, `spmodel` is designed to analyze both point-referenced and areal data using a common framework and syntax structure. `spmodel` also offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages -- together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, non-spatial random effects, anisotropy, big data methods, prediction, the option to fix spatial covariance parameters at known values, and more.
 
 The rest of this article is organized as follows. We first give a brief theoretical introduction to spatial linear models. We then outline the variety of methods used to estimate the parameters of spatial linear models. Next we explain how to obtain predictions at unobserved locations. Following that, we detail some advanced modeling features, including random effects, partition factors, anisotropy, and big data approaches. Finally we end with a short discussion. 
 
@@ -74,7 +72,7 @@ library(ggplot2)
 
 We also show code that can be used to create interactive visualizations of spatial data with `mapview` [@appelhans2022mapview]. `mapview` has many backgrounds available that contextualize spatial data with topographical information. Before running the `mapview` code provided interactively, make sure that `mapview` is installed and loaded.
 
-`spmodel` contains various methods for generic functions defined outside of `spmodel`. To find relevant documentation for these methods, run `help("generic.spmodel", "spmodel")` (e.g., `help("fitted.spmodel", "spmodel")`, `?help("summary.spmodel", "spmodel")`, `help("plot.spmodel", "spmodel")`, `?help("predict.spmodel", "spmodel")`, `help("tidy.spmodel", "spmodel")`, etc.) . We provide more details and examples regarding these methods and generics throughout this vignette. For a full list of `spmodel` functions available, see `spmodel`'s documentation manual.
+`spmodel` contains various methods for generic functions defined outside of `spmodel`. To find relevant documentation for these methods, run `help("generic.spmodel", "spmodel")` (e.g., `help("fitted.spmodel", "spmodel")`, `help("summary.spmodel", "spmodel")`, `help("plot.spmodel", "spmodel")`, `help("predict.spmodel", "spmodel")`, `help("tidy.spmodel", "spmodel")`, etc.) . We provide more details and examples regarding these methods and generics throughout this vignette. For a full list of `spmodel` functions available, see `spmodel`'s documentation manual.
 
 # The Spatial Linear Model {#sec:theomodel}
 
@@ -472,7 +470,7 @@ ggplot(sulfate_preds, aes(color = preds)) +
   theme_gray(base_size = 18)
 ```
 
-It is important to properly specify the `newdata` object when running `predict()`. If explanatory variables were used to fit the model, the same explanatory variables must be included in `newdata` with the same names as they have in `data`. If `data` is a `data.frame`, coordinates must be included in `newdata` with the same names as they have in `data`. If `data` is an `sf` object, coordinates must be included in `newdata` with the same geometry name as they have in `data`. When using projected coordinates, the projection for `newdata` should be the same as the projection for `data`.
+It is important to properly specify the `newdata` object when running `predict()`. If explanatory variables were used to fit the model, the same explanatory variables must be included in `newdata` with the same names as they have in `data`. Additionally, if an explanatory variable is categorical or a factor, the values of this variable in `newdata` must also be values in `data` (e.g., if a categorical variable with values `"A"`, and `"B"` was used to fit the model, the corresponding variable in `newdata` cannot have a value `"C"`). If `data` is a `data.frame`, coordinates must be included in `newdata` with the same names as they have in `data`. If `data` is an `sf` object, coordinates must be included in `newdata` with the same geometry name as they have in `data`. When using projected coordinates, the projection for `newdata` should be the same as the projection for `data`.
 
 Prediction standard errors are returned by setting the `se.fit` argument to `TRUE`:
 ```{r, results = "hide"}
@@ -486,6 +484,7 @@ predict(sulfmod, newdata = sulfate_preds, interval = "prediction")
 ```{r, results = "hide"}
 predict(sulfmod, newdata = sulfate_preds, interval = "confidence")
 ```
+\noindent The `predict()` output structure changes based on `interval` and `se.fit`. For more details, run `help("predict.spmodel", "spmodel")`.
 
 Previously we used the `augment()` function to augment `data` with model diagnostics. We can also use `augment()` to augment `newdata` with predictions, standard errors, and intervals. We remove the model predictions from `sulfate_preds` before showing how `augment()` is used to obtain the same predictions by running
 ```{r}
@@ -558,7 +557,7 @@ options(width = 80)
 
 `spmodel` offers several advanced features for fitting spatial linear models. We briefly discuss some of these features next using the `moss` data and some simulated data. Technical details for each advanced feature can be seen by running `vignette("technical", "spmodel")`.
 
-## Fixing Spatial Covariance Parameters
+## Fixing Spatial Covariance Parameters {#sec:spcov_init}
 
 We may desire to fix specific spatial covariance parameters at a particular value. Perhaps some parameter value is known, for example. Or perhaps we want to compare nested models where a reduced model uses a fixed parameter value while the full model estimates the parameter. Fixing spatial covariance parameters while fitting a model is possible using the `spcov_initial` argument to `splm()` and `spautor()`. The `spcov_initial` argument takes an `spcov_initial` object (run `help("spcov_initial", "spmodel")` for more). `spcov_initial` objects can also be used to specify initial values used during optimization, even if they are not assumed to be fixed. By default, `spmodel` uses a grid search to find suitable initial values to use during optimization.
 
@@ -589,7 +588,41 @@ options(width = 80)
 
 The lower AIC and AICc of the full model compared to the reduced model indicates that the independent random error variance is important to the model. A likelihood ratio test comparing the full and reduced models is also possible using `anova()`.
 
-Another application of fixing spatial covariance parameters involves calculating their profile likelihood confidence intervals [@box1964analysis]. Before calculating a profile likelihood confidence interval for $\boldsymbol{\Theta}_i$, the $i$th element of a general parameter vector $\boldsymbol{\Theta}$, it is necessary to obtain $-2\ell(\hat{\boldsymbol{\Theta}})$, minus twice the log-likelihood evaluated at the estimated parameter vector, $\hat{\boldsymbol{\Theta}}$. Then a $(1 - \alpha)$% profile likelihood confidence interval is then the set of values for $\boldsymbol{\Theta}_i$ such that $2\ell(\hat{\boldsymbol{\Theta}}) - 2\ell(\hat{\boldsymbol{\Theta}}_{-i}) \leq \chi^2_{1, 1 - \alpha}$, where $\ell(\hat{\boldsymbol{\Theta}}_{-i})$ is the value of the log-likelihood maximized after fixing $\boldsymbol{\Theta}_i$ and optimizing over the remaining parameters, $\boldsymbol{\Theta}_{-i}$, and $\chi^2_{1, 1 - \alpha}$ is the $1 - \alpha$ quantile of a chi-squared distribution with one degree of freedom. The result follows from inverting a likelihood ratio test comparing the full model to a reduced model that fixes the value of $\boldsymbol{\Theta}_i$. Because computing profile likelihood confidence intervals requires refitting the model many times for different fixed values of $\boldsymbol{\Theta}_i$, it can be computationally intensive. This approach can be generalized to yield joint profile likelihood confidence intervals cases when $i$ has dimension greater than one.
+Another application of fixing spatial covariance parameters involves calculating their profile likelihood confidence intervals [@box1964analysis]. Before calculating a profile likelihood confidence interval for $\boldsymbol{\Theta}_i$, the $i$th element of a general parameter vector $\boldsymbol{\Theta}$, it is necessary to obtain $-2\ell(\hat{\boldsymbol{\Theta}})$, minus twice the log-likelihood evaluated at the estimated parameter vector, $\hat{\boldsymbol{\Theta}}$. Then a $(1 - \alpha)$% profile likelihood confidence interval is the set of values for $\boldsymbol{\Theta}_i$ such that $2\ell(\hat{\boldsymbol{\Theta}}) - 2\ell(\hat{\boldsymbol{\Theta}}_{-i}) \leq \chi^2_{1, 1 - \alpha}$, where $\ell(\hat{\boldsymbol{\Theta}}_{-i})$ is the value of the log-likelihood maximized after fixing $\boldsymbol{\Theta}_i$ and optimizing over the remaining parameters, $\boldsymbol{\Theta}_{-i}$, and $\chi^2_{1, 1 - \alpha}$ is the $1 - \alpha$ quantile of a chi-squared distribution with one degree of freedom. The result follows from inverting a likelihood ratio test comparing the full model to a reduced model that fixes the value of $\boldsymbol{\Theta}_i$. Because computing profile likelihood confidence intervals requires refitting the model many times for different fixed values of $\boldsymbol{\Theta}_i$, it can be computationally intensive. This approach can be generalized to yield joint profile likelihood confidence intervals cases when $i$ has dimension greater than one.
+
+## Fitting and Predicting for Multiple Models
+
+Fitting multiple models is possible with a single call to `splm()` or `spautor()` when `spcov_type` is a vector with length greater than one or `spcov_initial` is a list (with length greater than one) of `spcov_initial` objects. We fit three separate spatial linear models using the exponential spatial covariance, spherical spatial covariance, and no spatial covariance by running
+```{r}
+spmods <- splm(
+  sulfate ~ 1,
+  sulfate,
+  spcov_type = c("exponential", "spherical", "none")
+)
+```
+\noindent Then `glances()`is used to glance at each fitted model object:
+```{r, echo = FALSE}
+# set global print option
+options(width = 65)
+```
+
+```{r}
+glances(spmods)
+```
+
+```{r, echo = FALSE}
+# set global print option
+options(width = 80)
+```
+\noindent And `predict()` is used to predict `newdata` separately fo each fitted model object:
+```{r, eval = FALSE}
+predict(spmods, newdata = sulfate_preds)
+```
+
+Currently, `glances()` and `predict()` are the only `spmodel` generic functions that operate on an object that contains multiple model fits. Generic functions that operate on individual models can still be called when the argument is an individual model object. For example, we can compute the AIC of the model fit using the exponential covariance function by running
+```{r}
+AIC(spmods$exponential)
+```
 
 ## Random Effects
 
@@ -617,7 +650,7 @@ rand2 <- splm(
 ```
 \noindent Note that `~ sample + (log_dist2road | year)` is shorthand for `~ (1 | sample) + (log_dist2road | year)`. If only random slopes within a year are desired (and no random intercepts), a `- 1` is given to the relevant portion of the formula: `(log_dist2road - 1 | year)`. When there is more than one term in `random`, each term must be surrounded by parentheses (recall that the random intercept shorthand automatically includes relevant parentheses). 
 
-We glance at all three models by running
+We can compare the AIC of all three models by running
 
 ```{r, echo = FALSE}
 # set global print option
@@ -625,7 +658,7 @@ options(width = 60)
 ```
 
 ```{r}
-glances(spmod, rand1, rand2)
+AIC(spmod, rand1, rand2)
 ```
 
 ```{r, echo = FALSE}
@@ -633,7 +666,7 @@ glances(spmod, rand1, rand2)
 options(width = 80)
 ```
 
-\noindent `rand2` has the lowest AIC and AICc.
+\noindent The `rand2` model has the lowest AIC.
 
 It is possible to fix random effect variances using the `randcov_initial` argument, and `randcov_initial` can also be used to set initial values for optimization.
 
@@ -771,7 +804,7 @@ Note that specifying an initial value for `rotate` that is different from zero, 
 
 ## Simulating Spatial Data {#sec:sim_data}
 
-The `sprnorm()` function is used to simulate normal (Gaussian) spatial data. To use `sprnorm()`, the `spcov_params()` function is used to create an `spcov_params` object. The `spcov_params()` function requires the spatial covariance type and and parameter values. We create an `spcov_params` object by running
+The `sprnorm()` function is used to simulate normal (Gaussian) spatial data. To use `sprnorm()`, the `spcov_params()` function is used to create an `spcov_params` object. The `spcov_params()` function requires the spatial covariance type and parameter values. We create an `spcov_params` object by running
 ```{r}
 sim_params <- spcov_params("exponential", de = 5, ie = 1, range = 0.5)
 ```
@@ -816,7 +849,7 @@ To show how to use `spmodel` for big data estimation and prediction, we use the 
 
 The `local` argument to `splm()` controls the big data options. `local` is a list with several arguments. The arguments to the `local` list control the method used to assign the indexes, the number of observations with the same index, the number of unique indexes, adjustments to the covariance matrix of $\hat{\boldsymbol{\beta}}$, whether or not to use parallel processing, and if parallel processing is used, the number of cores.
 
-Big data are most simply accommodated by setting `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which randomly assigns observations to groups, ensures each group has approximately 50 observations, uses the theoretically-correct covariance adjustment, and does not use parallel processing. 
+Big data are most simply accommodated by setting `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which randomly assigns observations to index groups, ensures each index group has approximately 50 observations, uses the theoretically-correct covariance adjustment, and does not use parallel processing. 
 ```{r}
 local1 <- splm(
   resp ~ 1,
@@ -904,9 +937,9 @@ For areal data, no local neighborhood approximation exists because of the data's
 
 # Discussion {#sec:discussion}
 
-`spmodel` is a novel, relevant contribution used to fit, summarize, and predict for a variety of spatial statistical models. Spatial linear models for point-referenced data (i.e., geostatistical models) are fit using the `splm()` function. Spatial linear models for areal data (i.e., autoregressive models) are fit using the `spautor()` function. Both functions use a common framework and syntax structure. Several model-fit statistics and diagnostics are available. The broom functions `tidy()` and `glance()` are used to tidy and glance at a fitted model. The broom function `augment()` is used to augment `data` with model diagnostics and augment `newdata` with predictions. Several advanced features are available to accommodate fixed covariance parameter values, random effects, partition factors, anisotropy, simulating data, and big data approximations for model fitting and prediction.
+`spmodel` is a novel, relevant contribution used to fit, summarize, and predict for a variety of spatial statistical models. Spatial linear models for point-referenced data (i.e., geostatistical models) are fit using the `splm()` function. Spatial linear models for areal data (i.e., autoregressive models) are fit using the `spautor()` function. Both functions use a common framework and syntax structure. Several model-fit statistics and diagnostics are available. The broom functions `tidy()` and `glance()` are used to tidy and glance at a fitted model. The broom function `augment()` is used to augment `data` with model diagnostics and augment `newdata` with predictions. Several advanced features are available to accommodate fixed covariance parameter values, random effects, partition factors, anisotropy, simulating data, and big data approximations for model fitting and prediction. 
 
-We appreciate feedback from users regarding `spmodel`. To learn more about `spmodel` or provide feedback, please visit our GitHub repository at [https://github.com/USEPA/spmodel](https://github.com/USEPA/spmodel). 
+We appreciate feedback from users regarding `spmodel`, and we have several plans to add new features to `spmodel` in the future. To learn more about `spmodel` or provide feedback, please visit our GitHub repository at [https://github.com/USEPA/spmodel](https://github.com/USEPA/spmodel). 
 
 # Data and Code Availability {.unnumbered}
 

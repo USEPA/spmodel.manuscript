@@ -254,16 +254,11 @@ like \texttt{lm()}.
 \texttt{spmodel} implements model-based inference, which relies on
 fitting a statistical model. Model-based inference is different than
 design-based inference, which relies on random sampling and estimators
-that incorporate the properties of the random sample. Spatial random
-sampling and design-based inference can be performed using the
-\texttt{spsurvey} \(\textbf{\textsf{R}}\) package {[}1{]}. Random
-sampling, while not explicitly required, can still benefit model-based
-inference when analyzing spatial data {[}2{]}.
-
-{[}3{]} defines two types of spatial data that can be analyzed using
-model-based inference: point-referenced data and areal data (areal data
-are sometimes called lattice data). Spatial data are point-referenced
-when they are observed at point-locations indexed by x-coordinates and
+that incorporate the properties of the random sample {[}1{]}. {[}2{]}
+defines two types of spatial data that can be analyzed using model-based
+inference: point-referenced data and areal data (areal data are
+sometimes called lattice data). Spatial data are point-referenced when
+they are observed at point-locations indexed by x-coordinates and
 y-coordinates on a spatially continuous surface with an infinite number
 of locations. Spatial models for point-referenced data are sometimes
 called geostatistical models. Spatial data are areal when they are
@@ -271,24 +266,26 @@ observed as part of a finite network of polygons whose connections are
 indexed by a neighborhood structure. For example, the polygons may
 represent counties in a state who are neighbors if they share at least
 one boundary. Spatial models for areal data are sometimes called spatial
-autoregressive models.
+autoregressive models. For thorough overviews model-based inference in a
+spatial context, see {[}2{]}, {[}3{]}, and {[}4{]}.
 
 Several \(\textbf{\textsf{R}}\) packages exist on CRAN that analyze
 either point-referenced or areal spatial data. For point-referenced
-data, they include \texttt{fields} {[}4{]}, \texttt{FRK} {[}5{]},
-\texttt{geoR} {[}6{]}, \texttt{GpGp} {[}7{]}, \texttt{gstat} {[}8{]},
-\texttt{LatticeKrig} {[}9{]}, \texttt{R-inla} {[}10{]}, \texttt{rstan}
-{[}11{]}, \texttt{spatial} {[}12{]}, \texttt{spBayes} {[}13{]}, and
-\texttt{spNNGP} {[}14{]}. For areal data, they include \texttt{brms}
-{[}15{]}, \texttt{CARBayes} {[}16{]} and \texttt{hglm} {[}17{]}. Unlike
-these aforementioned packages, \texttt{spmodel} is designed to analyze
-both point-referenced and areal data using a common framework and syntax
-structure. \texttt{spmodel} also offers many features missing from the
-aforementioned \(\textbf{\textsf{R}}\) packages -- together in one
-\(\textbf{\textsf{R}}\) package, \texttt{spmodel} offers detailed model
-summaries, extensive model diagnostics, non-spatial random effects,
-anisotropy, big data methods, prediction, the option to fix spatial
-covariance parameters at known values, and more.
+data, they include \texttt{fields} {[}5{]}, \texttt{FRK} {[}6{]},
+\texttt{geoR} {[}7{]}, \texttt{GpGp} {[}8{]}, \texttt{gstat} {[}9{]},
+\texttt{LatticeKrig} {[}10{]}, \texttt{R-inla} {[}11{]}, \texttt{rstan}
+{[}12{]}, \texttt{spatial} {[}13{]}, \texttt{spBayes} {[}14{]}, and
+\texttt{spNNGP} {[}15{]}. For areal data, they include \texttt{brms}
+{[}16{]}, \texttt{CARBayes} {[}17{]}, bigDM {[}18{]}, and \texttt{hglm}
+{[}19{]}. Unlike these aforementioned packages, \texttt{spmodel} is
+designed to analyze both point-referenced and areal data using a common
+framework and syntax structure. \texttt{spmodel} also offers many
+features missing from the aforementioned \(\textbf{\textsf{R}}\)
+packages -- together in one \(\textbf{\textsf{R}}\) package,
+\texttt{spmodel} offers detailed model summaries, extensive model
+diagnostics, non-spatial random effects, anisotropy, big data methods,
+prediction, the option to fix spatial covariance parameters at known
+values, and more.
 
 The rest of this article is organized as follows. We first give a brief
 theoretical introduction to spatial linear models. We then outline the
@@ -306,7 +303,7 @@ R> install.packages("spmodel")
 R> library(spmodel)
 \end{verbatim}
 
-We create visualizations using ggplot2 {[}18{]}, which we install from
+We create visualizations using ggplot2 {[}20{]}, which we install from
 CRAN and load by running
 
 \begin{verbatim}
@@ -315,7 +312,7 @@ R> library(ggplot2)
 \end{verbatim}
 
 We also show code that can be used to create interactive visualizations
-of spatial data with \texttt{mapview} {[}19{]}. \texttt{mapview} has
+of spatial data with \texttt{mapview} {[}21{]}. \texttt{mapview} has
 many backgrounds available that contextualize spatial data with
 topographical information. Before running the \texttt{mapview} code
 provided interactively, make sure that \texttt{mapview} is installed and
@@ -325,9 +322,9 @@ loaded.
 outside of \texttt{spmodel}. To find relevant documentation for these
 methods, run \texttt{help("generic.spmodel",\ "spmodel")} (e.g.,
 \texttt{help("fitted.spmodel",\ "spmodel")},
-\texttt{?help("summary.spmodel",\ "spmodel")},
+\texttt{help("summary.spmodel",\ "spmodel")},
 \texttt{help("plot.spmodel",\ "spmodel")},
-\texttt{?help("predict.spmodel",\ "spmodel")},
+\texttt{help("predict.spmodel",\ "spmodel")},
 \texttt{help("tidy.spmodel",\ "spmodel")}, etc.) . We provide more
 details and examples regarding these methods and generics throughout
 this vignette. For a full list of \texttt{spmodel} functions available,
@@ -355,7 +352,7 @@ and \(\mathbf{I}\) denotes the identity matrix.
 The model in Equation\(~\)\ref{eq:lm} assumes the elements of
 \(\mathbf{y}\) are uncorrelated. Typically for spatial data, elements of
 \(\mathbf{y}\) are correlated, as observations close together in space
-tend to be more similar than observations far apart {[}20{]}. Failing to
+tend to be more similar than observations far apart {[}22{]}. Failing to
 properly accommodate the spatial dependence in \(\mathbf{y}\) can lead
 researchers to incorrect conclusions about their data. To accommodate
 spatial dependence in \(\mathbf{y}\), an \(n \times 1\) spatial random
@@ -411,7 +408,7 @@ neighborhood structure in \(\mathbf{y}\). Parameterizations for
 matrices can be seen by running \texttt{help("spautor",\ "spmodel")} or
 \texttt{vignette("technical",\ "spmodel")}.
 
-One way to define \(\mathbf{W}\) is through queen contiguity {[}21{]}.
+One way to define \(\mathbf{W}\) is through queen contiguity {[}23{]}.
 Two observations are queen contiguous if they share a boundary. The
 \(ij\)th element of \(\mathbf{W}\) is then one if observation \(i\) and
 observation \(j\) are queen contiguous and zero otherwise. Observations
@@ -421,7 +418,7 @@ of \(\mathbf{W}\) is zero.
 Sometimes each element in the weight matrix \(\mathbf{W}\) is divided by
 its respective row sum. This is called row-standardization.
 Row-standardizing \(\mathbf{W}\) has several benefits, which are
-discussed in detail by {[}22{]}.
+discussed in detail by {[}24{]}.
 
 \hypertarget{sec:modelfit}{%
 \section{Model Fitting}\label{sec:modelfit}}
@@ -457,7 +454,7 @@ arguments:
   (\texttt{"exponential"}, \texttt{"matern"}, \texttt{"car"}, etc)
 \end{itemize}
 
-If \texttt{data} is an \texttt{sf} {[}23{]} object, spatial information
+If \texttt{data} is an \texttt{sf} {[}25{]} object, spatial information
 is stored in the object's geometry. If \texttt{data} is a
 \texttt{data.frame}, then the x-coordinates and y-coordinates must be
 provided via the \texttt{xcoord} and \texttt{ycoord} arguments (for
@@ -522,10 +519,10 @@ R> mapview(moss, zcol = "log_Zn")
 Generally the covariance parameters (\(\boldsymbol{\theta}\)) and fixed
 effects (\(\boldsymbol{\beta}\)) of the spatial linear model require
 estimation. The default estimation method in \texttt{spmodel} is
-restricted maximum likelihood {[}24--26{]}. Maximum likelihood
+restricted maximum likelihood {[}26--28{]}. Maximum likelihood
 estimation is also available. For point-referenced data, semivariogram
-weighted least squares {[}27{]} and semivariogram composite likelihood
-{[}28{]} are additional estimation methods. The estimation method is
+weighted least squares {[}29{]} and semivariogram composite likelihood
+{[}30{]} are additional estimation methods. The estimation method is
 chosen using the \texttt{estmethod} argument.
 
 We estimate parameters of a spatial linear model regressing log zinc
@@ -651,7 +648,7 @@ most helpful for comparing models that have the same covariance
 structure.
 
 The next two model-fit statistics we consider are the AIC and AICc that
-{[}29{]} derive for spatial data. The AIC and AICc evaluate the fit of a
+{[}31{]} derive for spatial data. The AIC and AICc evaluate the fit of a
 model with a penalty for the number of parameters estimated. This
 penalty balances model fit and model parsimony. Lower AIC and AICc
 indicate a better balance of model fit and parsimony. The AICc is a
@@ -679,7 +676,7 @@ fit with different likelihoods; and AIC comparisons between models fit
 using restricted maximum likelihood are only valid when the models have
 the same fixed effect structure; AIC comparisons between models fit
 using maximum likelihood are valid even when the models have different
-fixed effect structures {[}30{]}.
+fixed effect structures {[}32{]}.
 
 Suppose we want to quantify the difference in model quality between the
 spatial model and a non-spatial model using the AIC and AICc criteria.
@@ -720,7 +717,7 @@ Recall that these AIC and AICc comparisons are valid because both models
 are fit using restricted maximum likelihood (the default).
 
 Another approach to comparing the fitted models is to perform
-leave-one-out cross validation {[}31{]}. In leave-one-out cross
+leave-one-out cross validation {[}33{]}. In leave-one-out cross
 validation, a single observation is removed from the data, the model is
 re-fit, and a prediction is made for the held-out observation. Then, a
 loss metric like mean-squared-prediction error is computed and used to
@@ -771,7 +768,7 @@ given by \begin{equation*}
 \end{equation*} where
 \(\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2}\mathbf{X}\) and
 \(\boldsymbol{\Sigma}^{-1/2}\) is the inverse square root of the
-covariance matrix, \(\boldsymbol{\Sigma}\) {[}32{]}. The spatial hat
+covariance matrix, \(\boldsymbol{\Sigma}\) {[}34{]}. The spatial hat
 matrix can be viewed as the non-spatial hat matrix applied to
 \(\mathbf{X}^*\) instead of \(\mathbf{X}\). We compute the hat values
 (leverage) by running
@@ -811,7 +808,7 @@ R> residuals(spmod)
 \noindent The response residuals are typically not directly checked for
 linear model assumptions, as they have covariance closely resembling the
 covariance of \(\mathbf{y}\). Pre-multiplying the residuals by
-\(\boldsymbol{\Sigma}^{-1/2}\) yields the Pearson residuals {[}33{]}:
+\(\boldsymbol{\Sigma}^{-1/2}\) yields the Pearson residuals {[}35{]}:
 \begin{equation*}
   \mathbf{e}_{p} = \boldsymbol{\Sigma}^{-1/2}\mathbf{e}_{r}.
 \end{equation*} When the model is correct, the Pearson residuals have
@@ -826,7 +823,7 @@ R> residuals(spmod, type = "pearson")
 \((\mathbf{I} - \mathbf{H}^*)\), which is approximately \(\mathbf{I}\)
 for large sample sizes. Explicitly dividing \(\mathbf{e}_{p}\) by the
 respective diagonal element of \((\mathbf{I} - \mathbf{H}^*)\) yields
-the standardized residuals {[}33{]}: \begin{equation*}
+the standardized residuals {[}35{]}: \begin{equation*}
   \mathbf{e}_{s} = \frac{\mathbf{e}_{p}}{\sqrt{(1 - \text{diag}(\mathbf{H}^*))}},
 \end{equation*} where \(\text{diag}(\mathbf{H}^*)\) denotes the diagonal
 of \(\mathbf{H}^*\). We compute the standardized residuals of the
@@ -865,7 +862,7 @@ should closely follow the normal QQ-line.
 
 An observation is said to be influential if its omission has a large
 impact on model fit. Typically, this is measured using Cook's distance
-{[}34{]}. For the non-spatial model, the Cook's distance of the \(i\)th
+{[}36{]}. For the non-spatial model, the Cook's distance of the \(i\)th
 observation is denoted \(\mathbf{D}\) and given by \begin{equation*}
   \mathbf{D} = \mathbf{e}_{s}^2 \frac{\text{diag}(\mathbf{H})}{p(1 - \text{diag}(\mathbf{H}))},
 \end{equation*} where \(p\) is the dimension of \(\boldsymbol{\beta}\)
@@ -900,7 +897,7 @@ estimated and \(\boldsymbol{\Sigma}\) is replaced with
 \texttt{augment()}}{The broom functions: tidy(), glance(), and augment()}}\label{the-broom-functions-tidy-glance-and-augment}}
 
 The \texttt{tidy()}, \texttt{glance()}, and \texttt{augment()} functions
-from the broom \textbf{\textsf{R}} package {[}35{]} provide convenient
+from the broom \textbf{\textsf{R}} package {[}37{]} provide convenient
 output for many of the model fit and diagnostic metrics discussed in the
 previous two sections. The \texttt{tidy()} function returns a tidy
 tibble of the coefficient table from \texttt{summary()}:
@@ -1065,7 +1062,7 @@ contiguity defines two observations as neighbors if they share at least
 one common boundary. If at least one observation has no neighbors, the
 \texttt{extra} parameter is estimated, which quantifies variability
 among observations without neighbors. By default, \texttt{spautor()}
-uses row standardization {[}22{]} and assumes an independent error
+uses row standardization {[}24{]} and assumes an independent error
 variance (\texttt{ie}) of zero.
 
 We summarize, tidy, glance at, and augment the fitted model by running
@@ -1207,8 +1204,13 @@ R> ggplot(sulfate_preds, aes(color = preds)) +
 It is important to properly specify the \texttt{newdata} object when
 running \texttt{predict()}. If explanatory variables were used to fit
 the model, the same explanatory variables must be included in
-\texttt{newdata} with the same names as they have in \texttt{data}. If
-\texttt{data} is a \texttt{data.frame}, coordinates must be included in
+\texttt{newdata} with the same names as they have in \texttt{data}.
+Additionally, if an explanatory variable is categorical or a factor, the
+values of this variable in \texttt{newdata} must also be values in
+\texttt{data} (e.g., if a categorical variable with values \texttt{"A"},
+and \texttt{"B"} was used to fit the model, the corresponding variable
+in \texttt{newdata} cannot have a value \texttt{"C"}). If \texttt{data}
+is a \texttt{data.frame}, coordinates must be included in
 \texttt{newdata} with the same names as they have in \texttt{data}. If
 \texttt{data} is an \texttt{sf} object, coordinates must be included in
 \texttt{newdata} with the same geometry name as they have in
@@ -1240,6 +1242,10 @@ variable values (i.e., fitted values) and the corresponding
 \begin{verbatim}
 R> predict(sulfmod, newdata = sulfate_preds, interval = "confidence")
 \end{verbatim}
+
+\noindent The \texttt{predict()} output structure changes based on
+\texttt{interval} and \texttt{se.fit}. For more details, run
+\texttt{help("predict.spmodel",\ "spmodel")}.
 
 Previously we used the \texttt{augment()} function to augment
 \texttt{data} with model diagnostics. We can also use \texttt{augment()}
@@ -1440,9 +1446,8 @@ linear models. We briefly discuss some of these features next using the
 advanced feature can be seen by running
 \texttt{vignette("technical",\ "spmodel")}.
 
-\hypertarget{fixing-spatial-covariance-parameters}{%
-\subsection{Fixing Spatial Covariance
-Parameters}\label{fixing-spatial-covariance-parameters}}
+\hypertarget{sec:spcov_init}{%
+\subsection{Fixing Spatial Covariance Parameters}\label{sec:spcov_init}}
 
 We may desire to fix specific spatial covariance parameters at a
 particular value. Perhaps some parameter value is known, for example. Or
@@ -1515,14 +1520,14 @@ model. A likelihood ratio test comparing the full and reduced models is
 also possible using \texttt{anova()}.
 
 Another application of fixing spatial covariance parameters involves
-calculating their profile likelihood confidence intervals {[}36{]}.
+calculating their profile likelihood confidence intervals {[}38{]}.
 Before calculating a profile likelihood confidence interval for
 \(\boldsymbol{\Theta}_i\), the \(i\)th element of a general parameter
 vector \(\boldsymbol{\Theta}\), it is necessary to obtain
 \(-2\ell(\hat{\boldsymbol{\Theta}})\), minus twice the log-likelihood
 evaluated at the estimated parameter vector,
 \(\hat{\boldsymbol{\Theta}}\). Then a \((1 - \alpha)\)\% profile
-likelihood confidence interval is then the set of values for
+likelihood confidence interval is the set of values for
 \(\boldsymbol{\Theta}_i\) such that
 \(2\ell(\hat{\boldsymbol{\Theta}}) - 2\ell(\hat{\boldsymbol{\Theta}}_{-i}) \leq \chi^2_{1, 1 - \alpha}\),
 where \(\ell(\hat{\boldsymbol{\Theta}}_{-i})\) is the value of the
@@ -1538,13 +1543,72 @@ model many times for different fixed values of
 approach can be generalized to yield joint profile likelihood confidence
 intervals cases when \(i\) has dimension greater than one.
 
+\hypertarget{fitting-and-predicting-for-multiple-models}{%
+\subsection{Fitting and Predicting for Multiple
+Models}\label{fitting-and-predicting-for-multiple-models}}
+
+Fitting multiple models is possible with a single call to
+\texttt{splm()} or \texttt{spautor()} when \texttt{spcov\_type} is a
+vector with length greater than one or \texttt{spcov\_initial} is a list
+(with length greater than one) of \texttt{spcov\_initial} objects. We
+fit three separate spatial linear models using the exponential spatial
+covariance, spherical spatial covariance, and no spatial covariance by
+running
+
+\begin{verbatim}
+R> spmods <- splm(
++   sulfate ~ 1,
++   sulfate,
++   spcov_type = c("exponential", "spherical", "none")
++ )
+\end{verbatim}
+
+\noindent Then \texttt{glances()}is used to glance at each fitted model
+object:
+
+\begin{verbatim}
+R> glances(spmods)
+\end{verbatim}
+
+\begin{verbatim}
+# A tibble: 3 x 10
+  model           n     p  npar value   AIC  AICc logLik deviance
+  <chr>       <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>
+1 spherical     197     1     3 1137. 1143. 1143.  -569.     196.
+2 exponential   197     1     3 1140. 1146. 1146.  -570.     196.
+3 none          197     1     1 1448. 1450. 1450.  -724.     196 
+# ... with 1 more variable: pseudo.r.squared <dbl>
+\end{verbatim}
+
+\noindent And \texttt{predict()} is used to predict \texttt{newdata}
+separately fo each fitted model object:
+
+\begin{verbatim}
+R> predict(spmods, newdata = sulfate_preds)
+\end{verbatim}
+
+Currently, \texttt{glances()} and \texttt{predict()} are the only
+\texttt{spmodel} generic functions that operate on an object that
+contains multiple model fits. Generic functions that operate on
+individual models can still be called when the argument is an individual
+model object. For example, we can compute the AIC of the model fit using
+the exponential covariance function by running
+
+\begin{verbatim}
+R> AIC(spmods$exponential)
+\end{verbatim}
+
+\begin{verbatim}
+[1] 1145.824
+\end{verbatim}
+
 \hypertarget{random-effects}{%
 \subsection{Random Effects}\label{random-effects}}
 
 Non-spatial random effects incorporate additional sources of variability
 into model fitting. They are accommodated in \texttt{spmodel} using
-similar syntax as for random effects in the nlme {[}30{]} and lme4
-{[}37{]} \textbf{\textsf{R}} packages. Random effects are specified via
+similar syntax as for random effects in the nlme {[}32{]} and lme4
+{[}39{]} \textbf{\textsf{R}} packages. Random effects are specified via
 a formula passed to the \texttt{random} argument. Next, we show two
 examples that incorporate random effects into the spatial linear model
 using the \texttt{moss} data.
@@ -1601,23 +1665,20 @@ is more than one term in \texttt{random}, each term must be surrounded
 by parentheses (recall that the random intercept shorthand automatically
 includes relevant parentheses).
 
-We glance at all three models by running
+We can compare the AIC of all three models by running
 
 \begin{verbatim}
-R> glances(spmod, rand1, rand2)
+R> AIC(spmod, rand1, rand2)
 \end{verbatim}
 
 \begin{verbatim}
-# A tibble: 3 x 10
-  model     n     p  npar value   AIC  AICc logLik deviance
-  <chr> <int> <dbl> <int> <dbl> <dbl> <dbl>  <dbl>    <dbl>
-1 rand2   365     2     6  190.  202.  202.  -94.9     363.
-2 rand1   365     2     4  335.  343.  343. -168.      363 
-3 spmod   365     2     3  367.  373.  373. -184.      363 
-# ... with 1 more variable: pseudo.r.squared <dbl>
+      df      AIC
+spmod  3 373.2089
+rand1  4 343.1021
+rand2  6 201.8731
 \end{verbatim}
 
-\noindent \texttt{rand2} has the lowest AIC and AICc.
+\noindent The \texttt{rand2} model has the lowest AIC.
 
 It is possible to fix random effect variances using the
 \texttt{randcov\_initial} argument, and \texttt{randcov\_initial} can
@@ -1743,7 +1804,7 @@ The \texttt{sprnorm()} function is used to simulate normal (Gaussian)
 spatial data. To use \texttt{sprnorm()}, the \texttt{spcov\_params()}
 function is used to create an \texttt{spcov\_params} object. The
 \texttt{spcov\_params()} function requires the spatial covariance type
-and and parameter values. We create an \texttt{spcov\_params} object by
+and parameter values. We create an \texttt{spcov\_params} object by
 running
 
 \begin{verbatim}
@@ -1855,9 +1916,9 @@ and if parallel processing is used, the number of cores.
 Big data are most simply accommodated by setting \texttt{local} to
 \texttt{TRUE}. This is shorthand for
 \texttt{local\ =\ list(method\ =\ "random",\ size\ =\ 50,\ var\_adjust\ =\ "theoretical",\ parallel\ =\ FALSE)},
-which randomly assigns observations to groups, ensures each group has
-approximately 50 observations, uses the theoretically-correct covariance
-adjustment, and does not use parallel processing.
+which randomly assigns observations to index groups, ensures each index
+group has approximately 50 observations, uses the theoretically-correct
+covariance adjustment, and does not use parallel processing.
 
 \begin{verbatim}
 R> local1 <- splm(
@@ -1892,7 +1953,7 @@ Coefficients (exponential spatial covariance):
 
 Instead of using \texttt{local\ =\ TRUE}, we can explicitly set
 \texttt{local}. For example, we can fit a model using using k-means
-clustering {[}38{]} on the x-coordinates and y-coordinates to create 60
+clustering {[}40{]} on the x-coordinates and y-coordinates to create 60
 groups (clusters), use the pooled variance adjustment, and use parallel
 processing with two cores by running
 
@@ -2033,9 +2094,10 @@ parameter values, random effects, partition factors, anisotropy,
 simulating data, and big data approximations for model fitting and
 prediction.
 
-We appreciate feedback from users regarding \texttt{spmodel}. To learn
-more about \texttt{spmodel} or provide feedback, please visit our GitHub
-repository at \url{https://github.com/USEPA/spmodel}.
+We appreciate feedback from users regarding \texttt{spmodel}, and we
+have several plans to add new features to \texttt{spmodel} in the
+future. To learn more about \texttt{spmodel} or provide feedback, please
+visit our GitHub repository at \url{https://github.com/USEPA/spmodel}.
 
 \hypertarget{data-and-code-availability}{%
 \section*{Data and Code Availability}\label{data-and-code-availability}}
@@ -2084,185 +2146,193 @@ commercial products, services or enterprises.
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
-\leavevmode\hypertarget{ref-dumelle2022spsurvey}{}%
-1. Dumelle M, Kincaid TM, Olsen AR, Weber MH. Spsurvey: Spatial sampling
-design and analysis. 2022. Available:
-\url{https://CRAN.R-project.org/package=spsurvey}
-
-\leavevmode\hypertarget{ref-dumelle2022comparison}{}%
-2. Dumelle M, Higham M, Ver Hoef JM, Olsen AR, Madsen L. A comparison of
-design-based and model-based approaches for finite population spatial
-sampling and inference. Methods in Ecology and Evolution. 2022.
+\leavevmode\hypertarget{ref-brus1997random}{}%
+1. Brus D, De Gruijter J. Random sampling or geostatistical modelling?
+Choosing between design-based and model-based sampling strategies for
+soil (with discussion). Geoderma. 1997;80: 1--44.
 
 \leavevmode\hypertarget{ref-cressie1993statistics}{}%
-3. Cressie N. Statistics for spatial data. John Wiley \& Sons; 1993.
+2. Cressie N. Statistics for spatial data. John Wiley \& Sons; 1993.
+
+\leavevmode\hypertarget{ref-banerjee2003hierarchical}{}%
+3. Banerjee S, Carlin BP, Gelfand AE. Hierarchical modeling and analysis
+for spatial data. Chapman; Hall/CRC; 2003.
+
+\leavevmode\hypertarget{ref-schabenberger2017statistical}{}%
+4. Schabenberger O, Gotway CA. Statistical methods for spatial data
+analysis: Texts in statistical science. Chapman; Hall/CRC; 2017.
 
 \leavevmode\hypertarget{ref-nychka2021fields}{}%
-4. Nychka D, Furrer R, Paige J, Sain S. Fields: Tools for spatial data.
+5. Nychka D, Furrer R, Paige J, Sain S. Fields: Tools for spatial data.
 Boulder, CO, USA: University Corporation for Atmospheric Research; 2021.
 Available: \url{https://github.com/dnychka/fieldsRPackage}
 
 \leavevmode\hypertarget{ref-zammitmangion2021FRK}{}%
-5. Zammit-Mangion A, Cressie N. FRK: An R package for spatial and
+6. Zammit-Mangion A, Cressie N. FRK: An R package for spatial and
 spatio-temporal prediction with large datasets. Journal of Statistical
 Software. 2021;98: 1--48.
 
 \leavevmode\hypertarget{ref-ribiero2022geoR}{}%
-6. Ribeiro Jr PJ, Diggle P, Christensen O, Schlather M, Bivand R, Ripley
+7. Ribeiro Jr PJ, Diggle P, Christensen O, Schlather M, Bivand R, Ripley
 B. GeoR: Analysis of geostatistical data. 2022. Available:
 \url{https://CRAN.R-project.org/package=geoR}
 
 \leavevmode\hypertarget{ref-guiness2021gpgp}{}%
-7. Guiness J, Katzfuss M, Fahmy Y. GpGp: Fast Gaussian process
+8. Guiness J, Katzfuss M, Fahmy Y. GpGp: Fast Gaussian process
 computation using Vecchia's approximation. 2021. Available:
 \url{https://CRAN.R-project.org/package=GpGp}
 
 \leavevmode\hypertarget{ref-pebesma2004gstat}{}%
-8. Pebesma E. Multivariable geostatistics in S: The gstat package.
+9. Pebesma E. Multivariable geostatistics in S: The gstat package.
 Computers \& Geosciences. 2004;30: 683--691.
 
 \leavevmode\hypertarget{ref-nychka2016latticekrig}{}%
-9. Nychka D, Hammerling D, Sain S, Lenssen N. LatticeKrig:
+10. Nychka D, Hammerling D, Sain S, Lenssen N. LatticeKrig:
 Multiresolution Kriging based on Markov random fields. Boulder, CO, USA:
 University Corporation for Atmospheric Research; 2016.
 doi:\href{https://doi.org/10.5065/D6HD7T1R}{10.5065/D6HD7T1R}
 
 \leavevmode\hypertarget{ref-lindgren2015bayesian}{}%
-10. Lindgren F, Rue H. Bayesian spatial modelling with r-inla. Journal
+11. Lindgren F, Rue H. Bayesian spatial modelling with r-inla. Journal
 of statistical software. 2015;63: 1--25.
 
 \leavevmode\hypertarget{ref-rstan2023rstan}{}%
-11. Stan Development Team. RStan: The R interface to Stan. 2023.
+12. Stan Development Team. RStan: The R interface to Stan. 2023.
 Available: \url{https://mc-stan.org/}
 
 \leavevmode\hypertarget{ref-venables2002S}{}%
-12. Venables WN, Ripley BD. Modern applied statistics with S. Fourth.
+13. Venables WN, Ripley BD. Modern applied statistics with S. Fourth.
 New York: Springer; 2002. Available:
 \url{https://www.stats.ox.ac.uk/pub/MASS4/}
 
 \leavevmode\hypertarget{ref-finley2007spbayes}{}%
-13. Finley AO, Banerjee S, Carlin BP. spBayes: An R package for
+14. Finley AO, Banerjee S, Carlin BP. spBayes: An R package for
 univariate and multivariate hierarchical point-referenced spatial
 models. Journal of Statistical Software. 2007;19: 1--24. Available:
 \url{https://www.jstatsoft.org/article/view/v019i04}
 
 \leavevmode\hypertarget{ref-finley2002spnngp}{}%
-14. Finley AO, Datta A, Banerjee S. spNNGP R package for nearest
+15. Finley AO, Datta A, Banerjee S. spNNGP R package for nearest
 neighbor Gaussian process models. Journal of Statistical Software.
 2022;103: 1--40.
 doi:\href{https://doi.org/10.18637/jss.v103.i05}{10.18637/jss.v103.i05}
 
 \leavevmode\hypertarget{ref-burkner2017brms}{}%
-15. Bürkner P-C. Brms: An r package for bayesian multilevel models using
+16. Bürkner P-C. Brms: An r package for bayesian multilevel models using
 stan. Journal of statistical software. 2017;80: 1--28.
 
 \leavevmode\hypertarget{ref-lee2013carbayes}{}%
-16. Lee D. CARBayes: An R package for Bayesian spatial modeling with
+17. Lee D. CARBayes: An R package for Bayesian spatial modeling with
 conditional autoregressive priors. Journal of Statistical Software.
 2013;55: 1--24. Available:
 \url{https://www.jstatsoft.org/htaccess.php?volume=55\&type=i\&issue=13}
 
+\leavevmode\hypertarget{ref-adin2022bigdm}{}%
+18. Adin A, Orozco-Acosta E, Vicente G, Ugarte MD. BigDM: Scalable
+bayesian disease mapping models for high-dimensional data. 2022.
+Available: \url{https://github.com/spatialstatisticsupna/bigDM}
+
 \leavevmode\hypertarget{ref-ronnegard2010hglm}{}%
-17. Ronnegard L, Shen X, Alam M. Hglm: A package for fitting
+19. Ronnegard L, Shen X, Alam M. Hglm: A package for fitting
 hierarchical generalized linear models. The R Journal. 2010;2: 20--28.
 Available:
 \url{https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Roennegaard~et~al.pdf}
 
 \leavevmode\hypertarget{ref-wickham2016ggplot2}{}%
-18. Wickham H. Ggplot2: Elegant graphics for data analysis.
+20. Wickham H. Ggplot2: Elegant graphics for data analysis.
 Springer-Verlag New York; 2016. Available:
 \url{https://ggplot2.tidyverse.org}
 
 \leavevmode\hypertarget{ref-appelhans2022mapview}{}%
-19. Appelhans T, Detsch F, Reudenbach C, Woellauer S. Mapview:
+21. Appelhans T, Detsch F, Reudenbach C, Woellauer S. Mapview:
 Interactive viewing of spatial data in R. 2022. Available:
 \url{https://CRAN.R-project.org/package=mapview}
 
 \leavevmode\hypertarget{ref-tobler1970computer}{}%
-20. Tobler WR. A computer movie simulating urban growth in the Detroit
+22. Tobler WR. A computer movie simulating urban growth in the Detroit
 region. Economic geography. 1970;46: 234--240.
 
 \leavevmode\hypertarget{ref-anselin2010geoda}{}%
-21. Anselin L, Syabri I, Kho Y. GeoDa: An introduction to spatial data
+23. Anselin L, Syabri I, Kho Y. GeoDa: An introduction to spatial data
 analysis. Handbook of applied spatial analysis. Springer; 2010. pp.
 73--89.
 
 \leavevmode\hypertarget{ref-ver2018spatial}{}%
-22. Ver Hoef JM, Peterson EE, Hooten MB, Hanks EM, Fortin M-J. Spatial
+24. Ver Hoef JM, Peterson EE, Hooten MB, Hanks EM, Fortin M-J. Spatial
 autoregressive models for statistical inference from ecological data.
 Ecological Monographs. 2018;88: 36--59.
 
 \leavevmode\hypertarget{ref-pebesma2018sf}{}%
-23. Pebesma E. Simple features for R: standardized support for spatial
+25. Pebesma E. Simple features for R: standardized support for spatial
 vector data. The R Journal. 2018;10: 439--446.
 doi:\href{https://doi.org/10.32614/RJ-2018-009}{10.32614/RJ-2018-009}
 
 \leavevmode\hypertarget{ref-patterson1971recovery}{}%
-24. Patterson D, Thompson R. Recovery of inter-block information when
+26. Patterson D, Thompson R. Recovery of inter-block information when
 block sizes are unequal. Biometrika. 1971;58: 545--554.
 
 \leavevmode\hypertarget{ref-harville1977maximum}{}%
-25. Harville DA. Maximum likelihood approaches to variance component
+27. Harville DA. Maximum likelihood approaches to variance component
 estimation and to related problems. Journal of the American Statistical
 Association. 1977;72: 320--338.
 
 \leavevmode\hypertarget{ref-wolfinger1994computing}{}%
-26. Wolfinger R, Tobias R, Sall J. Computing Gaussian likelihoods and
+28. Wolfinger R, Tobias R, Sall J. Computing Gaussian likelihoods and
 their derivatives for general linear mixed models. SIAM Journal on
 Scientific Computing. 1994;15: 1294--1310.
 
 \leavevmode\hypertarget{ref-cressie1985fitting}{}%
-27. Cressie N. Fitting variogram models by weighted least squares.
+29. Cressie N. Fitting variogram models by weighted least squares.
 Journal of the international Association for mathematical Geology.
 1985;17: 563--586.
 
 \leavevmode\hypertarget{ref-curriero1999composite}{}%
-28. Curriero FC, Lele S. A composite likelihood approach to
+30. Curriero FC, Lele S. A composite likelihood approach to
 semivariogram estimation. Journal of Agricultural, biological, and
 Environmental statistics. 1999; 9--28.
 
 \leavevmode\hypertarget{ref-hoeting2006model}{}%
-29. Hoeting JA, Davis RA, Merton AA, Thompson SE. Model selection for
+31. Hoeting JA, Davis RA, Merton AA, Thompson SE. Model selection for
 geostatistical models. Ecological Applications. 2006;16: 87--98.
 
 \leavevmode\hypertarget{ref-pinheiro2006mixed}{}%
-30. Pinheiro J, Bates D. Mixed-effects models in S and S-PLUS. Springer
+32. Pinheiro J, Bates D. Mixed-effects models in S and S-PLUS. Springer
 science \& business media; 2006.
 
 \leavevmode\hypertarget{ref-hastie2009elements}{}%
-31. Hastie T, Tibshirani R, Friedman JH, Friedman JH. The elements of
+33. Hastie T, Tibshirani R, Friedman JH, Friedman JH. The elements of
 statistical learning: Data mining, inference, and prediction. Springer;
 2009.
 
 \leavevmode\hypertarget{ref-montgomery2021introduction}{}%
-32. Montgomery DC, Peck EA, Vining GG. Introduction to linear regression
+34. Montgomery DC, Peck EA, Vining GG. Introduction to linear regression
 analysis. John Wiley \& Sons; 2021.
 
 \leavevmode\hypertarget{ref-myers2012generalized}{}%
-33. Myers RH, Montgomery DC, Vining GG, Robinson TJ. Generalized linear
+35. Myers RH, Montgomery DC, Vining GG, Robinson TJ. Generalized linear
 models: With applications in engineering and the sciences. John Wiley \&
 Sons; 2012.
 
 \leavevmode\hypertarget{ref-cook1982residuals}{}%
-34. Cook RD, Weisberg S. Residuals and influence in regression. New
+36. Cook RD, Weisberg S. Residuals and influence in regression. New
 York: Chapman; Hall; 1982.
 
 \leavevmode\hypertarget{ref-robinson2021broom}{}%
-35. Robinson D, Hayes A, Couch S. Broom: Convert statistical objects
+37. Robinson D, Hayes A, Couch S. Broom: Convert statistical objects
 into tidy tibbles. 2021. Available:
 \url{https://CRAN.R-project.org/package=broom}
 
 \leavevmode\hypertarget{ref-box1964analysis}{}%
-36. Box GE, Cox DR. An analysis of transformations. Journal of the Royal
+38. Box GE, Cox DR. An analysis of transformations. Journal of the Royal
 Statistical Society: Series B (Methodological). 1964;26: 211--243.
 
 \leavevmode\hypertarget{ref-bates2015lme4}{}%
-37. Bates D, Mächler M, Bolker B, Walker S. Fitting linear mixed-effects
+39. Bates D, Mächler M, Bolker B, Walker S. Fitting linear mixed-effects
 models using lme4. Journal of Statistical Software. 2015;67: 1--48.
 doi:\href{https://doi.org/10.18637/jss.v067.i01}{10.18637/jss.v067.i01}
 
 \leavevmode\hypertarget{ref-macqueen1967some}{}%
-38. MacQueen J, others. Some methods for classification and analysis of
+40. MacQueen J, others. Some methods for classification and analysis of
 multivariate observations. Proceedings of the fifth berkeley symposium
 on mathematical statistics and probability. Oakland, CA, USA; 1967. pp.
 281--297.
