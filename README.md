@@ -13,7 +13,7 @@
 ### Abstract
 
 `spmodel` is an **R** package used to fit, summarize, and predict
-  for a variety spatial statistical models applied to point-referenced or areal (lattice) data. Parameters are estimated using various methods. Additional modeling features include anisotropy, random effects, partition factors, big data approaches, and more.   Model-fit statistics are used to summarize, visualize, and compare models. Predictions at unobserved locations are readily obtainable. This manuscript corresponds to `spmodel` version 0.1.0.
+  for a variety spatial statistical models applied to point-referenced or areal (lattice) data. Parameters are estimated using various methods. Additional modeling features include anisotropy, random effects, partition factors, big data approaches, and more.   Model-fit statistics are used to summarize, visualize, and compare models. Predictions at unobserved locations are readily obtainable. 
 
 ### Package Overview
 

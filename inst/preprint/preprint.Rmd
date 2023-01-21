@@ -23,7 +23,7 @@ abstract: |
   \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
   for a variety spatial statistical models applied to point-referenced or areal (lattice) data. Parameters are estimated using various
   methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
-  readily obtainable. This manuscript corresponds to \texttt{spmodel} version 0.1.0.
+  readily obtainable. 
 bibliography: references.bib
 output: rticles::plos_article
 # plos.csl can be download and used locally
@@ -54,10 +54,9 @@ Spatial data are ubiquitous in everyday life and the scientific literature. As s
 
 `spmodel` implements model-based inference, which relies on fitting a statistical model. Model-based inference is different than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample. Spatial random sampling and design-based inference can be performed using the `spsurvey` $\textbf{\textsf{R}}$ package [@dumelle2022spsurvey]. Random sampling, while not explicitly required, can still benefit model-based inference when analyzing spatial data [@dumelle2022comparison].
 
-@cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (area data is sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. 
+@cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (areal data are sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. 
 
-Several $\textbf{\textsf{R}}$ packages exist on CRAN that analyze either point-referenced or areal spatial data. For point-referenced data, they include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. For areal data, they include `CARBayes` [@lee2013carbayes] and `hglm` [@ronnegard2010hglm]. Unlike these aforementioned packages, `spmodel` is designed to analyze both point-referenced and areal data using a common framework and syntax structure. `spmodel` also offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages -- together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, random effects, anisotropy, big data methods, prediction, and more.
-
+Several $\textbf{\textsf{R}}$ packages exist on CRAN that analyze either point-referenced or areal spatial data. For point-referenced data, they include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `R-inla` [@lindgren2015bayesian], `rstan` [@rstan2023rstan], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. For areal data, they include `brms` [@burkner2017brms], `CARBayes` [@lee2013carbayes] and `hglm` [@ronnegard2010hglm]. Unlike these aforementioned packages, `spmodel` is designed to analyze both point-referenced and areal data using a common framework and syntax structure. `spmodel` also offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages -- together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, non-spatial random effects, anisotropy, big data methods, prediction, the option to fix spatial covariance parameters at known values, and more.
 
 The rest of this article is organized as follows. We first give a brief theoretical introduction to spatial linear models. We then outline the variety of methods used to estimate the parameters of spatial linear models. Next we explain how to obtain predictions at unobserved locations. Following that, we detail some advanced modeling features, including random effects, partition factors, anisotropy, and big data approaches. Finally we end with a short discussion. 
 
@@ -74,6 +73,8 @@ library(ggplot2)
 ```
 
 We also show code that can be used to create interactive visualizations of spatial data with `mapview` [@appelhans2022mapview]. `mapview` has many backgrounds available that contextualize spatial data with topographical information. Before running the `mapview` code provided interactively, make sure that `mapview` is installed and loaded.
+
+`spmodel` contains various methods for generic functions defined outside of `spmodel`. To find relevant documentation for these methods, run `help("generic.spmodel", "spmodel")` (e.g., `help("fitted.spmodel", "spmodel")`, `?help("summary.spmodel", "spmodel")`, `help("plot.spmodel", "spmodel")`, `?help("predict.spmodel", "spmodel")`, `help("tidy.spmodel", "spmodel")`, etc.) . We provide more details and examples regarding these methods and generics throughout this vignette. For a full list of `spmodel` functions available, see `spmodel`'s documentation manual.
 
 # The Spatial Linear Model {#sec:theomodel}
 
@@ -120,7 +121,7 @@ In the following subsections, we use the point-referenced `moss` data, an `sf` o
 
 ```{r, echo = FALSE}
 # set global print option
-options(width = 80)
+options(width = 65)
 ```
 
 ```{r}
@@ -132,7 +133,7 @@ moss
 options(width = 80)
 ```
 
-We can learn more about `moss` by running `help("moss", "spmodel")`, and we can visualize the distribution of log zinc concentration in `moss` (Fig 1) by running
+\noindent We can learn more about `moss` by running `help("moss", "spmodel")`, and we can visualize the distribution of log zinc concentration in `moss` (Fig 1) by running
 ```{r log_zn, eval = FALSE}
 ggplot(moss, aes(color = log_Zn)) +
   geom_sf(size = 2) +
@@ -142,7 +143,7 @@ ggplot(moss, aes(color = log_Zn)) +
 
 **Fig 1.Distribution of log zinc concentration in the moss data.**
 
-Log zinc concentration can be viewed interactively in `mapview` by running
+\noindent Log zinc concentration can be viewed interactively in `mapview` by running
 ```{r, eval = FALSE}
 mapview(moss, zcol = "log_Zn")
 ```
@@ -155,13 +156,11 @@ We estimate parameters of a spatial linear model regressing log zinc concentrati
 ```{r}
 spmod <- splm(log_Zn ~ log_dist2road, moss, spcov_type = "exponential")
 ```
-
-We summarize the model fit by running
+\noindent We summarize the model fit by running
 ```{r}
 summary(spmod)
 ```
-
-The fixed effects coefficient table contains estimates, standard errors, z-statistics, and asymptotic p-values for each fixed effect. From this table, we notice there is evidence that mean log zinc concentration significantly decreases with distance from the haul road (p-value < 2e-16). We see the fixed effect estimates by running
+\noindent The fixed effects coefficient table contains estimates, standard errors, z-statistics, and asymptotic p-values for each fixed effect. From this table, we notice there is evidence that mean log zinc concentration significantly decreases with distance from the haul road (p-value < 2e-16). We see the fixed effect estimates by running
 ```{r}
 coef(spmod)
 ```
@@ -173,20 +172,16 @@ ie_val <- as.vector(round(spcov_params_val[["ie"]], digits = 3))
 range_val <- as.vector(round(spcov_params_val[["range"]], digits = 0))
 eff_range_val <- 3 * range_val
 ```
-
-The model summary also contains the exponential spatial covariance parameter estimates, which we can view by running
+\noindent The model summary also contains the exponential spatial covariance parameter estimates, which we can view by running
 ```{r}
 coef(spmod, type = "spcov")
 ```
-
-The dependent random error variance ($\sigma^2_{de}$) is estimated to be approximately `r de_val` and the independent random error variance ($\sigma^2_{ie}$) is estimated to be approximately `r ie_val`. The range ($\phi$) is estimated to be approximately `r format(range_val, big.mark = ",")`. The effective range is the distance at which the spatial covariance is approximately zero. For the exponential covariance, the effective range is $3\phi$. This means that observations whose distance is greater than `r format(eff_range_val, big.mark = ",")` meters are approximately uncorrelated. The `rotate` and `scale` parameters affect the modeling of anisotropy, which we discuss later. By default, `rotate` and `scale` are assumed to be zero and one, respectively, which means that anisotropy is not modeled (i.e., the spatial covariance is assumed isotropic, or independent of direction). We visualize the fitted spatial covariance function (Fig 2) by running
+\noindent The dependent random error variance ($\sigma^2_{de}$) is estimated to be approximately `r de_val` and the independent random error variance ($\sigma^2_{ie}$) is estimated to be approximately `r ie_val`. The range ($\phi$) is estimated to be approximately `r format(range_val, big.mark = ",")`. The effective range is the distance at which the spatial covariance is approximately zero. For the exponential covariance, the effective range is $3\phi$. This means that observations whose distance is greater than `r format(eff_range_val, big.mark = ",")` meters are approximately uncorrelated. The `rotate` and `scale` parameters affect the modeling of anisotropy, which we discuss later. By default, `rotate` and `scale` are assumed to be zero and one, respectively, which means that anisotropy is not modeled (i.e., the spatial covariance is assumed isotropic, or independent of direction). We visualize the fitted spatial covariance function (Fig 2) by running
 ```{r emp_spcov, eval = FALSE}
 plot(spmod, which = 7)
 ```
 
 **Fig 2. Empirical spatial covariance of the fitted model.** The open circle at a distance of zero represents the $\sigma^2_{de} + \sigma^2_{ie}$. The solid line at positive distances represents $\sigma^2_{de} \mathbf{R}$ at a particular distance.
-
-We can learn more about the visualizations available for fitted models by running `help("plot.spmod", "spmodel")`.
 
 ## Model-Fit Statistics
 
@@ -198,7 +193,7 @@ where $\mathcal{D}_{\boldsymbol{\hat{\beta}}}$ is the deviance of the fitted mod
 ```{r}
 pseudoR2(spmod)
 ```
-Roughly `r 100 * round(pseudoR2(spmod), digits = 2)`% of the variability in log zinc is explained by log distance from the road. The pseudo R-squared can be adjusted to account for the number of explanatory variables using the `adjust` argument. Pseudo R-squared (and the adjusted version) is most helpful for comparing models that have the same covariance structure. 
+\noindent Roughly `r 100 * round(pseudoR2(spmod), digits = 2)`% of the variability in log zinc is explained by log distance from the road. The pseudo R-squared can be adjusted to account for the number of explanatory variables using the `adjust` argument. Pseudo R-squared (and the adjusted version) is most helpful for comparing models that have the same covariance structure. 
 
 The next two model-fit statistics we consider are the AIC and AICc that [@hoeting2006model] derive for spatial data. The AIC and AICc evaluate the fit of a model with a penalty for the number of parameters estimated. This penalty balances model fit and model parsimony. Lower AIC and AICc indicate a better balance of model fit and parsimony. The AICc is a correction to AIC that is better suited for small sample sizes. As the sample size increases, AIC and AICc converge. 
 
@@ -215,20 +210,19 @@ Suppose we want to quantify the difference in model quality between the spatial 
 ```{r}
 lmod <- splm(log_Zn ~ log_dist2road, moss, spcov_type = "none")
 ```
-
-This model is equivalent to one fit using `lm()`. We compute the spatial AIC and AICc of the spatial model and non-spatial model by running
+\noindent This model is equivalent to one fit using `lm()`. We compute the spatial AIC and AICc of the spatial model and non-spatial model by running
 ```{r}
 AIC(spmod, lmod)
 AICc(spmod, lmod)
 ```
-The noticeably lower AIC and AICc of of the spatial model indicate that it is a better fit to the data than the non-spatial model. 
+\noindent The noticeably lower AIC and AICc of of the spatial model indicate that it is a better fit to the data than the non-spatial model. Recall that these AIC and AICc comparisons are valid because both models are fit using restricted maximum likelihood (the default).
 
 Another approach to comparing the fitted models is to perform leave-one-out cross validation [@hastie2009elements]. In leave-one-out cross validation, a single observation is removed from the data, the model is re-fit, and a prediction is made for the held-out observation. Then, a loss metric like mean-squared-prediction error is computed and used to evaluate model fit. The lower the mean-squared-prediction error, the better the model fit. For computational efficiency, leave-one-out cross validation in `spmodel` is performed by first estimating $\boldsymbol{\theta}$ using all the data and then re-estimating $\boldsymbol{\beta}$ for each observation. We perform leave-one-out cross validation for the spatial and non-spatial model by running
 ```{r}
 loocv(spmod)
 loocv(lmod)
 ```
-The noticeably lower mean-squared-prediction error of the spatial model indicates that it is a better fit to the data than the non-spatial model.
+\noindent The noticeably lower mean-squared-prediction error of the spatial model indicates that it is a better fit to the data than the non-spatial model.
 
 ## Diagnostics
 
@@ -246,7 +240,7 @@ where $\mathbf{X}^* = \boldsymbol{\Sigma}^{-1/2}\mathbf{X}$ and $\boldsymbol{\Si
 ```{r, results = "hide"}
 hatvalues(spmod)
 ```
-Larger hat values indicate more leverage. 
+\noindent Larger hat values indicate more leverage, and observations with large hat values may be unusual and warrant further investigation. 
 
 The fitted value of an observation is the estimated mean response given the observation's explanatory variable values and the model fit:
 \begin{equation*}
@@ -256,17 +250,17 @@ We compute the fitted values by running
 ```{r, results = "hide"}
 fitted(spmod)
 ```
-Best linear unbiased predictions for the spatially dependent random errors ($\boldsymbol{\tau}$), spatially independent random errors ($\boldsymbol{\epsilon}$), and random effects can also be obtained via `fitted()` by changing the `type` argument.
+\noindent Fitted values for the spatially dependent random errors ($\boldsymbol{\tau}$), spatially independent random errors ($\boldsymbol{\epsilon}$), and random effects can also be obtained via `fitted()` by changing the `type` argument.
 
-The residuals measure each response's deviation from its fitted value. The raw residuals are given by
+The residuals measure each response's deviation from its fitted value. The response residuals are given by
 \begin{equation*}
   \mathbf{e}_{r} = \mathbf{y} - \hat{\mathbf{y}}.
 \end{equation*}
-We compute the raw residuals of the spatial model by running
+We compute the response residuals of the spatial model by running
 ```{r, results = "hide"}
 residuals(spmod)
 ```
-The raw residuals are typically not directly checked for linear model assumptions, as they have covariance closely resembling the covariance of $\mathbf{y}$. Pre-multiplying the residuals by $\boldsymbol{\Sigma}^{-1/2}$ yields the Pearson residuals [@myers2012generalized]:
+\noindent The response residuals are typically not directly checked for linear model assumptions, as they have covariance closely resembling the covariance of $\mathbf{y}$. Pre-multiplying the residuals by $\boldsymbol{\Sigma}^{-1/2}$ yields the Pearson residuals [@myers2012generalized]:
 \begin{equation*}
   \mathbf{e}_{p} = \boldsymbol{\Sigma}^{-1/2}\mathbf{e}_{r}.
 \end{equation*}
@@ -274,29 +268,30 @@ When the model is correct, the Pearson residuals have mean zero, variance approx
 ```{r, results = "hide"}
 residuals(spmod, type = "pearson")
 ```
-The covariance of $\mathbf{e}_{p}$ is $(\mathbf{I} - \mathbf{H}^*)$, which is approximately $\mathbf{I}$ for large sample sizes. Explicitly dividing $\mathbf{e}_{p}$ by the respective diagonal element of $(\mathbf{I} - \mathbf{H}^*)$ yields the standardized residuals [@myers2012generalized]:
+\noindent The covariance of $\mathbf{e}_{p}$ is $(\mathbf{I} - \mathbf{H}^*)$, which is approximately $\mathbf{I}$ for large sample sizes. Explicitly dividing $\mathbf{e}_{p}$ by the respective diagonal element of $(\mathbf{I} - \mathbf{H}^*)$ yields the standardized residuals [@myers2012generalized]:
 \begin{equation*}
   \mathbf{e}_{s} = \frac{\mathbf{e}_{p}}{\sqrt{(1 - \text{diag}(\mathbf{H}^*))}},
 \end{equation*}
 where $\text{diag}(\mathbf{H}^*)$ denotes the diagonal of $\mathbf{H}^*$.
-
 We compute the standardized residuals of the spatial model by running
 ```{r, results = "hide"}
 residuals(spmod, type = "standardized")
 ```
-or
+\noindent or
 ```{r, results = "hide"}
 rstandard(spmod)
 ```
-When the model is correct, the standardized residuals have mean zero, variance one, and are uncorrelated. It is common to check linear model assumptions through visualizations. We can visualize the standardized residuals vs fitted values by running
+\noindent When the model is correct, the standardized residuals have mean zero, variance one, and are uncorrelated. 
+
+It is common to check linear model assumptions through visualizations. We can visualize the standardized residuals vs fitted values by running
 ```{r r_vs_f, fig.cap="Standardized residuals vs fitted values of fitted model.", out.width="75%", fig.align="center", eval = FALSE}
 plot(spmod, which = 1) # figure omitted
 ```
-When the model is correct, the standardized residuals should be evenly spread around zero with no discernible pattern. We can visualize a normal QQ-plot of the standardized residuals by running
+\noindent When the model is correct, the standardized residuals should be evenly spread around zero with no discernible pattern. We can visualize a normal QQ-plot of the standardized residuals by running
 ```{r, eval = FALSE}
 plot(spmod, which = 2) # figure omitted
 ```
-When the standardized residuals are normally distributed, they should closely follow the normal QQ-line.
+\noindent When the standardized residuals are normally distributed, they should closely follow the normal QQ-line.
 
 An observation is said to be influential if its omission has a large impact on model fit. Typically, this is measured using Cook's distance [@cook1982residuals]. For the non-spatial model, the Cook's distance of the $i$th observation is denoted $\mathbf{D}$ and given by
 \begin{equation*}
@@ -308,11 +303,11 @@ For a spatial model, the Cook's distance of the $i$th observation is denoted $\m
 \begin{equation*}
   \mathbf{D}^* = \mathbf{e}_{s}^2 \frac{\text{diag}(\mathbf{H}^*)}{p(1 - \text{diag}(\mathbf{H}^*))} .
 \end{equation*}
-A larger Cook's distance indicates more influence from the observation. We compute Cook's distance by running
+A larger Cook's distance indicates more influence, and observations with large Cook's distance values may be unusual and warrant further investigation. We compute Cook's distance by running
 ```{r, results = "hide"}
 cooks.distance(spmod)
 ```
-The Cook's distance versus leverage (hat values) can be visualized by running
+\noindent The Cook's distance versus leverage (hat values) can be visualized by running
 ```{r d_vs_l, fig.cap="Cook's distance vs leverage of fitted model.", out.width="75%", fig.align="center", eval = FALSE}
 plot(spmod, which = 6) # figure omitted
 ```
@@ -325,7 +320,7 @@ The `tidy()`, `glance()`, and `augment()` functions from the broom \textbf{\text
 ```{r}
 tidy(spmod)
 ```
-This tibble format makes it easy to pull out the coefficient names, estimates, standard errors, z-statistics, and p-values from the `summary()` output. 
+\noindent This tibble format makes it easy to pull out the coefficient names, estimates, standard errors, z-statistics, and p-values from the `summary()` output. 
 
 The `glance()` function returns a tidy tibble of model-fit statistics:
 ```{r}
@@ -352,7 +347,7 @@ Finally, the `augment()` function augments the original data with model diagnost
 ```{r}
 augment(spmod)
 ```
-By default, only the columns of `data` used to fit the model are returned alongside the diagnostics. All original columns of `data` are returned by setting `drop` to `FALSE`. `augment()` is especially powerful when the data are an `sf` object because model diagnostics can be easily visualized spatially. For example, we could subset the augmented object so that it only includes observations whose standardized residuals have absolute values greater than some cutoff and then map them. To learn more about the broom functions for spatial linear models, run `help("tidy.spmod", "spmodel")`, `help("glance.spmod", "spmodel")`, and `help("augment.spmod", "spmodel")`.
+\noindent By default, only the columns of `data` used to fit the model are returned alongside the diagnostics. All original columns of `data` are returned by setting `drop` to `FALSE`. `augment()` is especially powerful when the data are an `sf` object because model diagnostics can be easily visualized spatially. For example, we could subset the augmented object so that it only includes observations whose standardized residuals have absolute values greater than some cutoff and then map them. 
 
 ## An Areal Data Example
 
@@ -372,7 +367,7 @@ seal
 options(width = 80)
 ```
 
-We can learn more about the data by running `help("seal", "spmodel")`.
+\noindent We can learn more about the data by running `help("seal", "spmodel")`.
 
 We can visualize the distribution of log seal trends in the `seal` data (Fig 3) by running
 ```{r log_trend, eval = FALSE}
@@ -384,7 +379,7 @@ ggplot(seal, aes(fill = log_trend)) +
 
 **Fig 3. Distribution of log seal trends in the seal data.** Polygons are gray if seal trends are missing.
 
-Log trends can be viewed interactively in `mapview` by running
+\noindent Log trends can be viewed interactively in `mapview` by running
 ```{r, eval = FALSE}
 mapview(seal, zcol = "log_trend")
 ```
@@ -398,7 +393,21 @@ sealmod <- spautor(log_trend ~ 1, seal, spcov_type = "car")
 
 If a weight matrix is not provided to `spautor()`, it is calculated internally using queen contiguity. Recall that queen contiguity defines two observations as neighbors if they share at least one common boundary. If at least one observation has no neighbors, the `extra` parameter is estimated, which quantifies variability among observations without neighbors. By default, `spautor()` uses row standardization [@ver2018spatial] and assumes an independent error variance (`ie`) of zero. 
 
-We tidy and glance at the fitted model and augment the data by running
+We summarize, tidy, glance at, and augment the fitted model by running
+```{r, echo = FALSE}
+# set global print option
+options(width = 60)
+```
+
+```{r}
+summary(sealmod)
+```
+
+```{r, echo = FALSE}
+# set global print option
+options(width = 80)
+```
+
 ```{r}
 tidy(sealmod)
 glance(sealmod)
@@ -418,6 +427,8 @@ augment(sealmod)
 options(width = 80)
 ```
 
+Note that for `spautor()` models, the `ie` spatial covariance parameter is assumed zero by default (and omitted from the `summary()` output). This default behavior can be overridden by specifying `ie` in the `spcov_initial` argument to `spautor()`. Also note that the pseudo R-squared is zero because there are no explanatory variables in the model (i.e., it is an intercept-only model).
+
 # Prediction {#sec:prediction}
 
 In this section, we show how to use `predict()` to perform spatial prediction (also called Kriging) in `spmodel`. We will fit a model using the point-referenced `sulfate` data, an `sf` object that contains sulfate measurements in the conterminous United States, and make predictions for each location in the point-referenced `sulfate_preds` data, an `sf` object that contains locations in the conterminous United States at which to predict sulfate.
@@ -436,12 +447,11 @@ We then fit a spatial linear model for sulfate using an intercept-only model wit
 ```{r}
 sulfmod <- splm(sulfate ~ 1, sulfate, spcov_type = "spherical")
 ```
-Then we obtain best linear unbiased predictions (Kriging predictions) using `predict()`. The `newdata` argument contains the locations at which to predict, and we store the predictions as a new variable in `sulfate_preds` called `preds` by running
+\noindent Then we obtain best linear unbiased predictions (Kriging predictions) using `predict()`. The `newdata` argument contains the locations at which to predict, and we store the predictions as a new variable in `sulfate_preds` called `preds` by running
 ```{r, results = "hide"}
 sulfate_preds$preds <- predict(sulfmod, newdata = sulfate_preds)
 ```
-
-We can then visualize the model predictions (Fig 4B) by running
+\noindent We can visualize the model predictions (Fig 4B) by running
 ```{r, eval = FALSE}
 ggplot(sulfate_preds, aes(color = preds)) +
   geom_sf(size = 2.5) +
@@ -468,11 +478,11 @@ Prediction standard errors are returned by setting the `se.fit` argument to `TRU
 ```{r, results = "hide"}
 predict(sulfmod, newdata = sulfate_preds, se.fit = TRUE)
 ```
-The `interval` argument determines the type of interval returned. If `interval` is `"none"` (the default), no intervals are returned. If `interval` is `"prediction"`, then `100 * level`% prediction intervals are returned (the default is 95% prediction intervals):
+\noindent The `interval` argument determines the type of interval returned. If `interval` is `"none"` (the default), no intervals are returned. If `interval` is `"prediction"`, then `100 * level`% prediction intervals are returned (the default is 95% prediction intervals):
 ```{r, results = "hide"}
 predict(sulfmod, newdata = sulfate_preds, interval = "prediction")
 ```
-If `interval` is `"confidence"`, the predictions are instead the estimated mean given each observation's explanatory variable values (i.e., fitted values) and the corresponding `100 * level`% confidence intervals are returned:
+\noindent If `interval` is `"confidence"`, the predictions are instead the estimated mean given each observation's explanatory variable values (i.e., fitted values) and the corresponding `100 * level`% confidence intervals are returned:
 ```{r, results = "hide"}
 predict(sulfmod, newdata = sulfate_preds, interval = "confidence")
 ```
@@ -481,8 +491,7 @@ Previously we used the `augment()` function to augment `data` with model diagnos
 ```{r}
 sulfate_preds$preds <- NULL
 ```
-
-We then view the first few rows of `sulfate_preds` augmented with a 90% prediction interval by running
+\noindent We then view the first few rows of `sulfate_preds` augmented with a 90% prediction interval by running
 ```{r}
 augment(
   sulfmod,
@@ -491,15 +500,14 @@ augment(
   level = 0.90
 )
 ```
-Here `.fitted` represents the predictions, `.lower` represents the lower bound of the 90% prediction intervals, and `.upper` represents the upper bound of the 95% prediction intervals.
+\noindent Here `.fitted` represents the predictions, `.lower` represents the lower bound of the 90% prediction intervals, and `.upper` represents the upper bound of the 95% prediction intervals.
 
 An alternative (but equivalent) approach can be used for model fitting and prediction that circumvents the need to keep `data` and `newdata` as separate objects. Suppose that observations requiring prediction are stored in `data` as missing (`NA`) values. We can add a column of missing values to `sulfate_preds` and then bind it together with `sulfate` by running
 ```{r}
 sulfate_preds$sulfate <- NA
 sulfate_with_NA <- rbind(sulfate, sulfate_preds)
 ```
-
-We can then fit a spatial linear model by running
+\noindent We can then fit a spatial linear model by running
 ```{r}
 sulfmod_with_NA <- splm(
   sulfate ~ 1,
@@ -507,18 +515,15 @@ sulfmod_with_NA <- splm(
   spcov_type = "spherical"
 )
 ```
-
-The missing values are ignored for model-fitting but stored in `sulfmod_with_NA` as `newdata`:
+\noindent The missing values are ignored for model-fitting but stored in `sulfmod_with_NA` as `newdata`:
 ```{r}
 sulfmod_with_NA$newdata
 ```
-
-We can then predict the missing values by running
+\noindent We can then predict the missing values by running
 ```{r, results = "hide"}
 predict(sulfmod_with_NA)
 ```
-
-The call to `predict()` finds in `sulfmod_with_NA` the `newdata` object and is equivalent to
+\noindent The call to `predict()` finds in `sulfmod_with_NA` the `newdata` object and is equivalent to
 ```{r, results = "hide"}
 predict(sulfmod_with_NA, newdata = sulfmod_with_NA$newdata)
 ```
@@ -527,13 +532,13 @@ We can also use `augment()` to make the predictions for the data set with missin
 ```{r}
 augment(sulfmod_with_NA, newdata = sulfmod_with_NA$newdata)
 ```
-Unlike `predict()`, `augment()` explicitly requires the `newdata` argument be specified in order to obtain predictions. Omitting `newdata` (e.g., running `augment(sulfmod_with_NA)`) returns model diagnostics, not predictions.
+\noindent Unlike `predict()`, `augment()` explicitly requires the `newdata` argument be specified in order to obtain predictions. Omitting `newdata` (e.g., running `augment(sulfmod_with_NA)`) returns model diagnostics, not predictions.
 
 For areal data models fit with `spautor()`, predictions cannot be computed at locations that were not incorporated in the neighborhood structure used to fit the model. Thus, predictions are only possible for observations in `data` whose response values are missing (`NA`), as their locations are incorporated into the neighborhood structure. For example, we make predictions of log seal trends at the missing polygons from Fig 3 by running
 ```{r, results = "hide"}
 predict(sealmod)
 ```
-We can also use `augment()` to make the predictions:
+\noindent We can also use `augment()` to make the predictions:
 
 ```{r, echo = FALSE}
 # set global print option
@@ -562,11 +567,11 @@ As an example, suppose our goal is to compare a model with an exponential covari
 init <- spcov_initial("exponential", ie = 0, known = "ie")
 init
 ```
-The `init` output shows that the `ie` parameter has an initial value of zero that is assumed to be known. Next the model is fit:
+\noindent The `init` output shows that the `ie` parameter has an initial value of zero that is assumed to be known. Next the model is fit:
 ```{r}
 spmod_red <- splm(log_Zn ~ log_dist2road, moss, spcov_initial = init)
 ```
-Notice that because the `spcov_initial` object contains information about the spatial covariance type, the `spcov_type` argument is not required when `spcov_initial` is provided. We can use `glances()` to glance at both models:
+\noindent Notice that because the `spcov_initial` object contains information about the spatial covariance type, the `spcov_type` argument is not required when `spcov_initial` is provided. We can use `glances()` to glance at both models:
 
 ```{r, echo = FALSE}
 # set global print option
@@ -599,7 +604,7 @@ rand1 <- splm(
   random = ~ sample
 )
 ```
-Note that `~ sample` is shorthand for `~ (1 | sample)`, which is more explicit notation that indicates random intercepts for each level of `sample`.
+\noindent Note that `~ sample` is shorthand for `~ (1 | sample)`, which is more explicit notation that indicates random intercepts for each level of `sample`.
 
 The second example adds a random intercept for `year`, which creates extra correlation for observations within a year. It also adds a random slope for `log_dist2road` within `year`, which lets the effect of `log_dist2road` vary between years. We fit this model by running
 ```{r}
@@ -610,7 +615,7 @@ rand2 <- splm(
   random = ~ sample + (log_dist2road | year)
 )
 ```
-Note that `~ sample + (log_dist2road | year)` is shorthand for `~ (1 | sample) + (log_dist2road | year)`. If only random slopes within a year are desired (and no random intercepts), a `- 1` is given to the relevant portion of the formula: `(log_dist2road - 1 | year)`. When there is more than one term in `random`, each term must be surrounded by parentheses (recall that the random intercept shorthand automatically includes relevant parentheses). 
+\noindent Note that `~ sample + (log_dist2road | year)` is shorthand for `~ (1 | sample) + (log_dist2road | year)`. If only random slopes within a year are desired (and no random intercepts), a `- 1` is given to the relevant portion of the formula: `(log_dist2road - 1 | year)`. When there is more than one term in `random`, each term must be surrounded by parentheses (recall that the random intercept shorthand automatically includes relevant parentheses). 
 
 We glance at all three models by running
 
@@ -628,7 +633,7 @@ glances(spmod, rand1, rand2)
 options(width = 80)
 ```
 
-`rand2` has the lowest AIC and AICc.
+\noindent `rand2` has the lowest AIC and AICc.
 
 It is possible to fix random effect variances using the `randcov_initial` argument, and `randcov_initial` can also be used to set initial values for optimization.
 
@@ -646,7 +651,7 @@ part <- splm(
 
 ## Anisotropy {#sec:anisotropy}
 
-A spatial covariance function for point-referenced data is isotropic if it behaves similarly in all directions (i.e., is independent of direction) as a function of distance. An anisotropic covariance function does not behave similarly in all directions as a function of distance. Consider the spatial covariance imposed by an eastward-moving wind pattern. A one-unit distance in the x-direction likely means something different than a one-unit distance in the y-direction. Fig 5 shows ellipses for an isotropic and anisotropic covariance function centered at the origin (a distance of zero). The black outline of each ellipse is a level curve of equal correlation. The left ellipse (a circle) represents an isotropic covariance function. The distance at which the correlation between two observations lays on the level curve is the same in all directions. The right ellipse represents an anisotropic covariance function. The distance at which the correlation between two observations lays on the level curve is different in different directions. 
+An isotroptic spatial covariance function (for point-referenced data) behaves similarly in all directions (i.e., is independent of direction) as a function of distance. An anisotropic covariance function does not behave similarly in all directions as a function of distance. Consider the spatial covariance imposed by an eastward-moving wind pattern. A one-unit distance in the x-direction likely means something different than a one-unit distance in the y-direction. Fig 5 shows ellipses for an isotropic and anisotropic covariance function centered at the origin (a distance of zero). The black outline of each ellipse is a level curve of equal correlation. The left ellipse (a circle) represents an isotropic covariance function. The distance at which the correlation between two observations lays on the level curve is the same in all directions. The right ellipse represents an anisotropic covariance function. The distance at which the correlation between two observations lays on the level curve is different in different directions. 
 ```{r anisotropy, echo = FALSE, eval = FALSE}
 # PRELIMINARIES 
 r <- 1
@@ -695,8 +700,7 @@ spmod_anis <- splm(
 )
 summary(spmod_anis)
 ```
-
-The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse such that the major axis of the ellipse is the new x-axis and the minor axis of the ellipse is the new y-axis. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. The transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle) requires rotating the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
+\noindent The `rotate` parameter is between zero and $\pi$ radians and represents the angle of a clockwise rotation of the ellipse such that the major axis of the ellipse is the new x-axis and the minor axis of the ellipse is the new y-axis. The `scale` parameter is between zero and one and represents the ratio of the distance between the origin and the edge of the ellipse along the minor axis to the distance between the origin and the edge of the ellipse along the major axis. The transformation that turns an anisotropic ellipse into an isotropic one (i.e., a circle) requires rotating the coordinates clockwise by `rotate` and then scaling them the reciprocal of `scale`.  The transformed coordinates are then used instead of the original coordinates to compute distances and spatial covariances.
 
 ```{r, anisotropy_fit, echo = FALSE, eval = FALSE}
 spcov_params_val <- coef(spmod_anis, type = "spcov")
@@ -787,15 +791,14 @@ resp <- sprnorm(
 )
 sim_data <- tibble::tibble(coords, resp)
 ```
-
-We can visualize the simulated data (Fig 6A) by running
+\noindent We can visualize the simulated data (Fig 6A) by running
 ```{r sim, fig.align="center", out.width = "75%", fig.cap = "Spatial data simulated in the unit square.", eval = FALSE}
 ggplot(sim_data, aes(x = x, y = y, color = resp)) +
   geom_point(size = 1.5) +
   scale_color_viridis_c(limits = c(-7, 7)) + 
   theme_gray(base_size = 18)
 ```
-There is noticeable spatial patterning in the response variable (`resp`). The default mean in `sprnorm()` is zero for all observations, though a mean vector can be provided using the `mean` argument. The default number of samples generated in `sprnorm()` is one, though this can be changed using the `samples` argument. Because `sim_data` is a `tibble` (`data.frame`) and not an `sf` object, the columns in `sim_data` representing the x-coordinates and y-coordinates must be provided to `sprnorm()`.
+\noindent There is noticeable spatial patterning in the response variable (`resp`). The default mean in `sprnorm()` is zero for all observations, though a mean vector can be provided using the `mean` argument. The default number of samples generated in `sprnorm()` is one, though this can be changed using the `samples` argument. Because `sim_data` is a `tibble` (`data.frame`) and not an `sf` object, the columns in `sim_data` representing the x-coordinates and y-coordinates must be provided to `sprnorm()`.
 
 **Fig 6. Observed data and big data predictions at unobserved locations.** In A (top), spatial data are simulated in the unit square. A spatial linear model is fit using the default big data approximation for model-fitting. In B (bottom), predictions are made using the fitted model and the default big data approximation for prediction.
 
@@ -813,7 +816,7 @@ To show how to use `spmodel` for big data estimation and prediction, we use the 
 
 The `local` argument to `splm()` controls the big data options. `local` is a list with several arguments. The arguments to the `local` list control the method used to assign the indexes, the number of observations with the same index, the number of unique indexes, adjustments to the covariance matrix of $\hat{\boldsymbol{\beta}}$, whether or not to use parallel processing, and if parallel processing is used, the number of cores.
 
-The simplest way to accommodate big data is to set `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which randomly assigns observations to groups, ensures each group has approximately 50 observations, uses the theoretically-correct covariance adjustment, and does not use parallel processing. 
+Big data are most simply accommodated by setting `local` to `TRUE`. This is shorthand for `local = list(method = "random", size = 50, var_adjust = "theoretical", parallel = FALSE)`, which randomly assigns observations to groups, ensures each group has approximately 50 observations, uses the theoretically-correct covariance adjustment, and does not use parallel processing. 
 ```{r}
 local1 <- splm(
   resp ~ 1,
@@ -865,16 +868,14 @@ The simplest way to accommodate big data prediction is to set `local` to `TRUE`.
 ```{r, results = "hide"}
 sim_preds$preds <- predict(local1, newdata = sim_preds, local = TRUE)
 ```
-
-The predictions are visualized (Fig 6B) by running
+\noindent The predictions are visualized (Fig 6B) by running
 ```{r, eval = FALSE}
 ggplot(sim_preds, aes(x = x, y = y, color = preds)) +
   geom_point(size = 1.5) +
   scale_color_viridis_c(limits = c(-7, 7)) + 
   theme_gray(base_size = 18)
 ```
-They display a similar pattern as the observed data.
-
+\noindent They display a similar pattern as the observed data.
 ```{r sim_preds, echo = FALSE, eval = FALSE}
 ggplot(sim_data, aes(x = x, y = y, color = resp)) +
   geom_point(size = 1.5) +
@@ -897,8 +898,7 @@ pred_list <- list(
 )
 predict(local1, newdata = sim_preds, local = pred_list)
 ```
-
-This code implies that uniquely for each location requiring prediction, only the 30 observations in the data closest to it (in terms of Euclidean distance) are used in the computation and parallel processing is used with two cores.
+\noindent This code implies that uniquely for each location requiring prediction, only the 30 observations in the data closest to it (in terms of Euclidean distance) are used in the computation and parallel processing is used with two cores.
 
 For areal data, no local neighborhood approximation exists because of the data's underlying neighborhood structure. Thus, all of the data must be used to compute predictions and by consequence, `method` and `size` are not components of the `local` list. The only components of the `local` list for areal data are `parallel` and `ncores`.
 
