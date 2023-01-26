@@ -22,7 +22,7 @@ address:
 abstract: |
   \texttt{spmodel} is an \textbf{\textsf{R}} package used to fit, summarize, and predict
   for a variety spatial statistical models applied to point-referenced or areal (lattice) data. Parameters are estimated using various
-  methods. Additional modeling features include anisotropy, random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
+  methods, including likelihood-based optimization and weighted least squares based on variograms. Additional modeling features include anisotropy, non-spatial random effects, partition         factors, big data approaches, and more.   Model-fit statistics are used to summarize,       visualize, and compare models. Predictions at unobserved locations are
   readily obtainable. 
 bibliography: references.bib
 output: rticles::plos_article
@@ -52,7 +52,7 @@ library(spmodel)
 
 Spatial data are ubiquitous in everyday life and the scientific literature. As such, it is becoming increasingly important to properly analyze spatial data. Spatial data can be analyzed using a statistical model that explicitly incorporates the spatial dependence among nearby observations. Incorporating this spatial dependence can be challenging, but ignoring it often yields poor statistical models that incorrectly quantify uncertainty, impacting the validity of hypothesis tests, confidence intervals, and predictions intervals. `spmodel` provides tools to easily incorporate spatial dependence into statistical models, building upon commonly used $\textbf{\textsf{R}}$ functions like `lm()`.
 
-`spmodel` implements model-based inference, which relies on fitting a statistical model. Model-based inference is different than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample [@brus1997random]. @cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (areal data are sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. For thorough overviews model-based inference in a spatial context, see @cressie1993statistics, @banerjee2003hierarchical, and @schabenberger2017statistical.
+`spmodel` implements model-based inference, which relies on fitting a statistical model. Model-based inference is different than design-based inference, which relies on random sampling and estimators that incorporate the properties of the random sample [@brus1997random]. @cressie1993statistics defines two types of spatial data that can be analyzed using model-based inference: point-referenced data and areal data (areal data are sometimes called lattice data). Spatial data are point-referenced when they are observed at point-locations indexed by x-coordinates and y-coordinates on a spatially continuous surface with an infinite number of locations. Spatial models for point-referenced data are sometimes called geostatistical models. Spatial data are areal when they are observed as part of a finite network of polygons whose connections are indexed by a neighborhood structure. For example, the polygons may represent counties in a state who are neighbors if they share at least one boundary. Spatial models for areal data are sometimes called spatial autoregressive models. For thorough overviews of model-based inference in a spatial context, see @cressie1993statistics, @banerjee2003hierarchical, and @schabenberger2017statistical.
 
 Several $\textbf{\textsf{R}}$ packages exist on CRAN that analyze either point-referenced or areal spatial data. For point-referenced data, they include `fields` [@nychka2021fields], `FRK` [@zammitmangion2021FRK], `geoR` [@ribiero2022geoR], `GpGp` [@guiness2021gpgp], `gstat` [@pebesma2004gstat], `LatticeKrig` [@nychka2016latticekrig], `R-inla` [@lindgren2015bayesian], `rstan` [@rstan2023rstan], `spatial` [@venables2002S], `spBayes` [@finley2007spbayes], and `spNNGP` [@finley2002spnngp]. For areal data, they include `brms` [@burkner2017brms], `CARBayes` [@lee2013carbayes], bigDM [@adin2022bigdm], and `hglm` [@ronnegard2010hglm]. Unlike these aforementioned packages, `spmodel` is designed to analyze both point-referenced and areal data using a common framework and syntax structure. `spmodel` also offers many features missing from the aforementioned $\textbf{\textsf{R}}$ packages -- together in one $\textbf{\textsf{R}}$ package, `spmodel` offers detailed model summaries, extensive model diagnostics, non-spatial random effects, anisotropy, big data methods, prediction, the option to fix spatial covariance parameters at known values, and more.
 
@@ -86,13 +86,13 @@ The model in Equation$~$\ref{eq:lm} assumes the elements of $\mathbf{y}$ are unc
 \begin{equation}\label{eq:splm}
  \mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\tau} + \boldsymbol{\epsilon},
 \end{equation}
-where $\boldsymbol{\tau}$ is independent of $\boldsymbol{\epsilon}$, $\text{E}(\boldsymbol{\tau}) = \mathbf{0}$, $\text{Cov}(\boldsymbol{\tau}) = \sigma^2_\tau \mathbf{R}$, and $\mathbf{R}$ is a matrix that determines the spatial dependence structure in $\mathbf{y}$ and depends on a range parameter, $\phi$. We discuss $\mathbf{R}$ in more detail shortly. The parameter $\sigma^2_\tau$ is called the spatially dependent random error variance or partial sill. The parameter $\sigma^2_\epsilon$ is called the spatially independent random error variance or nugget. These two variance parameters are henceforth more intuitively written as $\sigma^2_{de}$ and $\sigma^2_{ie}$, respectively. The covariance of $\mathbf{y}$ is denoted $\boldsymbol{\Sigma}$ and given by $\sigma^2_{de} \mathbf{R} + \sigma^2_{ie} \mathbf{I}$. The parameters that compose this covariance are typically indexed by the vector $\boldsymbol{\theta}$, which is called the covariance parameter vector.  
+where $\boldsymbol{\tau}$ is independent of $\boldsymbol{\epsilon}$, $\text{E}(\boldsymbol{\tau}) = \mathbf{0}$, $\text{Cov}(\boldsymbol{\tau}) = \sigma^2_\tau \mathbf{R}$, and $\mathbf{R}$ is a matrix that determines the spatial dependence structure in $\mathbf{y}$ and depends on a range parameter, $\phi$. We discuss $\mathbf{R}$ in more detail shortly. The parameter $\sigma^2_\tau$ is called the spatially dependent random error variance or partial sill. The parameter $\sigma^2_\epsilon$ is called the spatially independent random error variance or nugget. These two variance parameters are henceforth more intuitively written as $\sigma^2_{de}$ and $\sigma^2_{ie}$, respectively. The covariance of $\mathbf{y}$ is denoted $\boldsymbol{\Sigma}$ and given by $\sigma^2_{de} \mathbf{R} + \sigma^2_{ie} \mathbf{I}$. The parameters that compose this covariance are contained in the vector $\boldsymbol{\theta}$, which is called the covariance parameter vector.  
 
 Equation$~$\ref{eq:splm} is called the spatial linear model. The spatial linear model applies to both point-referenced and areal data. The `splm()` function is used to fit spatial linear models for point-referenced data (i.e., geostatistical models). One spatial covariance function available in `splm()` is the exponential spatial covariance function, which has an $\mathbf{R}$ matrix given by
 \begin{equation}\label{eq:r_exp}
   \mathbf{R} = \exp(-\mathbf{M} / \phi),
-\end{equation}  
-where $\mathbf{M}$ is a matrix of Euclidean distances among observations. Recall that $\phi$ is the range parameter, and it controls the behavior of $\mathbf{R}$ as a function of distance. In Equation$~$\ref{eq:r_exp}, as the distance between two observations increases, the correlation between them decreases. Parameterizations for other `splm()` spatial covariance types and their $\mathbf{R}$ matrices can be viewed by running `help("splm", "spmodel")` or `vignette("technical", "spmodel")`. Some of these spatial covariance types (e.g., Mat$\acute{e}$rn) depend on an extra parameter beyond $\sigma^2_{de}$, $\sigma^2_{ie}$, and $\phi$.
+\end{equation}
+where $\mathbf{M}$ is a matrix of Euclidean distances among observations. Recall that $\phi$ is the range parameter, and it controls the behavior of $\mathbf{R}$ as a function of distance. In Equation$~$\ref{eq:r_exp}, as the distance between two observations increases, the correlation between them decreases. Parameterizations for other `splm()` spatial covariance types and their $\mathbf{R}$ matrices can be viewed by running `help("splm", "spmodel")` or `vignette("technical", "spmodel")`. Some of these spatial covariance types (e.g., Matérn) depend on an extra parameter beyond $\sigma^2_{de}$, $\sigma^2_{ie}$, and $\phi$.
 
 The `spautor()` function is used to fit spatial linear models for areal data (i.e., spatial autoregressive models). One spatial autoregressive covariance function available in `spautor()` is the simultaneous autoregressive spatial covariance function, which has an $\mathbf{R}$ matrix given by
 \begin{equation*}
@@ -499,7 +499,7 @@ augment(
   level = 0.90
 )
 ```
-\noindent Here `.fitted` represents the predictions, `.lower` represents the lower bound of the 90% prediction intervals, and `.upper` represents the upper bound of the 95% prediction intervals.
+\noindent Here `.fitted` represents the predictions, `.lower` represents the lower bound of the 90% prediction intervals, and `.upper` represents the upper bound of the 90% prediction intervals.
 
 An alternative (but equivalent) approach can be used for model fitting and prediction that circumvents the need to keep `data` and `newdata` as separate objects. Suppose that observations requiring prediction are stored in `data` as missing (`NA`) values. We can add a column of missing values to `sulfate_preds` and then bind it together with `sulfate` by running
 ```{r}
@@ -863,7 +863,7 @@ summary(local1)
 ```
 
 
-Instead of using `local = TRUE`, we can explicitly set `local`. For example, we can fit a model using using k-means clustering [@macqueen1967some]  on the x-coordinates and y-coordinates to create 60 groups (clusters), use the pooled variance adjustment, and use parallel processing with two cores by running
+Instead of using `local = TRUE`, we can explicitly set `local`. For example, we can fit a model using k-means clustering [@macqueen1967some]  on the x-coordinates and y-coordinates to create 60 groups (clusters), use the pooled variance adjustment, and use parallel processing with two cores by running
 ```{r}
 local2_list <- list(
   method = "kmeans",
@@ -939,11 +939,11 @@ For areal data, no local neighborhood approximation exists because of the data's
 
 `spmodel` is a novel, relevant contribution used to fit, summarize, and predict for a variety of spatial statistical models. Spatial linear models for point-referenced data (i.e., geostatistical models) are fit using the `splm()` function. Spatial linear models for areal data (i.e., autoregressive models) are fit using the `spautor()` function. Both functions use a common framework and syntax structure. Several model-fit statistics and diagnostics are available. The broom functions `tidy()` and `glance()` are used to tidy and glance at a fitted model. The broom function `augment()` is used to augment `data` with model diagnostics and augment `newdata` with predictions. Several advanced features are available to accommodate fixed covariance parameter values, random effects, partition factors, anisotropy, simulating data, and big data approximations for model fitting and prediction. 
 
-We appreciate feedback from users regarding `spmodel`, and we have several plans to add new features to `spmodel` in the future. To learn more about `spmodel` or provide feedback, please visit our GitHub repository at [https://github.com/USEPA/spmodel](https://github.com/USEPA/spmodel). 
+We appreciate feedback from users regarding `spmodel`, and we have several plans to add new features to `spmodel` in the future. To learn more about `spmodel` or provide feedback, please visit our website at [https://usepa.github.io/spmodel/](https://usepa.github.io/spmodel/). 
 
 # Data and Code Availability {.unnumbered}
 
-This manuscript has a supplementary $\textbf{\textsf{R}}$ package that contains all of the data, code, and figures used in its creation. The supplementary \textbf{\textsf{R}} package is hosted on GitHub and available at [https://github.com/michaeldumelle/spmodel.manuscript](https://github.com/michaeldumelle/spmodel.manuscript).
+This manuscript has a supplementary $\textbf{\textsf{R}}$ package that contains all of the data, code, and figures used in its creation. The supplementary \textbf{\textsf{R}} package is hosted on GitHub and available at [https://github.com/USEPA/spmodel.manuscript](https://github.com/USEPA/spmodel.manuscript).
 
 # Author Contributions {.unnumbered}
 
@@ -954,6 +954,8 @@ This manuscript has a supplementary $\textbf{\textsf{R}}$ package that contains 
 * Jay M. Ver Hoef: Data Curation, Formal Analysis, Investigation, Methodology, Project Administration, Resources, Software, Supervision, Validation, Visualization, Writing
 
 # Acknowledgements {.unnumbered}
+
+We would like to thank the editor and anonymous reviewers for their feedback which greatly improved the manuscript.
 
 The views expressed in this manuscript are those of the authors and do not necessarily
 represent the views or policies of the U.S. Environmental Protection
