@@ -52,3 +52,7 @@ The raw figures are available at the file path found by running
 ```r
 system.file("preprint/figures", package = "spmodel.manuscript")
 ```
+
+### Disclaimer
+
+The views expressed in this manuscript are those of the authors and do not necessarily represent the views or policies of the U.S. Environmental Protection Agency. Any mention of trade names, products, or services does not imply an endorsement by the U.S. government or the U.S. Environmental Protection Agency. The U.S. Environmental Protection Agency does not endorse any commercial products, services, or enterprises.
