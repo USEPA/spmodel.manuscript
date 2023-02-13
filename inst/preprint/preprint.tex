@@ -275,19 +275,19 @@ Several \(\textbf{\textsf{R}}\) packages exist on CRAN that analyze
 either point-referenced or areal spatial data. For point-referenced
 data, they include \texttt{fields} {[}5{]}, \texttt{FRK} {[}6{]},
 \texttt{geoR} {[}7{]}, \texttt{GpGp} {[}8{]}, \texttt{gstat} {[}9{]},
-\texttt{LatticeKrig} {[}10{]}, \texttt{R-inla} {[}11{]}, \texttt{rstan}
+\texttt{LatticeKrig} {[}10{]}, \texttt{R-INLA} {[}11{]}, \texttt{rstan}
 {[}12{]}, \texttt{spatial} {[}13{]}, \texttt{spBayes} {[}14{]}, and
 \texttt{spNNGP} {[}15{]}. For areal data, they include \texttt{brms}
-{[}16{]}, \texttt{CARBayes} {[}17{]}, bigDM {[}18{]}, and \texttt{hglm}
-{[}19{]}. Unlike these aforementioned packages, \texttt{spmodel} is
-designed to analyze both point-referenced and areal data using a common
-framework and syntax structure. \texttt{spmodel} also offers many
-features missing from the aforementioned \(\textbf{\textsf{R}}\)
-packages -- together in one \(\textbf{\textsf{R}}\) package,
-\texttt{spmodel} offers detailed model summaries, extensive model
-diagnostics, non-spatial random effects, anisotropy, big data methods,
-prediction, the option to fix spatial covariance parameters at known
-values, and more.
+{[}16{]}, \texttt{CARBayes} {[}17{]}, \texttt{bigDM} {[}18{]}, and
+\texttt{hglm} {[}19{]}. Unlike these aforementioned packages,
+\texttt{spmodel} is designed to analyze both point-referenced and areal
+data using a common framework and syntax structure. \texttt{spmodel}
+also offers many features missing from the aforementioned
+\(\textbf{\textsf{R}}\) packages -- together in one
+\(\textbf{\textsf{R}}\) package, \texttt{spmodel} offers detailed model
+summaries, extensive model diagnostics, non-spatial random effects,
+anisotropy, big data methods, prediction, the option to fix spatial
+covariance parameters at known values, and more.
 
 The rest of this article is organized as follows. We first give a brief
 theoretical introduction to spatial linear models. We then outline the
@@ -2178,7 +2178,7 @@ Software. 2021;98: 1--48.
 
 \leavevmode\hypertarget{ref-ribiero2022geoR}{}%
 7. Ribeiro Jr PJ, Diggle P, Christensen O, Schlather M, Bivand R, Ripley
-B. GeoR: Analysis of geostatistical data. 2022. Available:
+B. geoR: Analysis of geostatistical data. 2022. Available:
 \url{https://CRAN.R-project.org/package=geoR}
 
 \leavevmode\hypertarget{ref-guiness2021gpgp}{}%
@@ -2197,8 +2197,8 @@ University Corporation for Atmospheric Research; 2016.
 doi:\href{https://doi.org/10.5065/D6HD7T1R}{10.5065/D6HD7T1R}
 
 \leavevmode\hypertarget{ref-lindgren2015bayesian}{}%
-11. Lindgren F, Rue H. Bayesian spatial modelling with r-inla. Journal
-of statistical software. 2015;63: 1--25.
+11. Lindgren F, Rue H. Bayesian spatial modelling with R-INLA. Journal
+of Statistical Software. 2015;63: 1--25.
 
 \leavevmode\hypertarget{ref-rstan2023rstan}{}%
 12. Stan Development Team. RStan: The R interface to Stan. 2023.
@@ -2222,8 +2222,8 @@ neighbor Gaussian process models. Journal of Statistical Software.
 doi:\href{https://doi.org/10.18637/jss.v103.i05}{10.18637/jss.v103.i05}
 
 \leavevmode\hypertarget{ref-burkner2017brms}{}%
-16. Bürkner P-C. Brms: An r package for bayesian multilevel models using
-stan. Journal of statistical software. 2017;80: 1--28.
+16. Bürkner P-C. Brms: An R package for Bayesian multilevel models using
+Stan. Journal of Statistical Software. 2017;80: 1--28.
 
 \leavevmode\hypertarget{ref-lee2013carbayes}{}%
 17. Lee D. CARBayes: An R package for Bayesian spatial modeling with
@@ -2254,7 +2254,7 @@ Interactive viewing of spatial data in R. 2022. Available:
 
 \leavevmode\hypertarget{ref-tobler1970computer}{}%
 22. Tobler WR. A computer movie simulating urban growth in the Detroit
-region. Economic geography. 1970;46: 234--240.
+region. Economic Geography. 1970;46: 234--240.
 
 \leavevmode\hypertarget{ref-anselin2010geoda}{}%
 23. Anselin L, Syabri I, Kho Y. GeoDa: An introduction to spatial data
@@ -2287,13 +2287,13 @@ Scientific Computing. 1994;15: 1294--1310.
 
 \leavevmode\hypertarget{ref-cressie1985fitting}{}%
 29. Cressie N. Fitting variogram models by weighted least squares.
-Journal of the international Association for mathematical Geology.
+Journal of the International Association for Mathematical Geology.
 1985;17: 563--586.
 
 \leavevmode\hypertarget{ref-curriero1999composite}{}%
 30. Curriero FC, Lele S. A composite likelihood approach to
-semivariogram estimation. Journal of Agricultural, biological, and
-Environmental statistics. 1999; 9--28.
+semivariogram estimation. Journal of Agricultural, Biological, and
+Environmental Statistics. 1999; 9--28.
 
 \leavevmode\hypertarget{ref-hoeting2006model}{}%
 31. Hoeting JA, Davis RA, Merton AA, Thompson SE. Model selection for
@@ -2301,7 +2301,7 @@ geostatistical models. Ecological Applications. 2006;16: 87--98.
 
 \leavevmode\hypertarget{ref-pinheiro2006mixed}{}%
 32. Pinheiro J, Bates D. Mixed-effects models in S and S-PLUS. Springer
-science \& business media; 2006.
+Science \& Business Media; 2006.
 
 \leavevmode\hypertarget{ref-hastie2009elements}{}%
 33. Hastie T, Tibshirani R, Friedman JH, Friedman JH. The elements of
@@ -2335,11 +2335,10 @@ Statistical Society: Series B (Methodological). 1964;26: 211--243.
 models using lme4. Journal of Statistical Software. 2015;67: 1--48.
 doi:\href{https://doi.org/10.18637/jss.v067.i01}{10.18637/jss.v067.i01}
 
-\leavevmode\hypertarget{ref-macqueen1967some}{}%
-40. MacQueen J, others. Some methods for classification and analysis of
-multivariate observations. Proceedings of the fifth berkeley symposium
-on mathematical statistics and probability. Oakland, CA, USA; 1967. pp.
-281--297.
+\leavevmode\hypertarget{ref-macqueen1967classification}{}%
+40. MacQueen J. Classification and analysis of multivariate
+observations. 5th Berkeley Symp Math Statist Probability. University of
+California Los Angeles LA USA; 1967. pp. 281--297.
 
 \nolinenumbers
 
