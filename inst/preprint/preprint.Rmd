@@ -945,14 +945,6 @@ We appreciate feedback from users regarding `spmodel`, and we have several plans
 
 This manuscript has a supplementary $\textbf{\textsf{R}}$ package that contains all of the data, code, and figures used in its creation. The supplementary \textbf{\textsf{R}} package is hosted on GitHub and available at [https://github.com/USEPA/spmodel.manuscript](https://github.com/USEPA/spmodel.manuscript).
 
-# Author Contributions {.unnumbered}
-
-* Michael Dumelle: Conceptualization, Data Curation, Formal Analysis, Investigation, Methodology, Project Administration, Resources, Software, Supervision, Validation, Visualization, Writing
-
-* Matt Higham: Formal Analysis, Investigation, Methodology, Project Administration, Resources, Software, Supervision, Validation, Visualization, Writing
-
-* Jay M. Ver Hoef: Data Curation, Formal Analysis, Investigation, Methodology, Project Administration, Resources, Software, Supervision, Validation, Visualization, Writing
-
 # Acknowledgements {.unnumbered}
 
 We would like to thank the editor and anonymous reviewers for their feedback which greatly improved the manuscript.

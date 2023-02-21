@@ -175,6 +175,35 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 
+% Pandoc citation processing
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{bm, bbm}
@@ -209,13 +238,14 @@ Michael Dumelle\textsuperscript{\getAff{USEPA}}\textsuperscript{*},
 Matt Higham\textsuperscript{\getAff{STLAWU}},
 Jay M. Ver Hoef\textsuperscript{\getAff{NOAA}}\\
 \bigskip
-\textbf{\getAff{USEPA}}United States Environmental Protection Agency, Corvallis, Oregon, United
-States of America\\
-\textbf{\getAff{STLAWU}}St.~Lawrence University Department of Math, Computer Science, and
-Statistics, Canton, New York, United States of America\\
-\textbf{\getAff{NOAA}}National Oceanic and Atmospheric Administration Alaska Fisheries Science
-Center, Marine Mammal Laboratory, Seattle, Washington, United States of
+\textbf{\getAff{USEPA}}United States Environmental Protection Agency,
+Corvallis, Oregon, United States of America\\
+\textbf{\getAff{STLAWU}}St.~Lawrence University Department of Math,
+Computer Science, and Statistics, Canton, New York, United States of
 America\\
+\textbf{\getAff{NOAA}}National Oceanic and Atmospheric Administration
+Alaska Fisheries Science Center, Marine Mammal Laboratory, Seattle,
+Washington, United States of America\\
 \bigskip
 * Corresponding author: Dumelle.Michael@epa.gov\\
 \end{flushleft}
@@ -542,7 +572,6 @@ R> summary(spmod)
 \end{verbatim}
 
 \begin{verbatim}
-
 Call:
 splm(formula = log_Zn ~ log_dist2road, data = moss, spcov_type = "exponential")
 
@@ -1073,7 +1102,6 @@ R> summary(sealmod)
 \end{verbatim}
 
 \begin{verbatim}
-
 Call:
 spautor(formula = log_trend ~ 1, data = seal, spcov_type = "car")
 
@@ -1747,7 +1775,6 @@ R> summary(spmod_anis)
 \end{verbatim}
 
 \begin{verbatim}
-
 Call:
 splm(formula = log_Zn ~ log_dist2road, data = moss, spcov_type = "exponential", 
     anisotropy = TRUE)
@@ -1934,7 +1961,6 @@ R> summary(local1)
 \end{verbatim}
 
 \begin{verbatim}
-
 Call:
 splm(formula = resp ~ 1, data = sim_data, spcov_type = "exponential", 
     xcoord = x, ycoord = y, local = TRUE)
@@ -1978,7 +2004,6 @@ R> summary(local2)
 \end{verbatim}
 
 \begin{verbatim}
-
 Call:
 splm(formula = resp ~ 1, data = sim_data, spcov_type = "exponential", 
     xcoord = x, ycoord = y, local = local2_list)
@@ -2109,25 +2134,6 @@ contains all of the data, code, and figures used in its creation. The
 supplementary \textbf{\textsf{R}} package is hosted on GitHub and
 available at \url{https://github.com/USEPA/spmodel.manuscript}.
 
-\hypertarget{author-contributions}{%
-\section*{Author Contributions}\label{author-contributions}}
-\addcontentsline{toc}{section}{Author Contributions}
-
-\begin{itemize}
-\item
-  Michael Dumelle: Conceptualization, Data Curation, Formal Analysis,
-  Investigation, Methodology, Project Administration, Resources,
-  Software, Supervision, Validation, Visualization, Writing
-\item
-  Matt Higham: Formal Analysis, Investigation, Methodology, Project
-  Administration, Resources, Software, Supervision, Validation,
-  Visualization, Writing
-\item
-  Jay M. Ver Hoef: Data Curation, Formal Analysis, Investigation,
-  Methodology, Project Administration, Resources, Software, Supervision,
-  Validation, Visualization, Writing
-\end{itemize}
-
 \hypertarget{acknowledgements}{%
 \section*{Acknowledgements}\label{acknowledgements}}
 \addcontentsline{toc}{section}{Acknowledgements}
@@ -2150,199 +2156,250 @@ commercial products, services or enterprises.
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
 \leavevmode\hypertarget{ref-brus1997random}{}%
-1. Brus D, De Gruijter J. Random sampling or geostatistical modelling?
-Choosing between design-based and model-based sampling strategies for
-soil (with discussion). Geoderma. 1997;80: 1--44.
+\CSLLeftMargin{1. }
+\CSLRightInline{Brus D, De Gruijter J. Random sampling or geostatistical
+modelling? {Choosing} between design-based and model-based sampling
+strategies for soil (with discussion). Geoderma. 1997;80: 1--44. }
 
 \leavevmode\hypertarget{ref-cressie1993statistics}{}%
-2. Cressie N. Statistics for spatial data. John Wiley \& Sons; 1993.
+\CSLLeftMargin{2. }
+\CSLRightInline{Cressie N. Statistics for spatial data. John Wiley \&
+Sons; 1993. }
 
 \leavevmode\hypertarget{ref-banerjee2003hierarchical}{}%
-3. Banerjee S, Carlin BP, Gelfand AE. Hierarchical modeling and analysis
-for spatial data. Chapman; Hall/CRC; 2003.
+\CSLLeftMargin{3. }
+\CSLRightInline{Banerjee S, Carlin BP, Gelfand AE. Hierarchical modeling
+and analysis for spatial data. Chapman; Hall/CRC; 2003. }
 
 \leavevmode\hypertarget{ref-schabenberger2017statistical}{}%
-4. Schabenberger O, Gotway CA. Statistical methods for spatial data
-analysis: Texts in statistical science. Chapman; Hall/CRC; 2017.
+\CSLLeftMargin{4. }
+\CSLRightInline{Schabenberger O, Gotway CA. Statistical methods for
+spatial data analysis: Texts in statistical science. Chapman; Hall/CRC;
+2017. }
 
 \leavevmode\hypertarget{ref-nychka2021fields}{}%
-5. Nychka D, Furrer R, Paige J, Sain S. Fields: Tools for spatial data.
-Boulder, CO, USA: University Corporation for Atmospheric Research; 2021.
-Available: \url{https://github.com/dnychka/fieldsRPackage}
+\CSLLeftMargin{5. }
+\CSLRightInline{Nychka D, Furrer R, Paige J, Sain S. Fields: Tools for
+spatial data. Boulder, CO, USA: University Corporation for Atmospheric
+Research; 2021. Available:
+\url{https://github.com/dnychka/fieldsRPackage}}
 
 \leavevmode\hypertarget{ref-zammitmangion2021FRK}{}%
-6. Zammit-Mangion A, Cressie N. FRK: An R package for spatial and
-spatio-temporal prediction with large datasets. Journal of Statistical
-Software. 2021;98: 1--48.
+\CSLLeftMargin{6. }
+\CSLRightInline{Zammit-Mangion A, Cressie N. FRK: An {R} package for
+spatial and spatio-temporal prediction with large datasets. Journal of
+Statistical Software. 2021;98: 1--48. }
 
 \leavevmode\hypertarget{ref-ribiero2022geoR}{}%
-7. Ribeiro Jr PJ, Diggle P, Christensen O, Schlather M, Bivand R, Ripley
-B. geoR: Analysis of geostatistical data. 2022. Available:
-\url{https://CRAN.R-project.org/package=geoR}
+\CSLLeftMargin{7. }
+\CSLRightInline{Ribeiro Jr PJ, Diggle P, Christensen O, Schlather M,
+Bivand R, Ripley B. {geoR}: Analysis of geostatistical data. 2022.
+Available: \url{https://CRAN.R-project.org/package=geoR}}
 
 \leavevmode\hypertarget{ref-guiness2021gpgp}{}%
-8. Guiness J, Katzfuss M, Fahmy Y. GpGp: Fast Gaussian process
-computation using Vecchia's approximation. 2021. Available:
-\url{https://CRAN.R-project.org/package=GpGp}
+\CSLLeftMargin{8. }
+\CSLRightInline{Guiness J, Katzfuss M, Fahmy Y. GpGp: Fast {G}aussian
+process computation using {V}ecchia's approximation. 2021. Available:
+\url{https://CRAN.R-project.org/package=GpGp}}
 
 \leavevmode\hypertarget{ref-pebesma2004gstat}{}%
-9. Pebesma E. Multivariable geostatistics in S: The gstat package.
-Computers \& Geosciences. 2004;30: 683--691.
+\CSLLeftMargin{9. }
+\CSLRightInline{Pebesma E. Multivariable geostatistics in {S}: The gstat
+package. Computers \& Geosciences. 2004;30: 683--691. }
 
 \leavevmode\hypertarget{ref-nychka2016latticekrig}{}%
-10. Nychka D, Hammerling D, Sain S, Lenssen N. LatticeKrig:
-Multiresolution Kriging based on Markov random fields. Boulder, CO, USA:
-University Corporation for Atmospheric Research; 2016.
-doi:\href{https://doi.org/10.5065/D6HD7T1R}{10.5065/D6HD7T1R}
+\CSLLeftMargin{10. }
+\CSLRightInline{Nychka D, Hammerling D, Sain S, Lenssen N.
+{LatticeKrig}: Multiresolution {K}riging based on {M}arkov random
+fields. Boulder, CO, USA: University Corporation for Atmospheric
+Research; 2016.
+doi:\href{https://doi.org/10.5065/D6HD7T1R}{10.5065/D6HD7T1R}}
 
 \leavevmode\hypertarget{ref-lindgren2015bayesian}{}%
-11. Lindgren F, Rue H. Bayesian spatial modelling with R-INLA. Journal
-of Statistical Software. 2015;63: 1--25.
+\CSLLeftMargin{11. }
+\CSLRightInline{Lindgren F, Rue H. Bayesian spatial modelling with
+{R-INLA}. Journal of Statistical Software. 2015;63: 1--25. }
 
 \leavevmode\hypertarget{ref-rstan2023rstan}{}%
-12. Stan Development Team. RStan: The R interface to Stan. 2023.
-Available: \url{https://mc-stan.org/}
+\CSLLeftMargin{12. }
+\CSLRightInline{Stan Development Team. {RStan}: The {R} interface to
+{Stan}. 2023. Available: \url{https://mc-stan.org/}}
 
 \leavevmode\hypertarget{ref-venables2002S}{}%
-13. Venables WN, Ripley BD. Modern applied statistics with S. Fourth.
-New York: Springer; 2002. Available:
-\url{https://www.stats.ox.ac.uk/pub/MASS4/}
+\CSLLeftMargin{13. }
+\CSLRightInline{Venables WN, Ripley BD. Modern applied statistics with
+{S}. Fourth. New York: Springer; 2002. Available:
+\url{https://www.stats.ox.ac.uk/pub/MASS4/}}
 
 \leavevmode\hypertarget{ref-finley2007spbayes}{}%
-14. Finley AO, Banerjee S, Carlin BP. spBayes: An R package for
-univariate and multivariate hierarchical point-referenced spatial
-models. Journal of Statistical Software. 2007;19: 1--24. Available:
-\url{https://www.jstatsoft.org/article/view/v019i04}
+\CSLLeftMargin{14. }
+\CSLRightInline{Finley AO, Banerjee S, Carlin BP. {spBayes}: An {R}
+package for univariate and multivariate hierarchical point-referenced
+spatial models. Journal of Statistical Software. 2007;19: 1--24.
+Available: \url{https://www.jstatsoft.org/article/view/v019i04}}
 
 \leavevmode\hypertarget{ref-finley2002spnngp}{}%
-15. Finley AO, Datta A, Banerjee S. spNNGP R package for nearest
-neighbor Gaussian process models. Journal of Statistical Software.
-2022;103: 1--40.
-doi:\href{https://doi.org/10.18637/jss.v103.i05}{10.18637/jss.v103.i05}
+\CSLLeftMargin{15. }
+\CSLRightInline{Finley AO, Datta A, Banerjee S. {spNNGP} {R} package for
+nearest neighbor {G}aussian process models. Journal of Statistical
+Software. 2022;103: 1--40.
+doi:\href{https://doi.org/10.18637/jss.v103.i05}{10.18637/jss.v103.i05}}
 
 \leavevmode\hypertarget{ref-burkner2017brms}{}%
-16. Bürkner P-C. Brms: An R package for Bayesian multilevel models using
-Stan. Journal of Statistical Software. 2017;80: 1--28.
+\CSLLeftMargin{16. }
+\CSLRightInline{Bürkner P-C. Brms: An {R} package for {Bayesian}
+multilevel models using {Stan}. Journal of Statistical Software.
+2017;80: 1--28. }
 
 \leavevmode\hypertarget{ref-lee2013carbayes}{}%
-17. Lee D. CARBayes: An R package for Bayesian spatial modeling with
-conditional autoregressive priors. Journal of Statistical Software.
-2013;55: 1--24. Available:
-\url{https://www.jstatsoft.org/htaccess.php?volume=55\&type=i\&issue=13}
+\CSLLeftMargin{17. }
+\CSLRightInline{Lee D. {CARBayes}: An {R} package for {B}ayesian spatial
+modeling with conditional autoregressive priors. Journal of Statistical
+Software. 2013;55: 1--24. Available:
+\url{https://www.jstatsoft.org/htaccess.php?volume=55\&type=i\&issue=13}}
 
 \leavevmode\hypertarget{ref-adin2022bigdm}{}%
-18. Adin A, Orozco-Acosta E, Vicente G, Ugarte MD. BigDM: Scalable
-bayesian disease mapping models for high-dimensional data. 2022.
-Available: \url{https://github.com/spatialstatisticsupna/bigDM}
+\CSLLeftMargin{18. }
+\CSLRightInline{Adin A, Orozco-Acosta E, Vicente G, Ugarte MD. bigDM:
+Scalable bayesian disease mapping models for high-dimensional data.
+2022. Available: \url{https://github.com/spatialstatisticsupna/bigDM}}
 
 \leavevmode\hypertarget{ref-ronnegard2010hglm}{}%
-19. Ronnegard L, Shen X, Alam M. Hglm: A package for fitting
+\CSLLeftMargin{19. }
+\CSLRightInline{Ronnegard L, Shen X, Alam M. Hglm: A package for fitting
 hierarchical generalized linear models. The R Journal. 2010;2: 20--28.
 Available:
-\url{https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Roennegaard~et~al.pdf}
+\url{https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Roennegaard~et~al.pdf}}
 
 \leavevmode\hypertarget{ref-wickham2016ggplot2}{}%
-20. Wickham H. Ggplot2: Elegant graphics for data analysis.
+\CSLLeftMargin{20. }
+\CSLRightInline{Wickham H. ggplot2: Elegant graphics for data analysis.
 Springer-Verlag New York; 2016. Available:
-\url{https://ggplot2.tidyverse.org}
+\url{https://ggplot2.tidyverse.org}}
 
 \leavevmode\hypertarget{ref-appelhans2022mapview}{}%
-21. Appelhans T, Detsch F, Reudenbach C, Woellauer S. Mapview:
-Interactive viewing of spatial data in R. 2022. Available:
-\url{https://CRAN.R-project.org/package=mapview}
+\CSLLeftMargin{21. }
+\CSLRightInline{Appelhans T, Detsch F, Reudenbach C, Woellauer S.
+Mapview: Interactive viewing of spatial data in {R}. 2022. Available:
+\url{https://CRAN.R-project.org/package=mapview}}
 
 \leavevmode\hypertarget{ref-tobler1970computer}{}%
-22. Tobler WR. A computer movie simulating urban growth in the Detroit
-region. Economic Geography. 1970;46: 234--240.
+\CSLLeftMargin{22. }
+\CSLRightInline{Tobler WR. A computer movie simulating urban growth in
+the {D}etroit region. Economic Geography. 1970;46: 234--240. }
 
 \leavevmode\hypertarget{ref-anselin2010geoda}{}%
-23. Anselin L, Syabri I, Kho Y. GeoDa: An introduction to spatial data
-analysis. Handbook of applied spatial analysis. Springer; 2010. pp.
-73--89.
+\CSLLeftMargin{23. }
+\CSLRightInline{Anselin L, Syabri I, Kho Y. {GeoDa}: An introduction to
+spatial data analysis. Handbook of applied spatial analysis. Springer;
+2010. pp. 73--89. }
 
 \leavevmode\hypertarget{ref-ver2018spatial}{}%
-24. Ver Hoef JM, Peterson EE, Hooten MB, Hanks EM, Fortin M-J. Spatial
-autoregressive models for statistical inference from ecological data.
-Ecological Monographs. 2018;88: 36--59.
+\CSLLeftMargin{24. }
+\CSLRightInline{Ver Hoef JM, Peterson EE, Hooten MB, Hanks EM, Fortin
+M-J. Spatial autoregressive models for statistical inference from
+ecological data. Ecological Monographs. 2018;88: 36--59. }
 
 \leavevmode\hypertarget{ref-pebesma2018sf}{}%
-25. Pebesma E. Simple features for R: standardized support for spatial
-vector data. The R Journal. 2018;10: 439--446.
-doi:\href{https://doi.org/10.32614/RJ-2018-009}{10.32614/RJ-2018-009}
+\CSLLeftMargin{25. }
+\CSLRightInline{Pebesma E. {Simple features for {R}: standardized
+support for spatial vector data}. {The R Journal}. 2018;10: 439--446.
+doi:\href{https://doi.org/10.32614/RJ-2018-009}{10.32614/RJ-2018-009}}
 
 \leavevmode\hypertarget{ref-patterson1971recovery}{}%
-26. Patterson D, Thompson R. Recovery of inter-block information when
-block sizes are unequal. Biometrika. 1971;58: 545--554.
+\CSLLeftMargin{26. }
+\CSLRightInline{Patterson D, Thompson R. Recovery of inter-block
+information when block sizes are unequal. Biometrika. 1971;58: 545--554.
+}
 
 \leavevmode\hypertarget{ref-harville1977maximum}{}%
-27. Harville DA. Maximum likelihood approaches to variance component
-estimation and to related problems. Journal of the American Statistical
-Association. 1977;72: 320--338.
+\CSLLeftMargin{27. }
+\CSLRightInline{Harville DA. Maximum likelihood approaches to variance
+component estimation and to related problems. Journal of the American
+Statistical Association. 1977;72: 320--338. }
 
 \leavevmode\hypertarget{ref-wolfinger1994computing}{}%
-28. Wolfinger R, Tobias R, Sall J. Computing Gaussian likelihoods and
-their derivatives for general linear mixed models. SIAM Journal on
-Scientific Computing. 1994;15: 1294--1310.
+\CSLLeftMargin{28. }
+\CSLRightInline{Wolfinger R, Tobias R, Sall J. Computing {G}aussian
+likelihoods and their derivatives for general linear mixed models. SIAM
+Journal on Scientific Computing. 1994;15: 1294--1310. }
 
 \leavevmode\hypertarget{ref-cressie1985fitting}{}%
-29. Cressie N. Fitting variogram models by weighted least squares.
-Journal of the International Association for Mathematical Geology.
-1985;17: 563--586.
+\CSLLeftMargin{29. }
+\CSLRightInline{Cressie N. Fitting variogram models by weighted least
+squares. Journal of the International Association for Mathematical
+Geology. 1985;17: 563--586. }
 
 \leavevmode\hypertarget{ref-curriero1999composite}{}%
-30. Curriero FC, Lele S. A composite likelihood approach to
+\CSLLeftMargin{30. }
+\CSLRightInline{Curriero FC, Lele S. A composite likelihood approach to
 semivariogram estimation. Journal of Agricultural, Biological, and
-Environmental Statistics. 1999; 9--28.
+Environmental Statistics. 1999; 9--28. }
 
 \leavevmode\hypertarget{ref-hoeting2006model}{}%
-31. Hoeting JA, Davis RA, Merton AA, Thompson SE. Model selection for
-geostatistical models. Ecological Applications. 2006;16: 87--98.
+\CSLLeftMargin{31. }
+\CSLRightInline{Hoeting JA, Davis RA, Merton AA, Thompson SE. Model
+selection for geostatistical models. Ecological Applications. 2006;16:
+87--98. }
 
 \leavevmode\hypertarget{ref-pinheiro2006mixed}{}%
-32. Pinheiro J, Bates D. Mixed-effects models in S and S-PLUS. Springer
-Science \& Business Media; 2006.
+\CSLLeftMargin{32. }
+\CSLRightInline{Pinheiro J, Bates D. Mixed-effects models in {S} and
+{S-PLUS}. Springer Science \& Business Media; 2006. }
 
 \leavevmode\hypertarget{ref-hastie2009elements}{}%
-33. Hastie T, Tibshirani R, Friedman JH, Friedman JH. The elements of
-statistical learning: Data mining, inference, and prediction. Springer;
-2009.
+\CSLLeftMargin{33. }
+\CSLRightInline{Hastie T, Tibshirani R, Friedman JH, Friedman JH. The
+elements of statistical learning: Data mining, inference, and
+prediction. Springer; 2009. }
 
 \leavevmode\hypertarget{ref-montgomery2021introduction}{}%
-34. Montgomery DC, Peck EA, Vining GG. Introduction to linear regression
-analysis. John Wiley \& Sons; 2021.
+\CSLLeftMargin{34. }
+\CSLRightInline{Montgomery DC, Peck EA, Vining GG. Introduction to
+linear regression analysis. John Wiley \& Sons; 2021. }
 
 \leavevmode\hypertarget{ref-myers2012generalized}{}%
-35. Myers RH, Montgomery DC, Vining GG, Robinson TJ. Generalized linear
-models: With applications in engineering and the sciences. John Wiley \&
-Sons; 2012.
+\CSLLeftMargin{35. }
+\CSLRightInline{Myers RH, Montgomery DC, Vining GG, Robinson TJ.
+Generalized linear models: With applications in engineering and the
+sciences. John Wiley \& Sons; 2012. }
 
 \leavevmode\hypertarget{ref-cook1982residuals}{}%
-36. Cook RD, Weisberg S. Residuals and influence in regression. New
-York: Chapman; Hall; 1982.
+\CSLLeftMargin{36. }
+\CSLRightInline{Cook RD, Weisberg S. Residuals and influence in
+regression. New York: Chapman; Hall; 1982. }
 
 \leavevmode\hypertarget{ref-robinson2021broom}{}%
-37. Robinson D, Hayes A, Couch S. Broom: Convert statistical objects
-into tidy tibbles. 2021. Available:
-\url{https://CRAN.R-project.org/package=broom}
+\CSLLeftMargin{37. }
+\CSLRightInline{Robinson D, Hayes A, Couch S. Broom: Convert statistical
+objects into tidy tibbles. 2021. Available:
+\url{https://CRAN.R-project.org/package=broom}}
 
 \leavevmode\hypertarget{ref-box1964analysis}{}%
-38. Box GE, Cox DR. An analysis of transformations. Journal of the Royal
-Statistical Society: Series B (Methodological). 1964;26: 211--243.
+\CSLLeftMargin{38. }
+\CSLRightInline{Box GE, Cox DR. An analysis of transformations. Journal
+of the Royal Statistical Society: Series {B} (Methodological). 1964;26:
+211--243. }
 
 \leavevmode\hypertarget{ref-bates2015lme4}{}%
-39. Bates D, Mächler M, Bolker B, Walker S. Fitting linear mixed-effects
-models using lme4. Journal of Statistical Software. 2015;67: 1--48.
-doi:\href{https://doi.org/10.18637/jss.v067.i01}{10.18637/jss.v067.i01}
+\CSLLeftMargin{39. }
+\CSLRightInline{Bates D, Mächler M, Bolker B, Walker S. Fitting linear
+mixed-effects models using {lme4}. Journal of Statistical Software.
+2015;67: 1--48.
+doi:\href{https://doi.org/10.18637/jss.v067.i01}{10.18637/jss.v067.i01}}
 
 \leavevmode\hypertarget{ref-macqueen1967classification}{}%
-40. MacQueen J. Classification and analysis of multivariate
-observations. 5th Berkeley Symp Math Statist Probability. University of
-California Los Angeles LA USA; 1967. pp. 281--297.
+\CSLLeftMargin{40. }
+\CSLRightInline{MacQueen J. Classification and analysis of multivariate
+observations. 5th {Berkeley} {Symp} {Math} {Statist} {Probability}.
+University of California Los Angeles LA USA; 1967. pp. 281--297. }
+
+\end{CSLReferences}
 
 \nolinenumbers
 
 
 
 \end{document}
-
