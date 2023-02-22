@@ -941,10 +941,6 @@ For areal data, no local neighborhood approximation exists because of the data's
 
 We appreciate feedback from users regarding `spmodel`, and we have several plans to add new features to `spmodel` in the future. To learn more about `spmodel` or provide feedback, please visit our website at [https://usepa.github.io/spmodel/](https://usepa.github.io/spmodel/). 
 
-# Data and Code Availability {.unnumbered}
-
-This manuscript has a supplementary $\textbf{\textsf{R}}$ package that contains all of the data, code, and figures used in its creation. The supplementary \textbf{\textsf{R}} package is hosted on GitHub and available at [https://github.com/USEPA/spmodel.manuscript](https://github.com/USEPA/spmodel.manuscript).
-
 # Acknowledgements {.unnumbered}
 
 We would like to thank the editor and anonymous reviewers for their feedback which greatly improved the manuscript.
